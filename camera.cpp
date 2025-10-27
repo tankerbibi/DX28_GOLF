@@ -37,7 +37,7 @@ void UpdateCamera()
 
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
 
-	XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); 
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); 
 
 	XMVECTOR forwardVec = XMVector3TransformCoord(forwardBase, rotationMatrix);
 
@@ -48,19 +48,25 @@ void UpdateCamera()
 
 	if (Keyboard_IsKeyDown(KK_W))
 	{
-
+		XMStoreFloat3(&g_CameraPos, targetPosVec);
 	}
 	else if (Keyboard_IsKeyDown(KK_S))
 	{
-
+		XMStoreFloat3(&g_CameraPos, XMVectorNegate(targetPosVec));
 	}
 	if (Keyboard_IsKeyDown(KK_D))
 	{
-
+		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0, -90.0f, 0);
+		XMVECTOR leftVec = XMVector3TransformCoord(forwardBase, leftRotationMatrix);
+		XMVECTOR posVec = cameraPosVec + leftVec;
+		XMStoreFloat3(&g_CameraPos, posVec);
 	}
 	else if (Keyboard_IsKeyDown(KK_A))
 	{
-
+		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0, 90.0f, 0);
+		XMVECTOR rightVec = XMVector3TransformCoord(forwardBase, rightRotationMatrix);
+		XMVECTOR posVec = cameraPosVec + rightVec;
+		XMStoreFloat3(&g_CameraPos, posVec);
 	}
 }
 
