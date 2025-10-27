@@ -20,7 +20,7 @@ void InitializeGame()
 	InitializeMouse();
 
 	//BGM“Ç‚İ‚İ
-	g_BGM = LoadSound("asset\\sound\\Banana,_Mango,_Pineapple.wav");
+	g_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
 
 	//BGMÄ¶
 	PlaySound(g_BGM, -1);  // |‚P‚Å–³ŒÀ¦‚·‚±‚Ìd—l‚Í•ª‚©‚è‚Ã‚ç‚¢‚ç‚µ‚¢B

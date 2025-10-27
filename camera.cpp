@@ -1,17 +1,24 @@
 #include "directx.h"
 #include "camera.h"
+
+#include <cmath>
+
+
 #include "mouse.h"
 #include "Keyboard.h"
 
-XMMATRIX g_ViewMatrix;
-XMMATRIX g_ProjectionMatrix;
-XMFLOAT3 g_CameraPos;
-XMFLOAT3 g_CameraTargetPos;
+static XMMATRIX g_ViewMatrix;
+static XMMATRIX g_ProjectionMatrix;
+static XMFLOAT3 g_CameraPos;
+static XMFLOAT3 g_CameraTargetPos;
+
+static float g_CameraYaw = 0.0f;
+static float g_CameraPitch = 0.0f;
 
 void InitializeCamera()
 {
 	g_CameraPos = { 0.0f, 10.0f, -10.0f };
-	g_CameraTargetPos = { 0.0f, 0.0f, 0.0f };
+	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
 }
 
 void FinalizeCamera()
@@ -20,11 +27,40 @@ void FinalizeCamera()
 
 void UpdateCamera()
 {
-	g_CameraTargetPos.x += GetMousePosDif().x * 0.05f;
-	g_CameraTargetPos.y += -GetMousePosDif().y * 0.05f;
+	XMFLOAT2 mousePosDif = GetMousePosDif();
+
+	g_CameraYaw += mousePosDif.x * 0.005f;
+	g_CameraPitch += mousePosDif.y * 0.005f;
+
+	const float pitchLimit = XM_PIDIV2 * 0.99f;
+	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
+
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
+
+	XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); 
+
+	XMVECTOR forwardVec = XMVector3TransformCoord(forwardBase, rotationMatrix);
+
+	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
+	XMVECTOR targetPosVec = cameraPosVec + forwardVec;
+
+	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 計算結果をg_CameraTargetPosに保存。
+
 	if (Keyboard_IsKeyDown(KK_W))
 	{
-		
+
+	}
+	else if (Keyboard_IsKeyDown(KK_S))
+	{
+
+	}
+	if (Keyboard_IsKeyDown(KK_D))
+	{
+
+	}
+	else if (Keyboard_IsKeyDown(KK_A))
+	{
+
 	}
 }
 
