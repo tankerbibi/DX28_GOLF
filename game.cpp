@@ -56,8 +56,11 @@ void UpdateGame()
 
 void DrawGame()
 {
+	SetDepthEnable(true);
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
-	DrawScore();
 	DrawCube();
+
+	SetDepthEnable(false);
+	DrawScore();
 	DrawMouse();
 }

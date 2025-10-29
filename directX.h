@@ -25,9 +25,11 @@ void DirectXFinalize(void);
 ID3D11Device* DirectXGetDevice(void);
 ID3D11DeviceContext* DirectXGetDeviceContext(void);
 
-void SetFullScreen(bool fullScreen);
+void SetFullScreen(bool fullScreen);  // égÇ¡ÇƒÇ¢Ç»Ç¢ÅB
 
 void Clear(void);
 void Present(void);
+
+void SetDepthEnable(bool depthEnable);
 
 #endif

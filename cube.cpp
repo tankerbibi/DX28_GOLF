@@ -6,7 +6,7 @@
 #include "texture.h"
 #include "camera.h"
 
-static constexpr unsigned int cubeNum = 100;
+static constexpr unsigned int cubeNum = 500;
 static constexpr float halfSize = 1.0f;
 
 struct Vertex //頂点データ　GPUメモリに保存する。
@@ -21,12 +21,347 @@ static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
 
 static int g_Texture;
 
+static constexpr float xDif = halfSize * 44.0f;
+static constexpr float yGap = -halfSize * 6.0f;
+
+// 座標配列
+static constexpr XMFLOAT3 g_CubePos[cubeNum] =
+{
+	{0.0f, 0.0f, 0.0f},
+	{halfSize * 2.0f, 0.0f,  0.0f},
+	{halfSize * 4.0f, 0.0f,  0.0f},
+	{halfSize * 6.0f, 0.0f,  0.0f},
+	{halfSize * 8.0f, 0.0f,  0.0f},
+	{halfSize * 10.0f, 0.0f, 0.0f},
+	{halfSize * 12.0f, 0.0f, 0.0f},
+	{halfSize * 14.0f, 0.0f, 0.0f},
+	{halfSize * 16.0f, 0.0f, 0.0f},
+	{halfSize * 18.0f, 0.0f, 0.0f},
+	{halfSize * 20.0f, 0.0f, 0.0f},
+	{halfSize * 22.0f, 0.0f, 0.0f},  // 12
+
+	{0.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 2.0f, 0.0f,  halfSize * 2.0f},
+	{halfSize * 4.0f, 0.0f,  halfSize * 2.0f},
+	{halfSize * 6.0f, 0.0f,  halfSize * 2.0f},
+	{halfSize * 8.0f, 0.0f,  halfSize * 2.0f},
+	{halfSize * 10.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 12.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 14.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 16.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 18.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 20.0f, 0.0f, halfSize * 2.0f},
+	{halfSize * 22.0f, 0.0f, halfSize * 2.0f},  // 12
+
+	{0.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 2.0f, 0.0f,  halfSize * 4.0f},
+	{halfSize * 4.0f, 0.0f,  halfSize * 4.0f},
+	{halfSize * 6.0f, 0.0f,  halfSize * 4.0f},
+	{halfSize * 8.0f, 0.0f,  halfSize * 4.0f},
+	{halfSize * 10.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 12.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 14.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 16.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 18.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 20.0f, 0.0f, halfSize * 4.0f},
+	{halfSize * 22.0f, 0.0f, halfSize * 4.0f},  // 12
+
+	{0.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 2.0f, 0.0f,  halfSize * 6.0f},
+	{halfSize * 4.0f, 0.0f,  halfSize * 6.0f},
+	{halfSize * 6.0f, 0.0f,  halfSize * 6.0f},
+	{halfSize * 8.0f, 0.0f,  halfSize * 6.0f},
+	{halfSize * 10.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 12.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 14.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 16.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 18.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 20.0f, 0.0f, halfSize * 6.0f},
+	{halfSize * 22.0f, 0.0f, halfSize * 6.0f},  // 12
+
+	{0.0f, 0.0f, halfSize * 8.0f},
+	{halfSize * 2.0f, 0.0f,  halfSize * 8.0f},
+	{halfSize * 4.0f, 0.0f,  halfSize * 8.0f},
+	{halfSize * 6.0f, 0.0f,  halfSize * 8.0f},
+	{halfSize * 8.0f, 0.0f, halfSize * 8.0f},
+	{ halfSize * 10.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 8.0f },  // 12
+
+	{ 0.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 2.0f, 0.0f,  halfSize * 10.0f },
+	{ halfSize * 4.0f, 0.0f,  halfSize * 10.0f },
+	{ halfSize * 6.0f, 0.0f,  halfSize * 10.0f },
+	{ halfSize * 8.0f, 0.0f,  halfSize * 10.0f },
+	{ halfSize * 10.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 10.0f },  // 12
+
+	{ 0.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 2.0f, 0.0f,  halfSize * 12.0f },
+	{ halfSize * 4.0f, 0.0f,  halfSize * 12.0f },
+	{ halfSize * 6.0f, 0.0f,  halfSize * 12.0f },
+	{ halfSize * 8.0f, 0.0f,  halfSize * 12.0f },
+	{ halfSize * 10.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 12.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 12.0f },  // 12
+
+	{ 0.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 2.0f, 0.0f,  halfSize * 14.0f },
+	{ halfSize * 4.0f, 0.0f,  halfSize * 14.0f },
+	{ halfSize * 6.0f, 0.0f,  halfSize * 14.0f },
+	{ halfSize * 8.0f, 0.0f,  halfSize * 14.0f },
+	{ halfSize * 10.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 14.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 14.0f },  // 12
+
+	{ 0.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 2.0f, 0.0f,  halfSize * 16.0f },
+	{ halfSize * 4.0f, 0.0f,  halfSize * 16.0f },
+	{ halfSize * 6.0f, 0.0f,  halfSize * 16.0f },
+	{ halfSize * 8.0f, 0.0f,  halfSize * 16.0f },
+	{ halfSize * 10.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 16.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 16.0f },  // 12
+
+	{ 0.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 2.0f, 0.0f,  halfSize * 18.0f },
+	{ halfSize * 4.0f, 0.0f,  halfSize * 18.0f },
+	{ halfSize * 6.0f, 0.0f,  halfSize * 18.0f },
+	{ halfSize * 8.0f, 0.0f,  halfSize * 18.0f },
+	{ halfSize * 10.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 12.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 14.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 16.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 18.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 20.0f, 0.0f, halfSize * 18.0f },
+	{ halfSize * 22.0f, 0.0f, halfSize * 18.0f },  // 12
+	//////////////////////////////////////////////////////////
+
+	{ 0.0f, halfSize * 2.0f, -halfSize * 2.0f },  // 壁
+	{ halfSize * 2.0f, halfSize * 2.0f,  -halfSize * 2.0f },
+	{ halfSize * 4.0f, halfSize * 2.0f,  -halfSize * 2.0f },
+	{ halfSize * 6.0f, halfSize * 2.0f,  -halfSize * 2.0f },
+	{ halfSize * 8.0f, halfSize * 2.0f,  -halfSize * 2.0f },
+	{ halfSize * 10.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 12.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 14.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 16.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 18.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 20.0f, halfSize * 2.0f, -halfSize * 2.0f },
+	{ halfSize * 22.0f, halfSize * 2.0f, -halfSize * 2.0f },  // 12
+
+	{ 0.0f, halfSize * 2.0f, halfSize * 20.0f },  // 壁
+	{ halfSize * 2.0f, halfSize * 2.0f,  halfSize * 20.0f },
+	{ halfSize * 4.0f, halfSize * 2.0f,  halfSize * 20.0f },
+	{ halfSize * 6.0f, halfSize * 2.0f,  halfSize * 20.0f },
+	{ halfSize * 8.0f, halfSize * 2.0f,  halfSize * 20.0f },
+	{ halfSize * 10.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 12.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 14.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 16.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 18.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 20.0f, halfSize * 2.0f, halfSize * 20.0f },
+	{ halfSize * 22.0f, halfSize * 2.0f, halfSize * 20.0f },  // 12
+
+	{ -halfSize * 2.0f,  halfSize * 2.0f, -halfSize * 2.0f },  // 手前の
+	{ -halfSize * 2.0f, halfSize * 2.0f,  halfSize * 0.0f },
+	{ -halfSize * 2.0f, halfSize * 2.0f,  halfSize * 2.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f,  halfSize * 4.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f,  halfSize * 6.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 8.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 10.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 12.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 14.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 16.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 18.0f },
+	{  -halfSize * 2.0f, halfSize * 2.0f, halfSize * 20.0f },
+
+	//////////////////////////////////////////////////////////
+
+	{ halfSize * 24.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 26.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 28.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 30.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 32.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 34.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 36.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 38.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 40.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 42.0f, 0.0f, halfSize * 8.0f },
+	{ halfSize * 44.0f, 0.0f, halfSize * 8.0f },
+
+	{ halfSize * 24.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 26.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 28.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 30.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 32.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 34.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 36.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 38.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 40.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 42.0f, 0.0f, halfSize * 10.0f },
+	{ halfSize * 44.0f, 0.0f, halfSize * 10.0f },
+
+	////////////////////////////////////////////////////
+	
+
+	{ xDif + 0.0f, yGap, 0.0f },
+	{ xDif + halfSize * 2.0f, yGap,  0.0f },
+	{ xDif + halfSize * 4.0f, yGap,  0.0f },
+	{ xDif + halfSize * 6.0f, yGap,  0.0f },
+	{ xDif + halfSize * 8.0f, yGap,  0.0f },
+	{ xDif + halfSize * 10.0f, yGap, 0.0f },
+	{ xDif + halfSize * 12.0f, yGap, 0.0f },
+	{ xDif + halfSize * 14.0f, yGap, 0.0f },
+	{ xDif + halfSize * 16.0f, yGap, 0.0f },
+	{ xDif + halfSize * 18.0f, yGap, 0.0f },
+	{ xDif + halfSize * 20.0f, yGap, 0.0f },
+	{ xDif + halfSize * 22.0f, yGap, 0.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 2.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 2.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 2.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 2.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 2.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 2.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 4.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 4.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 4.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 4.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 4.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 4.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 6.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 6.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 6.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 6.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 6.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 6.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 8.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 8.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 8.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 8.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 8.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 8.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 10.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 10.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 10.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 10.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 10.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 10.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 12.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 12.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 12.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 12.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 12.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 12.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 14.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 14.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 14.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 14.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 14.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 14.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 16.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 16.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 16.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 16.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 16.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 16.0f },  // 12
+
+	{  xDif + 0.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 2.0f, yGap,  halfSize * 18.0f },
+	{  xDif + halfSize * 4.0f, yGap,  halfSize * 18.0f },
+	{  xDif + halfSize * 6.0f, yGap,  halfSize * 18.0f },
+	{  xDif + halfSize * 8.0f, yGap,  halfSize * 18.0f },
+	{  xDif + halfSize * 10.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 12.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 14.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 16.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 18.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 20.0f, yGap, halfSize * 18.0f },
+	{  xDif + halfSize * 22.0f, yGap, halfSize * 18.0f },  // 12
+};
+
 static XMFLOAT3 g_Rotation;
 
 void InitializeCube()
 {
-	// 頂点バッファ生成
-	{
+	{  // 頂点バッファ生成
 		D3D11_BUFFER_DESC bd{};
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.ByteWidth = sizeof(Vertex) * 24;
@@ -36,8 +371,7 @@ void InitializeCube()
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer); //g_VertexBufferはGPUのメモリなのでアクセスできない。
 	}
 
-	// インデックスバッファ生成
-	{
+	{  // インデックスバッファ生成
 		D3D11_BUFFER_DESC bd{};
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		bd.ByteWidth = sizeof(unsigned int) * 36;
@@ -51,9 +385,8 @@ void InitializeCube()
 
 	g_Texture = TextureLoad(L"asset\\texture\\Wood.png");
 
-	///////////////////Indexバッファ設定開始
+	///////////////////Indexバッファ設定開始/////////////////////////////
 	{
-		//インデックスバッファにデータを設定
 		D3D11_MAPPED_SUBRESOURCE msr;  // 存在範囲を指定できる
 		DirectXGetDeviceContext()->Map(g_IndexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr); //g_VertexBufferのありかを探す。
 
@@ -109,15 +442,13 @@ void InitializeCube()
 
 		DirectXGetDeviceContext()->Unmap(g_IndexBuffer, 0);
 	}
-	///////////////////Indexバッファ設定終了
+	///////////////////Indexバッファ設定終了/////////////////////
 
-	///////////////////頂点バッファ設定開始
-	//頂点バッファにデータを設定
+	///////////////////頂点バッファ設定開始///////////////////////
 	D3D11_MAPPED_SUBRESOURCE msr;
 	DirectXGetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr); //g_VertexBufferのありかを探す。
 
 	Vertex* v = (Vertex*)msr.pData;
-
 
 	// 3dにおいては、ピクセル単位ではなくメートル単位になる。
 	// xが横方向、yが縦方向、zが奥行方向
@@ -200,9 +531,8 @@ void InitializeCube()
 	v[22].texcoord = { tx,		ty + th };
 	v[23].texcoord = { tx + tw,	ty + th };
 
-
 	DirectXGetDeviceContext()->Unmap(g_VertexBuffer, 0);
-	//////////////頂点バッファ設定終了
+	//////////////頂点バッファ設定終了////////////////////
 }
 
 void FinalizeCube()
@@ -212,25 +542,35 @@ void FinalizeCube()
 
 void UpdateCube()
 {
-	//g_Rotation.y += 0.07f;
-	// g_Rotation.x += 0.01f;
 }
 
 void DrawCube()
 {
-	// シェーダーの設定
-	Shader_Begin();
+	Shader_Begin();  // シェーダーの設定
+
+	// 頂点バッファ設定
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	DirectXGetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
+
+	// プリミティブトポロジ設定
+	// DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） つまりZの書き方
+	DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // トライアングルリスト（独立）
+
+	ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
+	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
+
+	// indexバッファ設定
+	DirectXGetDeviceContext()->IASetIndexBuffer(g_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);  // intは4byteで、32bit 
 
 	for(int i = 0; i < cubeNum; i++)
 	{
-		//頂点シェーダーに変換行列を設定
+		// 頂点シェーダーに変換行列を設定
 		XMMATRIX matrix{ XMMatrixIdentity() };  // 行列を作成　float 4 x 4
 
-		matrix *= XMMatrixScaling(1.0f, 1.0f, 1.0f); //拡大縮小マトリクス
-
-		matrix *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z); //回転マトリクス
-
-		matrix *= XMMatrixTranslation(i * 2.0f * halfSize, 0.0f, 0.0f);  // 移動マトリクス。gpuで計算されている。
+		matrix *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
+		matrix *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
+		matrix *= XMMatrixTranslation(g_CubePos[i].x, g_CubePos[i].y, g_CubePos[i].z);  // 移動マトリクス。gpuで計算されている。
 
 		matrix *= GetCameraViewMatrix();  // ビューマトリクス
 
@@ -238,22 +578,8 @@ void DrawCube()
 
 		Shader_SetMatrix(matrix);
 
-		//頂点バッファ設定
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		DirectXGetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
-
-		// indexバッファ設定
-		DirectXGetDeviceContext()->IASetIndexBuffer(g_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);  // intは4byteで、32bit 
-
-		//プリミティブトポロジ設定
-		// DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） 
-		DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // トライアングルリスト（独立）
-
-		ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
-		DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
-
-		//ポリゴン描画
-		DirectXGetDeviceContext()->DrawIndexed(36, 0, 0);  //頂点数
+		DirectXGetDeviceContext()->DrawIndexed(36, 0, 0);  // ポリゴン描画
 	}
 }
+// 実際の描画は2dで行われている。最後に描画したものが手前になる。
+// 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。

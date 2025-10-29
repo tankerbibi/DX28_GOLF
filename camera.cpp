@@ -9,8 +9,10 @@
 
 static XMMATRIX g_ViewMatrix;
 static XMMATRIX g_ProjectionMatrix;
+
 static XMFLOAT3 g_CameraPos;
 static XMFLOAT3 g_CameraTargetPos;
+static XMFLOAT3 g_CameraRotation;
 
 static float g_CameraYaw = 0.0f;
 static float g_CameraPitch = 0.0f;
@@ -19,6 +21,9 @@ void InitializeCamera()
 {
 	g_CameraPos = { 0.0f, 10.0f, -10.0f };
 	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
+	g_CameraRotation = {0.0f, 0.0f,0.0f};
+	g_CameraYaw = 0.0f;
+	g_CameraPitch = 0.0f;
 }
 
 void FinalizeCamera()
@@ -32,82 +37,95 @@ void UpdateCamera()
 	g_CameraYaw += mousePosDif.x * 0.005f;
 	g_CameraPitch += mousePosDif.y * 0.005f;
 
-	const float pitchLimit = XM_PIDIV2 * 0.99f;
+	const float pitchLimit = XM_PIDIV2 * 0.99f;  // 限りなく90度に近い数値を取得(90 * 0.99)
+
 	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
 
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
 
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); 
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
 
-	XMVECTOR forwardVec = XMVector3TransformCoord(forwardBase, rotationMatrix);
+	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
-	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
-	XMVECTOR targetPosVec = cameraPosVec + forwardVec;
-
-	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 計算結果をg_CameraTargetPosに保存。
+	XMVECTOR velocity = XMVectorZero();
 
 	if (Keyboard_IsKeyDown(KK_W))
 	{
-		XMStoreFloat3(&g_CameraPos, targetPosVec);
+		velocity = XMVectorAdd(velocity, forwardVec);
 	}
 	else if (Keyboard_IsKeyDown(KK_S))
 	{
-		XMStoreFloat3(&g_CameraPos, XMVectorNegate(targetPosVec));
+		velocity = XMVectorAdd(velocity, XMVectorNegate(forwardVec));
 	}
-	if (Keyboard_IsKeyDown(KK_D))
+
+	if (Keyboard_IsKeyDown(KK_A))
 	{
-		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0, -90.0f, 0);
-		XMVECTOR leftVec = XMVector3TransformCoord(forwardBase, leftRotationMatrix);
-		XMVECTOR posVec = cameraPosVec + leftVec;
-		XMStoreFloat3(&g_CameraPos, posVec);
+		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0, -XM_PIDIV2, 0);  // 回転マトリクスを取得
+		XMVECTOR left = XMVector3TransformNormal(forwardVec, leftRotationMatrix);  // 前方ベクトルを回転
+		velocity = XMVectorAdd(velocity, left);
 	}
-	else if (Keyboard_IsKeyDown(KK_A))
+	else if (Keyboard_IsKeyDown(KK_D))
 	{
-		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0, 90.0f, 0);
-		XMVECTOR rightVec = XMVector3TransformCoord(forwardBase, rightRotationMatrix);
-		XMVECTOR posVec = cameraPosVec + rightVec;
-		XMStoreFloat3(&g_CameraPos, posVec);
+		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0, XM_PIDIV2, 0);  // 回転マトリクスを取得
+		XMVECTOR right = XMVector3TransformNormal(forwardVec, rightRotationMatrix);  // 前方ベクトルを回転
+		velocity = XMVectorAdd(velocity, right);
 	}
+
+	if (Keyboard_IsKeyDown(KK_E))
+	{
+		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+		XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // 前方ベクトルを回転
+		velocity = XMVectorAdd(velocity, up);
+	}
+	else if (Keyboard_IsKeyDown(KK_Q))
+	{
+		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+		XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // 前方ベクトルを回転
+		velocity = XMVectorAdd(velocity, down);
+	}
+
+	velocity = XMVector3Normalize(velocity);
+
+	velocity = XMVectorScale(velocity, 0.2f);
+
+	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
+	velocity = XMVectorAdd(cameraPosVec, velocity);  //
+	XMStoreFloat3(&g_CameraPos, velocity);
+
+	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPos), forwardVec);  // 注視点ベクトルを導き出す
+	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
+
+	///授業コード始まり///
+	/*if (Keyboard_IsKeyDown(KK_RIGHT))
+	{
+		g_CameraTargetPos.x += 0.1f;
+	}
+	if (Keyboard_IsKeyDown(KK_LEFT))
+	{
+		g_CameraTargetPos.x -= 0.1f;
+	}
+
+	if (Keyboard_IsKeyDown(KK_K))
+	{
+		g_CameraRotation.y += 0.1f;
+	}
+	if (Keyboard_IsKeyDown(KK_J))
+	{
+		g_CameraRotation.y -= 0.1f;
+	}
+
+	g_CameraPos.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
+	g_CameraPos.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;*/
+	///授業コード終わり///
 }
 
 void DrawCamera()
 {
-	// ビューマトリクス （新規）
-	XMFLOAT3 pos = g_CameraPos;
-	//XMFLOAT3 target = XMFLOAT3(pos.x, 0.0f, pos.z + 20.0f);  // この書き方何だろう？
-	XMFLOAT3 target = g_CameraTargetPos;
-	XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // カメラの上方向
-	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&pos), XMLoadFloat3(&target), XMLoadFloat3(&up));
+	const XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // カメラの上方向
+	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_CameraPos), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
 
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス （新規）
 	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 1.0f/*見ることができる一番近い距離*/, 1000.0f/*見ることができる一番遠い距離*/);
-}
-
-void AddCameraPosX(float x)
-{
-	g_CameraPos.x += x;
-}
-
-void AddCameraPosY(float y)
-{
-	g_CameraPos.y += y;
-}
-
-void AddCameraPosZ(float z)
-{
-	g_CameraPos.z += z;
-}
-
-void AddCameraPos(float x, float y, float z)
-{
-	g_CameraPos.x += x;
-	g_CameraPos.y += y;
-	g_CameraPos.z += z;
-}
-
-void SetCameraTargetPos(XMFLOAT3 newTargetPos)
-{
-	g_CameraTargetPos = newTargetPos;
 }
 
 XMMATRIX GetCameraViewMatrix()

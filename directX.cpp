@@ -13,6 +13,7 @@ static ID3D11DepthStencilView* g_DepthStencilView = NULL;
 static ID3D11RasterizerState* g_RasterizerState = NULL;
 static ID3D11BlendState* g_BlendState = NULL;
 static ID3D11DepthStencilState* g_DepthStencilStateDepthDisable = NULL;
+static ID3D11DepthStencilState* g_DepthStencilStateDepthEnable = NULL;  // DirectXは設定ごとにオブジェクトしなければならない。
 
 void DirectXInitialize(HWND hWnd)
 {
@@ -127,11 +128,15 @@ void DirectXInitialize(HWND hWnd)
 
 	//深度ステンシルステート設定
 	D3D11_DEPTH_STENCIL_DESC dsd = {};
-	dsd.DepthEnable = TRUE;
+	dsd.DepthEnable = FALSE;
 	dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsd.DepthFunc = D3D11_COMPARISON_LESS;
 	dsd.StencilEnable = FALSE;
 	g_Device->CreateDepthStencilState(&dsd, &g_DepthStencilStateDepthDisable);
+
+	dsd.DepthEnable = TRUE;
+	g_Device->CreateDepthStencilState(&dsd, &g_DepthStencilStateDepthEnable);
+
 	g_DeviceContext->OMSetDepthStencilState(g_DepthStencilStateDepthDisable, NULL);
 }
 
@@ -179,4 +184,16 @@ void Present(void)
 {
 	//　バックバッファとフロントバッファの交換
 	g_SwapChain->Present(0, 0);
+}
+
+void SetDepthEnable(bool depthEnable)
+{
+	if (depthEnable)
+	{
+		g_DeviceContext->OMSetDepthStencilState(g_DepthStencilStateDepthEnable, NULL);
+	}
+	else
+	{
+		g_DeviceContext->OMSetDepthStencilState(g_DepthStencilStateDepthDisable, NULL);
+	}
 }
