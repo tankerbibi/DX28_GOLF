@@ -73,13 +73,13 @@ void UpdateCamera()
 
 	if (Keyboard_IsKeyDown(KK_E))
 	{
-		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
 		XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // 前方ベクトルを回転
 		velocity = XMVectorAdd(velocity, up);
 	}
 	else if (Keyboard_IsKeyDown(KK_Q))
 	{
-		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
 		XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // 前方ベクトルを回転
 		velocity = XMVectorAdd(velocity, down);
 	}
