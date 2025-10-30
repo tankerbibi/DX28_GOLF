@@ -10,12 +10,6 @@
 ポリゴンを出すためにはVertex(頂点)が4コ必要。
 */
 
-struct Vertex //頂点データ　GPUメモリに保存する。
-{
-	XMFLOAT3 position;
-	XMFLOAT2 texcoord;
-};
-
 struct AlphaBuffer
 {
 	float alpha{ 1.0f };

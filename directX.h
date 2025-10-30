@@ -1,11 +1,17 @@
 #ifndef DIRECTX_H //インクルードガード
 #define DIRECTX_H
 
-#define NOMIMAX //windows.hでファインの直前に書くルール。 No! Min and Maxマクロ定義。
-#include <Windows.h>
+#define NOMINMAX  //windows.hでファインの直前に書くルール。 No! Min and Maxマクロ定義。
+#include <Windows.h>  // min max関数が二重定義されるのを防ぐためにNOMINMAXが必要。
 #include <d3d11.h> //DirectX 11の関数のプロトタイプ宣言が入ったヘッダー DirectX11と12では設計思想が違う。12は難しすぎるらしい、GPUを直接操作する。
 #include <DirectXMath.h> //エフェクトとかマトリックスを使うための関数
 using namespace DirectX;
+
+struct Vertex //頂点データ　GPUメモリに保存する。
+{
+	XMFLOAT3 position;
+	XMFLOAT2 texcoord;
+};
 
 #define SAFE_RELEASE(o)		if (o) { (o)->Release(); o = NULL;}
 

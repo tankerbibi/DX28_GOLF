@@ -9,12 +9,6 @@
 static constexpr unsigned int cubeNum = 500;
 static constexpr float halfSize = 1.0f;
 
-struct Vertex //頂点データ　GPUメモリに保存する。
-{
-	XMFLOAT3 position;
-	XMFLOAT2 texcoord;
-};
-
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
 
 static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
@@ -383,7 +377,7 @@ void InitializeCube()
 
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 
-	g_Texture = TextureLoad(L"asset\\texture\\Wood.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_field.png");
 
 	///////////////////Indexバッファ設定開始/////////////////////////////
 	{
@@ -498,8 +492,8 @@ void InitializeCube()
 	// 上面
 	v[0].texcoord = { tx,		ty };
 	v[1].texcoord = { tx + tw,	ty };
-	v[2].texcoord = { tx,		ty + th};
-	v[3].texcoord = { tx + tw,	ty + th};
+	v[2].texcoord = { tx,		ty + 0.3f };
+	v[3].texcoord = { tx + tw,	ty + 0.3f };
 
 	// 底面
 	v[4].texcoord = { tx,		ty };

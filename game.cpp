@@ -6,6 +6,7 @@
 #include "cube.h"
 #include "camera.h"
 #include "mouse.h"
+#include "ball.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -18,6 +19,7 @@ void InitializeGame()
 	InitializeScore();
 	InitializeCube();
 	InitializeMouse();
+	InitializeBall();
 
 	//BGM読み込み
 	g_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
@@ -37,6 +39,7 @@ void FinalizeGame()
 	FinalizeCube();
 	FinalizeCamera();
 	FinalizeMouse();
+	FinalizeBall();
 }
 
 void UpdateGame()
@@ -51,6 +54,7 @@ void UpdateGame()
 		UpdateScore();
 		UpdateCube();
 		UpdateMouse();
+		UpdateBall();
 	}
 }
 
@@ -59,8 +63,10 @@ void DrawGame()
 	SetDepthEnable(true);
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
 	DrawCube();
+	DrawBall();
 
 	SetDepthEnable(false);
 	DrawScore();
 	DrawMouse();
+	
 }
