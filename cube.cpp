@@ -443,13 +443,13 @@ void InitializeCube()
 	DirectXGetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr); //g_VertexBufferのありかを探す。
 
 	Vertex* v = (Vertex*)msr.pData;
-
+	
 	// 3dにおいては、ピクセル単位ではなくメートル単位になる。
 	// xが横方向、yが縦方向、zが奥行方向
 	//四つの頂点を作る。頭の中でイメージ
 
 	// 上面
-	v[0].position = { -halfSize, halfSize, halfSize };
+	v[0].position = { -halfSize, halfSize, halfSize };  
 	v[1].position = { halfSize, halfSize, halfSize };  
 	v[2].position = { -halfSize, halfSize, -halfSize };
 	v[3].position = { halfSize, halfSize, -halfSize };  
@@ -465,7 +465,7 @@ void InitializeCube()
 	v[9].position = { halfSize, halfSize, -halfSize };  
 	v[10].position = { -halfSize, -halfSize, -halfSize };
 	v[11].position = { halfSize, -halfSize, -halfSize };
-
+	
 	// 背面
 	v[12].position = { halfSize, halfSize, halfSize };
 	v[13].position = { -halfSize, halfSize, halfSize };
@@ -477,12 +477,13 @@ void InitializeCube()
 	v[17].position = { halfSize, halfSize, halfSize };
 	v[18].position = { halfSize, -halfSize, -halfSize };
 	v[19].position = { halfSize, -halfSize, halfSize };
-
+	
 	// 左面
 	v[20].position = { -halfSize, halfSize, halfSize };
 	v[21].position = { -halfSize, halfSize, -halfSize };
 	v[22].position = { -halfSize, -halfSize, halfSize };
 	v[23].position = { -halfSize, -halfSize, -halfSize };
+	
 
 	float tx = 0.0f;
 	float ty = 0.0f;
@@ -496,8 +497,8 @@ void InitializeCube()
 	v[3].texcoord = { tx + tw,	ty + 0.3f };
 
 	// 底面
-	v[4].texcoord = { tx,		ty };
-	v[5].texcoord = { tx + tw,	ty };
+	v[4].texcoord = { tx,		ty + 0.7f };
+	v[5].texcoord = { tx + tw,	ty + 0.7f };
 	v[6].texcoord = { tx,		ty + th };
 	v[7].texcoord = { tx + tw,	ty + th };
 
@@ -524,6 +525,42 @@ void InitializeCube()
 	v[21].texcoord = { tx + tw,	ty };
 	v[22].texcoord = { tx,		ty + th };
 	v[23].texcoord = { tx + tw,	ty + th };
+
+	// 上面
+	v[0].normal = { 0.0f, 1.0f, 0.0f };
+	v[1].normal = { 0.0f, 1.0f, 0.0f };
+	v[2].normal = { 0.0f, 1.0f, 0.0f };
+	v[3].normal = { 0.0f, 1.0f, 0.0f };
+
+	// 下面
+	v[4].normal = { 0.0f, -1.0f, 0.0f };
+	v[5].normal = { 0.0f, -1.0f, 0.0f };
+	v[6].normal = { 0.0f, -1.0f, 0.0f };
+	v[7].normal = { 0.0f, -1.0f, 0.0f };
+
+	// 前面
+	v[8].normal = { 0.0f, 0.0f, -1.0f };
+	v[9].normal = { 0.0f, 0.0f, -1.0f };
+	v[10].normal = { 0.0f, 0.0f, -1.0f };
+	v[11].normal = { 0.0f, 0.0f, -1.0f };
+
+	// 後ろ面
+	v[12].normal = { 0.0f, 0.0f, 1.0f };
+	v[13].normal = { 0.0f, 0.0f, 1.0f };
+	v[14].normal = { 0.0f, 0.0f, 1.0f };
+	v[15].normal = { 0.0f, 0.0f, 1.0f };
+
+	// 右面
+	v[16].normal = { 1.0f, 0.0f, 0.0f };
+	v[17].normal = { 1.0f, 0.0f, 0.0f };
+	v[18].normal = { 1.0f, 0.0f, 0.0f };
+	v[19].normal = { 1.0f, 0.0f, 0.0f };
+
+	// 左面
+	v[20].normal = { -1.0f, 0.0f, 0.0f };
+	v[21].normal = { -1.0f, 0.0f, 0.0f };
+	v[22].normal = { -1.0f, 0.0f, 0.0f };
+	v[23].normal = { -1.0f, 0.0f, 0.0f };
 
 	DirectXGetDeviceContext()->Unmap(g_VertexBuffer, 0);
 	//////////////頂点バッファ設定終了////////////////////

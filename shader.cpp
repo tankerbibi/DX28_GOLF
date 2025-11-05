@@ -4,7 +4,7 @@
 														 Author : Youhei Sato
 														 Date   : 2025/05/15
 --------------------------------------------------------------------------------
-
+シェーダー言語とcpu言語の橋渡しの役割
 ==============================================================================*/
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -42,7 +42,7 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 
 	// 事前コンパイル済み頂点シェーダーの読み込み
-	std::ifstream ifs_vs("shaderVertex2D.cso", std::ios::binary);
+	std::ifstream ifs_vs("shaderVertex3D.cso", std::ios::binary);
 
 	if (!ifs_vs) {
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました\n\nshader_vertex_2d.cso", "エラー", MB_OK);
@@ -72,8 +72,9 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 	// 頂点レイアウトの定義
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 3要素32bitが入っている。rgbは関係ない。
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
 	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
@@ -88,7 +89,6 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 		return false;
 	}
 
-
 	// 頂点シェーダー用定数バッファの作成
 	D3D11_BUFFER_DESC buffer_desc{};
 	buffer_desc.ByteWidth = sizeof(XMMATRIX); // バッファのサイズ
@@ -97,7 +97,7 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSConstantBuffer);
 
 	// 事前コンパイル済みピクセルシェーダーの読み込み
-	std::ifstream ifs_ps("shaderPixel2D.cso", std::ios::binary);
+	std::ifstream ifs_ps("shaderPixel3D.cso", std::ios::binary);
 	if (!ifs_ps) {
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました\n\nshader_pixel_2d.cso", "エラー", MB_OK);
 		return false;

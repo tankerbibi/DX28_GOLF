@@ -16,7 +16,7 @@ struct MODEL
 	ID3D11Buffer** VertexBuffer;
 	ID3D11Buffer** IndexBuffer;
 
-	std::unordered_map<std::string, ID3D11ShaderResourceView*> Texture;
+	std::unordered_map<std::string, ID3D11ShaderResourceView*> Texture;  // mapはunreal engineのやつ。配列の進化版。
 };
 
 

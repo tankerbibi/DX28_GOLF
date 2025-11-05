@@ -7,7 +7,7 @@ cbuffer g_AlphaBuffer : register(b0)
     float alpha;
 }
 
-float4 main(in float4 position : SV_Position,
+float4 main(in float4 position : SV_Position,  // 一万個ピクセルがあるなら、一万回ピクセルが呼ばれる。
             in float2 texcoord: TEXCOORD0) : SV_TARGET
 {
     float4 color = tex.Sample(samplerState, texcoord);

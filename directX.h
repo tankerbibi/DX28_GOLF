@@ -9,8 +9,9 @@ using namespace DirectX;
 
 struct Vertex //頂点データ　GPUメモリに保存する。
 {
-	XMFLOAT3 position;
-	XMFLOAT2 texcoord;
+	XMFLOAT3 position;  // 頂点座標
+	XMFLOAT2 texcoord;  // テクスチャ座標
+	XMFLOAT3 normal;  // 法線座標
 };
 
 #define SAFE_RELEASE(o)		if (o) { (o)->Release(); o = NULL;}
