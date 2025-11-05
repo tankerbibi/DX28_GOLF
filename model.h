@@ -9,7 +9,6 @@
 #pragma comment (lib, "assimp-vc143-mt.lib")
 
 
-
 struct MODEL
 {
 	const aiScene* AiScene = nullptr;
@@ -24,4 +23,3 @@ struct MODEL
 MODEL* ModelLoad(const char* FileName);
 void ModelRelease(MODEL* model);
 void ModelDraw(MODEL* model);
-

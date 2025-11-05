@@ -10,16 +10,16 @@ MODEL* ModelLoad( const char *FileName)
 	MODEL* model = new MODEL;
 
 
-	const std::string modelPath( FileName );
+	const std::string modelPath( FileName );  // stringに変換
 
-	model->AiScene = aiImportFile(FileName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);
-	assert(model->AiScene);
+	model->AiScene = aiImportFile(FileName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded);  // asimpの真骨頂 directXの座標に変換
+	assert(model->AiScene);  // 読み込めたかどうか確認している。
 
-	model->VertexBuffer = new ID3D11Buffer*[model->AiScene->mNumMeshes];
+	model->VertexBuffer = new ID3D11Buffer*[model->AiScene->mNumMeshes];  // パーツ（メッシュ）の数を取得
 	model->IndexBuffer = new ID3D11Buffer*[model->AiScene->mNumMeshes];
 
 
-	for (unsigned int m = 0; m < model->AiScene->mNumMeshes; m++)
+	for (unsigned int m = 0; m < model->AiScene->mNumMeshes; m++)  // ループで数を取得
 	{
 		aiMesh* mesh = model->AiScene->mMeshes[m];
 
@@ -35,6 +35,7 @@ MODEL* ModelLoad( const char *FileName)
 				// vertex[v].normal = XMFLOAT3(mesh->mNormals[v].x, -mesh->mNormals[v].z, mesh->mNormals[v].y);
 			}
 
+			// 頂点バッファ作成。それにデータも入れてしまう。
 			D3D11_BUFFER_DESC bd;
 			ZeroMemory(&bd, sizeof(bd));
 			bd.Usage = D3D11_USAGE_DYNAMIC;
@@ -85,9 +86,7 @@ MODEL* ModelLoad( const char *FileName)
 
 	}
 
-
-
-	//テクスチャ読み込み
+	//テクスチャ読み込み fbxにテクスチャ内蔵方式
 	for(int i = 0; i < model->AiScene->mNumTextures; i++)
 	{
 		aiTexture* aitexture = model->AiScene->mTextures[i];
@@ -102,14 +101,11 @@ MODEL* ModelLoad( const char *FileName)
 		model->Texture[aitexture->mFilename.data] = texture;
 	}
 
-
-
 	return model;
 }
 
 
-
-
+// メモリ全部解放
 void ModelRelease(MODEL* model)
 {
 	for (unsigned int m = 0; m < model->AiScene->mNumMeshes; m++)
@@ -121,15 +117,12 @@ void ModelRelease(MODEL* model)
 	delete[] model->VertexBuffer;
 	delete[] model->IndexBuffer;
 
-
 	for (std::pair<const std::string, ID3D11ShaderResourceView*> pair : model->Texture)
 	{
 		pair.second->Release();
 	}
 
-
 	aiReleaseImport(model->AiScene);
-
 
 	delete model;
 }
@@ -139,7 +132,7 @@ void ModelRelease(MODEL* model)
 void ModelDraw(MODEL* model)
 {
 	// プリミティブトポロジ設定
-	DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // assimpはTriangleListに対応している
 
 
 	for (unsigned int m = 0; m < model->AiScene->mNumMeshes; m++)
