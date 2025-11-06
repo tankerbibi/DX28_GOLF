@@ -607,7 +607,7 @@ void DrawCube()
 
 		matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
 
-		Shader_SetMatrix(matrix);
+		Shader_SetMatrix(matrix);  // vertex.hlslのmtxに値を送っている。
 
 		DirectXGetDeviceContext()->DrawIndexed(36, 0, 0);  // ポリゴン描画
 	}

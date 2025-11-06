@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "mouse.h"
 #include "ball.h"
+#include "shader.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -60,12 +61,21 @@ void UpdateGame()
 
 void DrawGame()
 {
+	LIGHT light;
+	
 	SetDepthEnable(true);
+	light.lightEnable = true;
+	light.lightDirection = {0.0f, -1.0f, 0.0f};
+	Shader_SetLight(light);
+
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
 	DrawCube();
 	DrawBall();
 
 	SetDepthEnable(false);
+	light.lightEnable = false;
+	Shader_SetLight(light);	
+
 	DrawScore();
 	DrawMouse();
 	

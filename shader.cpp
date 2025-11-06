@@ -12,11 +12,13 @@ using namespace DirectX;
 #include "directx.h"
 #include "debug_ostream.h"
 #include <fstream>
+#include "shader.h"
 
 
 static ID3D11VertexShader* g_pVertexShader = nullptr;
 static ID3D11InputLayout* g_pInputLayout = nullptr;
 static ID3D11Buffer* g_pVSConstantBuffer = nullptr;
+static ID3D11Buffer* g_pVSLightBuffer = nullptr;  // ライトにまつわる色々Buffer
 static ID3D11PixelShader* g_pPixelShader = nullptr;
 static ID3D11SamplerState* g_SamplerState = nullptr;
 
@@ -71,7 +73,7 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 
 	// 頂点レイアウトの定義
-	D3D11_INPUT_ELEMENT_DESC layout[] = {
+	D3D11_INPUT_ELEMENT_DESC layout[] = {  // GPUに正しくデータを送るための設定
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 3要素32bitが入っている。rgbは関係ない。
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
@@ -95,6 +97,9 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // バインドフラグ
 
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSConstantBuffer);
+	
+	buffer_desc.ByteWidth = sizeof(LIGHT);  // directX11には16バイト区切りでなければいけないルールがある。GPU都合。
+	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSLightBuffer);
 
 	// 事前コンパイル済みピクセルシェーダーの読み込み
 	std::ifstream ifs_ps("shaderPixel3D.cso", std::ios::binary);
@@ -161,6 +166,13 @@ void Shader_SetMatrix(const DirectX::XMMATRIX& matrix)
 	g_pContext->UpdateSubresource(g_pVSConstantBuffer, 0, nullptr, &transpose, 0, 0);
 }
 
+void Shader_SetLight(const LIGHT& light )
+{
+	// 定数バッファにライトをセット
+	g_pContext->UpdateSubresource(g_pVSLightBuffer, 0, nullptr, &light, 0, 0);
+}
+
+
 void Shader_Begin()
 {
 	// 頂点シェーダーとピクセルシェーダーを描画パイプラインに設定
@@ -171,5 +183,6 @@ void Shader_Begin()
 	g_pContext->IASetInputLayout(g_pInputLayout);
 
 	// 定数バッファを描画パイプラインに設定
-	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer);
+	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer);  // 引数の一個目は、どこからメモリを入れるか設定できる。
+	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
 }

@@ -12,10 +12,19 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+struct LIGHT
+{
+	BOOL lightEnable;  // 4バイト
+	float dummy0[3];  // 12バイト
+	XMFLOAT3 lightDirection;  // float 4バイト　int 4バイト  4*3=12
+	float dummy1;
+};
+
 bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 void Shader_Finalize();
 
 void Shader_SetMatrix(const DirectX::XMMATRIX& matrix);
+void Shader_SetLight(const LIGHT& light);
 
 void Shader_Begin();
 
