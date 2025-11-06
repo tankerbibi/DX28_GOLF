@@ -39,7 +39,7 @@ void UpdateCamera()
 
 	const float pitchLimit = XM_PIDIV2 * 0.99f;  // 限りなく90度に近い数値を取得(90 * 0.99)
 		
-	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
+	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; else if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
 
 	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
 	// --- 1. W/S (前後) 用の前方ベクトルを計算 (ピッチを考慮する) ---
