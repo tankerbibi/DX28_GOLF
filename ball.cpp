@@ -15,7 +15,7 @@ void InitializeBall()
 	g_Model = ModelLoad("asset\\model\\Ball.fbx");
 	g_BallPos = {5.0f, 7.0f, -5.0f};
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
-	g_BallRotation = { -XM_PIDIV2, 0.0f, 0.0f };
+	g_BallRotation = { 0.0f, 0.0f, 0.0f };
 }
 
 void FinalizeBall()
@@ -25,21 +25,27 @@ void FinalizeBall()
 
 void UpdateBall()
 {
+	g_BallRotation.y += 0.01f;
 }
 
 void DrawBall()
 {
 	Shader_Begin();  // シェーダーの設定
 	// 頂点シェーダーに変換行列を設定
-	XMMATRIX matrix{ XMMatrixIdentity() };  // 行列を作成　float 4 x 4
 
-	matrix *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
-	matrix *= XMMatrixRotationRollPitchYaw(g_BallRotation.x, g_BallRotation.y, g_BallRotation.z);  // 回転マトリクス
-	matrix *= XMMatrixTranslation(g_BallPos.x, g_BallPos.y, g_BallPos.z);  // 移動マトリクス。gpuで計算されている。
+	MATRIX matrix;
 
-	matrix *= GetCameraViewMatrix();  // ビューマトリクス
+	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
+	matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
+	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_BallRotation.x, g_BallRotation.y, g_BallRotation.z);  // 回転マトリクス
+	matrix.matrixWorld *= XMMatrixTranslation(g_BallPos.x, g_BallPos.y, g_BallPos.z);  // 移動マトリクス。gpuで計算されている。
+
+	matrix.matrix = matrix.matrixWorld;
+
+	matrix.matrix *= GetCameraViewMatrix();  // ビューマトリクス
+	matrix.matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
 
 	Shader_SetMatrix(matrix);
 	ModelDraw(g_Model);

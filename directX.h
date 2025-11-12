@@ -12,6 +12,9 @@ struct Vertex //頂点データ　GPUメモリに保存する。
 	XMFLOAT3 position;  // 頂点座標
 	XMFLOAT2 texcoord;  // テクスチャ座標
 	XMFLOAT3 normal;  // 法線座標
+
+	UINT bone_indices[4];
+	float bone_weights[4];  // 各ボーンからの影響度
 };
 
 #define SAFE_RELEASE(o)		if (o) { (o)->Release(); o = NULL;}

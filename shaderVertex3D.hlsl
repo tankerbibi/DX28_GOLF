@@ -1,18 +1,19 @@
 
-//定数バッファ
+//定数バッファ  gpuとcpuはまったく別なので、情報のやりとりにはこれを使う。
 cbuffer MatrixBuffer : register(b0)  // b0はスロット番号　shader.cppで引数として送った数字と連携している。
 {
     float4x4 mtx;
+    float4x4 mtxWorld;
 }
 
 cbuffer LightBuffer : register(b1)
 {
-    bool lightEnable;
+    bool lightEnable;  // 2D描画の時にはFalseにする  float4つ分区切り
     float3 dummy0;
+    
     float3 lightDirection;
     float dummy1;  // ダミー 16バイト区切りにしなければならないルールを遵守するために存在する。
 }
-
 // hlslはc言語ベース
 // グローバルイルミネーション すべての物体から反射する光を計算して影を作ることをいう。
 
@@ -28,9 +29,13 @@ float4 main(in float4 position : POSITION0,
     
     if (lightEnable)
     {
+        // 法線ベクトルの座標変換(回転)
+        normal = mul(float4(normal, 0.0), mtxWorld);  // normalを回転させる
+        
          // ランバート拡散照明(直接光)
         outColor.rgb = -dot(lightDirection, normal);
-    
+        outColor.rgb *= float3(1.0, 1.0, -lightDirection.g);
+        
         outColor.rgb += float3(0.3, 0.2, 0.2);  // 環境光（アンビエントライト）　空が夕日の色なので赤を強めにしてみた。
         outColor.rgb = saturate(outColor.rgb);  // saturateは０以下を０に、１以上を１に制限してくれる
     }
@@ -42,5 +47,5 @@ float4 main(in float4 position : POSITION0,
     outColor.a = 1.0;
     
     outTexcoord = texcoord;
-    return mul(position, mtx);
+    return mul(position, mtx);  //行列の掛け算で回転している。
 }

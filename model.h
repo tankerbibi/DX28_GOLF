@@ -8,6 +8,11 @@
 #include "assimp/matrix4x4.h"
 #pragma comment (lib, "assimp-vc143-mt.lib")
 
+struct BoneInfo
+{
+	aiMatrix4x4 offsetMatrix;
+	aiMatrix4x4 finalTransform;
+};
 
 struct MODEL
 {
@@ -17,6 +22,9 @@ struct MODEL
 	ID3D11Buffer** IndexBuffer;
 
 	std::unordered_map<std::string, ID3D11ShaderResourceView*> Texture;  // mapはunreal engineのやつ。配列の進化版。
+	std::unordered_map<std::string, int> boneMapping;
+	BoneInfo boneInfo[100];
+	int numBones = 0;
 };
 
 

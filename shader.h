@@ -12,7 +12,13 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-struct LIGHT
+struct MATRIX
+{
+	XMMATRIX matrix;  // XMMATRIX 計算に適している    XMFLOAT4X4 保存に適している
+	XMMATRIX matrixWorld;
+};
+
+struct LIGHT  // shader.hlslのlightに対応する物
 {
 	BOOL lightEnable;  // 4バイト
 	float dummy0[3];  // 12バイト
@@ -23,7 +29,7 @@ struct LIGHT
 bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 void Shader_Finalize();
 
-void Shader_SetMatrix(const DirectX::XMMATRIX& matrix);
+void Shader_SetMatrix(const MATRIX& matrix);
 void Shader_SetLight(const LIGHT& light);
 
 void Shader_Begin();

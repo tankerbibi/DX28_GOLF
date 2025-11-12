@@ -33,7 +33,29 @@ MODEL* ModelLoad( const char *FileName)
 				vertex[v].texcoord = XMFLOAT2( mesh->mTextureCoords[0][v].x, mesh->mTextureCoords[0][v].y);
 				// vertex[v].color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 				vertex[v].normal = XMFLOAT3(mesh->mNormals[v].x, -mesh->mNormals[v].z, mesh->mNormals[v].y);
+			
+				//for (int i = 0; i < 4; i++)  // 頂点に対するボーンの情報を初期化
+				//{
+				//	vertex[v].bone_indices[i] = 0;
+				//	vertex[v].bone_weights[i] = 0.0f;
+				//}
 			}
+
+			/*for (unsigned int b = 0; b < mesh->mNumBones; b++)
+			{
+				aiBone* bone = mesh->mBones[b];
+				std::string boneName(bone->mName.data);
+				int boneIndex = 0;
+
+				if (model->boneMapping.find(boneName) == model->boneMapping.end())
+				{
+					boneIndex = model->numBones;
+					model->numBones++;
+					BoneInfo bi;
+					bi.offsetMatrix = bone->mOffsetMatrix;
+					
+				}
+			}*/
 
 			// 頂点バッファ作成。それにデータも入れてしまう。
 			D3D11_BUFFER_DESC bd;

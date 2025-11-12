@@ -3,8 +3,8 @@
 #include "score.h" 
 #include "sound.h"
 #include "Keyboard.h"
-#include "cube.h"
 #include "camera.h"
+#include "field.h"
 #include "mouse.h"
 #include "ball.h"
 #include "shader.h"
@@ -12,16 +12,18 @@
 static int g_BGM{};
 static bool g_Pause{false};
 
+static XMFLOAT3 g_LightDirection;
 
 void InitializeGame()
 {
 	g_Pause = false;
 	InitializeCamera();
 	InitializeScore();
-	InitializeCube();
 	InitializeMouse();
 	InitializeBall();
+	InitializeField();
 
+	g_LightDirection = { 0.0f, -1.0f, 0.0f };
 	//BGM読み込み
 	g_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
 
@@ -37,7 +39,7 @@ void FinalizeGame()
 	//BGM停止
 	StopSoundAll();
 	FinalizeScore();
-	FinalizeCube();
+	FinalizeField();
 	FinalizeCamera();
 	FinalizeMouse();
 	FinalizeBall();
@@ -53,9 +55,17 @@ void UpdateGame()
 	{
 		UpdateCamera();
 		UpdateScore();
-		UpdateCube();
+		UpdateField();
 		UpdateMouse();
 		UpdateBall();
+		if (g_LightDirection.y > 1.0f)
+		{
+			g_LightDirection.y -= 0.01f;
+		}
+		else if (g_LightDirection.y < -1.0f)
+		{
+			g_LightDirection.y += 0.01f;
+		}
 	}
 }
 
@@ -65,11 +75,11 @@ void DrawGame()
 	
 	SetDepthEnable(true);
 	light.lightEnable = true;
-	light.lightDirection = {0.0f, -1.0f, 0.0f};
+	light.lightDirection = g_LightDirection;
 	Shader_SetLight(light);
 
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
-	DrawCube();
+	DrawField();
 	DrawBall();
 
 	SetDepthEnable(false);

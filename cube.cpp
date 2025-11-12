@@ -597,17 +597,20 @@ void DrawCube()
 	for(int i = 0; i < cubeNum; i++)
 	{
 		// 頂点シェーダーに変換行列を設定
-		XMMATRIX matrix{ XMMatrixIdentity() };  // 行列を作成　float 4 x 4
+		XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+		
+		matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
+		matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
+		matrixWorld *= XMMatrixTranslation(g_CubePos[i].x, g_CubePos[i].y, g_CubePos[i].z);  // 移動マトリクス。gpuで計算されている。
 
-		matrix *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
-		matrix *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-		matrix *= XMMatrixTranslation(g_CubePos[i].x, g_CubePos[i].y, g_CubePos[i].z);  // 移動マトリクス。gpuで計算されている。
+		matrix = matrixWorld;
 
 		matrix *= GetCameraViewMatrix();  // ビューマトリクス
 
 		matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
 
-		Shader_SetMatrix(matrix);  // vertex.hlslのmtxに値を送っている。
+		Shader_SetMatrix({matrix, matrixWorld });  // vertex.hlslのmtxに値を送っている。
 
 		DirectXGetDeviceContext()->DrawIndexed(36, 0, 0);  // ポリゴン描画
 	}

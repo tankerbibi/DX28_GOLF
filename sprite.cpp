@@ -81,7 +81,7 @@ void SpriteDraw(float x, float y, float width, float height, float tx, float ty,
 
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス
 	matrix *= XMMatrixOrthographicOffCenterLH(0.0f, screenWidth, screenHeight, 0.0f, 0.0f, 1.0f);
-	Shader_SetMatrix(matrix);  // 画面の大きさにうまく合わせてくれる。
+	Shader_SetMatrix({ matrix, matrix });  // 画面の大きさにうまく合わせてくれる。
 
 	//頂点バッファ設定
 	UINT stride = sizeof(Vertex);
@@ -125,6 +125,7 @@ void SpriteDrawRotation(float x, float y, float width, float height, float tx, f
 
 	//頂点シェーダーに変換行列を設定
 	XMMATRIX matrix{ XMMatrixIdentity() };  // 行列を作成　float 4 x 4
+	XMMATRIX matrixWorld{ XMMatrixIdentity() };
 
 	//回転マトリクス
 	matrix *= XMMatrixRotationZ(rotation);  // z軸を中心に回転する　行列はかけ合わせることで、合成できる
@@ -132,9 +133,11 @@ void SpriteDrawRotation(float x, float y, float width, float height, float tx, f
 	//移動マトリクス
 	matrix *= XMMatrixTranslation(x, y, 0.0f); // gpuで計算されている。
 
+	matrixWorld = matrix;
+
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス
-	matrix *= XMMatrixOrthographicOffCenterLH(0.0f, screenWidth, screenHeight, 0.0f, 0.0f, 1.0f);
-	Shader_SetMatrix(matrix);  // 画面の大きさにうまく合わせてくれる。
+	matrixWorld *= XMMatrixOrthographicOffCenterLH(0.0f, screenWidth, screenHeight, 0.0f, 0.0f, 1.0f);
+	Shader_SetMatrix({ matrix, matrixWorld });  // 画面の大きさにうまく合わせてくれる。
 
 	//頂点バッファ設定
 	UINT stride = sizeof(Vertex);

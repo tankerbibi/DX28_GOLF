@@ -93,9 +93,8 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 	// 頂点シェーダー用定数バッファの作成
 	D3D11_BUFFER_DESC buffer_desc{};
-	buffer_desc.ByteWidth = sizeof(XMMATRIX); // バッファのサイズ
+	buffer_desc.ByteWidth = sizeof(MATRIX); // バッファのサイズ
 	buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // バインドフラグ
-
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSConstantBuffer);
 	
 	buffer_desc.ByteWidth = sizeof(LIGHT);  // directX11には16バイト区切りでなければいけないルールがある。GPU都合。
@@ -154,19 +153,20 @@ void Shader_Finalize()
 	SAFE_RELEASE(g_pVertexShader);
 }
 
-void Shader_SetMatrix(const DirectX::XMMATRIX& matrix)
+void Shader_SetMatrix(const MATRIX& matrix)  // gpuに、定数バッファを経由してデータを送る
 {
 	// 定数バッファ格納用行列の構造体を定義
-	XMFLOAT4X4 transpose;
+	XMFLOAT4X4 transpose[2];
 
-	// 行列を転置して定数バッファ格納用行列に変換
-	XMStoreFloat4x4(&transpose, XMMatrixTranspose(matrix));
+	// 行列を転置して定数バッファ格納用行列に変換  そのほうが効率が良いらしい。
+	XMStoreFloat4x4(&transpose[0], XMMatrixTranspose(matrix.matrix));
+	XMStoreFloat4x4(&transpose[1], XMMatrixTranspose(matrix.matrixWorld));
 
 	// 定数バッファに行列をセット
-	g_pContext->UpdateSubresource(g_pVSConstantBuffer, 0, nullptr, &transpose, 0, 0);
+	g_pContext->UpdateSubresource(g_pVSConstantBuffer, 0, nullptr, transpose, 0, 0);
 }
 
-void Shader_SetLight(const LIGHT& light )
+void Shader_SetLight(const LIGHT& light )  // gpuに、定数バッファを経由してデータを送る
 {
 	// 定数バッファにライトをセット
 	g_pContext->UpdateSubresource(g_pVSLightBuffer, 0, nullptr, &light, 0, 0);
@@ -182,7 +182,7 @@ void Shader_Begin()
 	// 頂点レイアウトを描画パイプラインに設定
 	g_pContext->IASetInputLayout(g_pInputLayout);
 
-	// 定数バッファを描画パイプラインに設定
+	// 定数バッファを描画パイプラインに設定(ここを経由して描画してほしい)
 	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer);  // 引数の一個目は、どこからメモリを入れるか設定できる。
 	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
 }
