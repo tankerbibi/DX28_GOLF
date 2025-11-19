@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-
+#include "ball.h"
 #include "mouse.h"
 #include "Keyboard.h"
 
@@ -19,8 +19,8 @@ static float g_CameraPitch = 0.0f;
 
 void InitializeCamera()
 {
-	g_CameraPos = { 0.0f, 10.0f, -10.0f };
-	g_CameraTargetPos = { 0.0f, 0.0f, -1.0f };
+	g_CameraPos = { 0.0f, 1.0f, -10.0f };
+	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
 	g_CameraRotation = {0.0f, 0.0f,0.0f};
 	g_CameraYaw = 0.0f;
 	g_CameraPitch = 0.0f;
@@ -32,6 +32,7 @@ void FinalizeCamera()
 
 void UpdateCamera()
 {
+	/*/////////////////////////////////////////////////////////////
 	XMFLOAT2 mousePosDif = GetMousePosDif();
 
 	g_CameraYaw += mousePosDif.x * 0.0018f;
@@ -97,6 +98,17 @@ void UpdateCamera()
 
 	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPos), forwardVec_WS);  // 注視点ベクトルを導き出す
 	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
+
+	*//////////////////////////////////////////////////////////////////
+
+	XMFLOAT3 ballPos = GetBallPos();
+	g_CameraPos = ballPos;
+	g_CameraPos.z -= 5.0f;
+	g_CameraPos.y += 5.0f;
+
+	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
+	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
+	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
 
 	///授業コード始まり///
 	/*if (Keyboard_IsKeyDown(KK_RIGHT))

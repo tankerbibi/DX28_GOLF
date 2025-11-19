@@ -1,5 +1,5 @@
-#include "field.h"
 #include "directX.h"
+#include "field.h"
 #include "Keyboard.h"
 #include "model.h"
 #include "camera.h"
@@ -82,6 +82,12 @@ static BLOCK g_Block[blockMax]
 	{{3.0f, 1.0f, 7.0f}, 0 },
 	{{4.0f, 1.0f, 7.0f}, 0 },
 	{{5.0f, 1.0f, 7.0f}, 0 },
+
+	{{5.0f, 5.0f, 7.0f}, 0 },
+	{{6.0f, 5.0f, 7.0f}, 0 },
+	{{6.0f, 2.0f, 7.0f}, 0 },
+	{{7.0f, 5.0f, 7.0f}, 0 },
+
 	{{6.0f, 1.0f, 7.0f}, 0 },
 	{{7.0f, 1.0f, 7.0f}, 0 },
 	{{8.0f, 1.0f, 7.0f}, 0 },
@@ -192,7 +198,8 @@ void DrawField()
 
 		matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 		matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-		if (i == 0)
+
+		if (i == 0)  // 広い床の時
 		{
 			matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);  // 拡大縮小マトリクス
 			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
@@ -200,15 +207,19 @@ void DrawField()
 		}
 		else
 		{
-			matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
-			if (g_Block[i].type == 2)
+			if (g_Block[i].type == 2)  // カービーの時
 			{
 				matrix.matrixWorld *= XMMatrixScaling(0.6f, 0.6f, 0.6f);
 				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0.0f, 0.0f);
 				matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 			}
+			else
+			{
+				matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+				matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+			}
+			
 		}
 
 		matrix.matrix = matrix.matrixWorld;
