@@ -13,7 +13,7 @@ static XMFLOAT3 g_BallRotation;
 void InitializeBall()
 {
 	g_Model = ModelLoad("asset\\model\\Ball.fbx");
-	g_BallPos = {5.0f, 7.0f, -5.0f};
+	g_BallPos = {0.0f, 1.75f, 0.0f};
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  âΩÇ™à·Ç§ÅH
 	g_BallRotation = { 0.0f, 0.0f, 0.0f };
 }

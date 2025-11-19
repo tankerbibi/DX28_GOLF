@@ -33,11 +33,11 @@ float4 main(in float4 position : POSITION0,
         normal = mul(float4(normal, 0.0), mtxWorld);  // normalを回転させる
         
          // ランバート拡散照明(直接光)
-        outColor.rgb = -dot(lightDirection, normal);
+        outColor.rgb = saturate(-dot(lightDirection, normal)); // lightDirectionは長さが１でなければならない。
         outColor.rgb *= float3(1.0, 1.0, -lightDirection.g);
         
-        outColor.rgb += float3(0.3, 0.2, 0.2);  // 環境光（アンビエントライト）　空が夕日の色なので赤を強めにしてみた。
-        outColor.rgb = saturate(outColor.rgb);  // saturateは０以下を０に、１以上を１に制限してくれる
+        //outColor.rgb = saturate(outColor.rgb);  // saturateは０以下を０に、１以上を１に制限してくれる 内積の後にsaturateする。ーになるのを防ぐ。
+        outColor.rgb += float3(0.6, 0.4, 0.4);  // 環境光（アンビエントライト）　空が夕日の色なので赤を強めにしてみた。
     }
     else
     {

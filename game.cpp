@@ -23,7 +23,10 @@ void InitializeGame()
 	InitializeBall();
 	InitializeField();
 
-	g_LightDirection = { 0.0f, -1.0f, 0.0f };
+	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
+	direction = XMVector3Normalize(direction);  // 正規化(長さ)
+	DirectX::XMStoreFloat3(&g_LightDirection, direction);
+
 	//BGM読み込み
 	g_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
 
@@ -58,14 +61,14 @@ void UpdateGame()
 		UpdateField();
 		UpdateMouse();
 		UpdateBall();
-		if (g_LightDirection.y > 1.0f)
+		/*if (g_LightDirection.y > 1.0f)
 		{
 			g_LightDirection.y -= 0.01f;
 		}
 		else if (g_LightDirection.y < -1.0f)
 		{
 			g_LightDirection.y += 0.01f;
-		}
+		}*/
 	}
 }
 
