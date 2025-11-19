@@ -81,7 +81,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,  // ‚P”N¶‚Ì‚Éì‚Á‚Ä‚¢‚½mainŠÖ
 	DWORD dwCurrentTime;
 	DWORD dwFrameCount;
 
-	timeBeginPeriod(1);  // ¸“x‚ ‚°‚ ‚°‚·‚éB
+	timeBeginPeriod(1);  // ¸“x‚ ‚°‚éB
 	dwExecLastTime = dwFPSLastTime = timeGetTime();
 	dwCurrentTime = dwFrameCount = 0;
 

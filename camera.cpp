@@ -52,22 +52,22 @@ void UpdateCamera()
 
 	XMVECTOR velocity = XMVectorZero();
 
-	if (Keyboard_IsKeyDown(KK_W))
+	if (Keyboard_IsKeyDown(KK_UP))
 	{
 		velocity = XMVectorAdd(velocity, forwardVec_WS);
 	}
-	else if (Keyboard_IsKeyDown(KK_S))
+	else if (Keyboard_IsKeyDown(KK_DOWN))
 	{
 		velocity = XMVectorAdd(velocity, XMVectorNegate(forwardVec_WS));
 	}
 
-	if (Keyboard_IsKeyDown(KK_A))
+	if (Keyboard_IsKeyDown(KK_LEFT))
 	{
 		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // 回転マトリクスを取得
 		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // 前方ベクトルを回転
 		velocity = XMVectorAdd(velocity, left);
 	}
-	else if (Keyboard_IsKeyDown(KK_D))
+	else if (Keyboard_IsKeyDown(KK_RIGHT))
 	{
 		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2, 0);  // 回転マトリクスを取得
 		XMVECTOR right = XMVector3TransformNormal(forwardVec_AD, rightRotationMatrix);  // 前方ベクトルを回転

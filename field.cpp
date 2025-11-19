@@ -6,14 +6,6 @@
 #include "shader.h"
 
 
-struct BLOCK
-{
-	XMFLOAT3 pos;
-	int type;
-};
-
-static constexpr unsigned int blockMax = 1000;
-
 static BLOCK g_Block[blockMax]
 {
 	{{0.0f, 0.0f, 0.0f}, 0 },
@@ -160,6 +152,12 @@ static BLOCK g_Block[blockMax]
 static XMFLOAT3 g_Rotation;  // pi
 
 static MODEL* g_Model[3];
+
+
+BLOCK* GetFieldBlock()
+{
+	return g_Block;
+}
 
 void InitializeField()
 {
