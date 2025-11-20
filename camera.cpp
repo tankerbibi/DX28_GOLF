@@ -111,7 +111,7 @@ void UpdateCamera()
 	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
 
 	///授業コード始まり///
-	/*if (Keyboard_IsKeyDown(KK_RIGHT))
+	if (Keyboard_IsKeyDown(KK_RIGHT))
 	{
 		g_CameraTargetPos.x += 0.1f;
 	}
@@ -130,7 +130,7 @@ void UpdateCamera()
 	}
 
 	g_CameraPos.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
-	g_CameraPos.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;*/
+	g_CameraPos.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
 	///授業コード終わり///
 }
 
@@ -151,4 +151,13 @@ XMMATRIX GetCameraViewMatrix()
 XMMATRIX GetCameraProjectionMatrix()
 {
 	return g_ProjectionMatrix;
+}
+
+XMFLOAT3 GetCameraForward()
+{
+	XMFLOAT3 forward;
+	forward.x = g_CameraTargetPos.x - g_CameraPos.x;
+	forward.y = g_CameraTargetPos.y - g_CameraPos.y;
+	forward.z = g_CameraTargetPos.z - g_CameraPos.z;
+	return forward;
 }
