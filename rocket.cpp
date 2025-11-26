@@ -1,5 +1,5 @@
 #include "directX.h"
-#include "ball.h"
+#include "rocket.h"
 #include "Keyboard.h"
 #include "model.h"
 #include "camera.h"
@@ -14,26 +14,31 @@ static XMFLOAT3 g_Pos;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
 
-static constexpr float g_BallRadius = 0.2f;
+static XMFLOAT3 g_Pitch;
+static XMFLOAT3 g_Yaw;
 
-void BallHitCheck();
+static constexpr float g_RocketRadius = 0.2f;
+
+void RocketHitCheck();
 
 
-void InitializeBall()
+void InitializeRocket()
 {
-	g_Model = ModelLoad("asset\\model\\Ball.fbx");
-	g_Pos = {0.0f, 10.0f, 0.0f};
-	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
+	g_Model = ModelLoad("asset\\model\\Rocket.fbx");
+	g_Pos = { 0.0f, 10.0f, 0.0f };
+	// g_RocketPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
+	g_Pitch = {0.0f, 0.0f, 0.0f};
+	g_Yaw = {0.0f, 0.0f, 0.0f};
 }
 
-void FinalizeBall()
+void FinalizeRocket()
 {
 	ModelRelease(g_Model);
 }
 
-void UpdateBall()
+void UpdateRocket()
 {
 	float deltaTime = 1.0f / 60.0f;
 
@@ -43,39 +48,41 @@ void UpdateBall()
 
 	// sqrtfはルート 三平方の定理
 	float length = sqrtf(cameraForward.x * cameraForward.x
-						+ cameraForward.y * cameraForward.y 
-						+ cameraForward.z * cameraForward.z);
+		+ cameraForward.y * cameraForward.y
+		+ cameraForward.z * cameraForward.z);
 
 	// Normalize 正規化(長さを１にする) 長さ３のベクトルを長さ３で割るので１になる
 	cameraForward.x /= length;
 	cameraForward.y /= length;
 	cameraForward.z /= length;
-	
+
 	// 力
 	XMFLOAT3 force = { 0.0f, 0.0f, 0.0f };
 
-	// 加速
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
+	// --- 1. W/S (前後) 用の前方ベクトルを計算 (ピッチを考慮する) ---
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
+	XMVECTOR forwardVec_WS = XMVector3TransformNormal(forwardBase, rotationMatrix);
+
+	// --- 2. A/D (左右) 用の"水平"前方ベクトルを計算 (ピッチを 0.0f にする) ---
+	XMMATRIX horizontalRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, g_Yaw, 0.0f);
+	XMVECTOR forwardVec_AD = XMVector3TransformNormal(forwardBase, horizontalRotationMatrix);
+
+	// 回転させる
 	if (Keyboard_IsKeyDown(KK_A))
 	{
-		// 例のベクトルの回転の公式
-		force.x -= cameraForward.z; // xとzを返ればいいだけ
-		force.z += cameraForward.x;
-		
+		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // 回転マトリクスを取得
+		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // 前方ベクトルを回転
+		g_Veloci = XMVectorAdd(velocity, left);
 	}
 	else if (Keyboard_IsKeyDown(KK_D))
 	{
-		force.x += cameraForward.z;
-		force.z -= cameraForward.x;
 	}
 	if (Keyboard_IsKeyDown(KK_W))
 	{
-		force.x += cameraForward.x;
-		force.z += cameraForward.z;
 	}
 	else if (Keyboard_IsKeyDown(KK_S))
 	{
-		force.x -= cameraForward.x;
-		force.z -= cameraForward.z;
 	}
 
 	// 力ベクトルの長さ
@@ -115,28 +122,10 @@ void UpdateBall()
 	g_Pos.z += g_Velocity.z * deltaTime;
 
 	// 衝突判定
-	BallHitCheck();
-
-
-	// 終点から始点を引くことで、ベクトルを求める
-	XMFLOAT3 goalVec;
-	XMFLOAT3 goalPosition = GetGoalPosition();
-	goalVec.x = goalPosition.x - g_Pos.x;
-	goalVec.y = goalPosition.y - g_Pos.y;
-	goalVec.z = goalPosition.z - g_Pos.z;
-
-	float goalLength = sqrtf(goalVec.x * goalVec.x
-		+ goalVec.y * goalVec.y
-		+ goalVec.z * goalVec.z);
-
-	// ゴール衝突判定
-	if (goalLength < g_BallRadius * 4.0f)
-	{
-		SetScene(SCENE_RESULT);
-	}
+	RocketHitCheck();
 }
 
-void DrawBall()
+void DrawRocket()
 {
 	Shader_Begin();  // シェーダーの設定
 	// 頂点シェーダーに変換行列を設定
@@ -159,16 +148,16 @@ void DrawBall()
 	ModelDraw(g_Model);
 }
 
-XMFLOAT3 GetBallPos()
+XMFLOAT3 GetRocketPos()
 {
 	return g_Pos;
 }
 
-void BallHitCheck()
+void RocketHitCheck()
 {
 	BLOCK* block = GetFieldBlock();
 	float blockRadius = 0.5f;
-	
+
 
 	float e = 0.5f;  // 跳ね返り係数
 
@@ -182,44 +171,44 @@ void BallHitCheck()
 			if (block[i].pos.z - blockRadius < g_Pos.z &&
 				g_Pos.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x + g_BallRadius &&
-					g_Pos.x - g_BallRadius < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
+					g_Pos.x - g_RocketRadius < block[i].pos.x + blockRadius)
 				{
 					if (block[i].pos.x < g_Pos.x)
 					{
 						// 右
-						g_Pos.x = block[i].pos.x + blockRadius + g_BallRadius;
+						g_Pos.x = block[i].pos.x + blockRadius + g_RocketRadius;
 					}
 					else
 					{
 						// 左
-						g_Pos.x = block[i].pos.x - blockRadius - g_BallRadius;
+						g_Pos.x = block[i].pos.x - blockRadius - g_RocketRadius;
 					}
 					g_Velocity.x *= -e;
 				}
 			}
 			// z方向
-			else if(block[i].pos.x - blockRadius < g_Pos.x + g_BallRadius &&
+			else if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
 				g_Pos.x < block[i].pos.x + blockRadius)
 			{
-				if (block[i].pos.z - blockRadius < g_Pos.z + g_BallRadius &&
-					g_Pos.z - g_BallRadius < block[i].pos.z + blockRadius)
+				if (block[i].pos.z - blockRadius < g_Pos.z + g_RocketRadius &&
+					g_Pos.z - g_RocketRadius < block[i].pos.z + blockRadius)
 				{
 					if (block[i].pos.z < g_Pos.z)
 					{
 						// 奥
-						g_Pos.z = block[i].pos.z + blockRadius + g_BallRadius;
+						g_Pos.z = block[i].pos.z + blockRadius + g_RocketRadius;
 					}
 					else
 					{
 						// 手前
-						g_Pos.z = block[i].pos.z - blockRadius - g_BallRadius;
+						g_Pos.z = block[i].pos.z - blockRadius - g_RocketRadius;
 					}
 				}
 			}
 		}
 		else
-		// 縦方向の当たり判定処理
+			// 縦方向の当たり判定処理
 		{
 			// 手前　奥
 			if (block[i].pos.z - blockRadius < g_Pos.z &&
@@ -228,19 +217,19 @@ void BallHitCheck()
 				if (block[i].pos.x - blockRadius < g_Pos.x &&
 					g_Pos.x < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.y - blockRadius < g_Pos.y + g_BallRadius &&
-						g_Pos.y - g_BallRadius < block[i].pos.y + blockRadius)
+					if (block[i].pos.y - blockRadius < g_Pos.y + g_RocketRadius &&
+						g_Pos.y - g_RocketRadius < block[i].pos.y + blockRadius)
 					{
 						if (g_Pos.y > block[i].pos.y)
 						{
 							// 上
-							g_Pos.y = block[i].pos.y + blockRadius + g_BallRadius;
+							g_Pos.y = block[i].pos.y + blockRadius + g_RocketRadius;
 
 						}
 						else
 						{
 							// 下
-							g_Pos.y = block[i].pos.y - blockRadius - g_BallRadius;
+							g_Pos.y = block[i].pos.y - blockRadius - g_RocketRadius;
 						}
 						g_Velocity.y *= -e;
 					}

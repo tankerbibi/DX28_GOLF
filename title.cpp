@@ -16,7 +16,7 @@ static float g_Alpha;
 
 void InitializeTitle()
 {
-	g_BGTexture = TextureLoad(L"asset\\texture\\BG_06.png");
+	g_BGTexture = TextureLoad(L"asset\\texture\\PROGOLFERTitle.png");
 	g_TitleTexture = TextureLoad(L"asset\\texture\\Title.png");
 	g_PressKeyTexture = TextureLoad(L"asset\\texture\\PressKey.png");
 	g_FrameCount = 0;

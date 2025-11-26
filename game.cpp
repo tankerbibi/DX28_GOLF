@@ -8,6 +8,7 @@
 #include "mouse.h"
 #include "ball.h"
 #include "shader.h"
+#include "goal.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -22,6 +23,7 @@ void InitializeGame()
 	InitializeMouse();
 	InitializeBall();
 	InitializeField();
+	InitializeGoal();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -46,6 +48,7 @@ void FinalizeGame()
 	FinalizeCamera();
 	FinalizeMouse();
 	FinalizeBall();
+	FinalizeGoal();
 }
 
 void UpdateGame()
@@ -59,8 +62,9 @@ void UpdateGame()
 		UpdateCamera();
 		UpdateScore();
 		UpdateField();
-		UpdateMouse();
+		// UpdateMouse();
 		UpdateBall();
+		UpdateGoal();
 		/*if (g_LightDirection.y > 1.0f)
 		{
 			g_LightDirection.y -= 0.01f;
@@ -83,6 +87,7 @@ void DrawGame()
 
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
 	DrawField();
+	DrawGoal();
 	DrawBall();
 
 	SetDepthEnable(false);

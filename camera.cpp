@@ -155,6 +155,7 @@ XMMATRIX GetCameraProjectionMatrix()
 
 XMFLOAT3 GetCameraForward()
 {
+	// 終点から始点を引く
 	XMFLOAT3 forward;
 	forward.x = g_CameraTargetPos.x - g_CameraPos.x;
 	forward.y = g_CameraTargetPos.y - g_CameraPos.y;
