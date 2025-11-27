@@ -10,15 +10,16 @@
 static constexpr unsigned int rankingMax = 4;
 
 static int g_Texture;
-static int g_Score[rankingMax] = { 10, 5, 1, 0};
+static int g_Score[rankingMax] = { 0, 5, 10, 0 };
 
 void SetRankingScore(int score)
 {
 	g_Score[3] = score;
 
+	// ソート（簡易バブルソート）
 	for (int i = rankingMax - 1; i > 0; i--)  // rankingMax - 1　これ大事。
 	{
-		if (g_Score[i] > g_Score[i - 1])
+		if (g_Score[i] < g_Score[i - 1])
 		{
 			int score = g_Score[i];
 			g_Score[i] = g_Score[i - 1];
@@ -29,7 +30,7 @@ void SetRankingScore(int score)
 
 void InitializeRanking()
 {
-	g_Texture = TextureLoad(L"asset\\texture\\number_2.png");
+	g_Texture = TextureLoad(L"asset\\texture\\number_1.png");
 }
 
 void FinalizeRanking()
@@ -46,7 +47,7 @@ void DrawRanking()
 	{
 		int value = g_Score[j];
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			int num = value % 10;
 			value /= 10;

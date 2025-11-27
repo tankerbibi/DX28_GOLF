@@ -9,6 +9,8 @@
 #include "ball.h"
 #include "shader.h"
 #include "goal.h"
+#include "stroke.h"
+#include "rocket.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -20,8 +22,10 @@ void InitializeGame()
 	g_Pause = false;
 	InitializeCamera();
 	InitializeScore();
+	InitializeStroke();
 	InitializeMouse();
 	InitializeBall();
+	InitializeRocket();
 	InitializeField();
 	InitializeGoal();
 
@@ -44,10 +48,12 @@ void FinalizeGame()
 	//BGM’âŽ~
 	StopSoundAll();
 	FinalizeScore();
+	FinalizeStroke();
 	FinalizeField();
 	FinalizeCamera();
 	FinalizeMouse();
 	FinalizeBall();
+	FinalizeRocket();
 	FinalizeGoal();
 }
 
@@ -60,10 +66,12 @@ void UpdateGame()
 	if (g_Pause == false)
 	{
 		UpdateCamera();
-		UpdateScore();
+		// UpdateScore();
+		UpdateStroke();
 		UpdateField();
-		// UpdateMouse();
+		UpdateMouse();
 		UpdateBall();
+		UpdateRocket();
 		UpdateGoal();
 		/*if (g_LightDirection.y > 1.0f)
 		{
@@ -89,12 +97,14 @@ void DrawGame()
 	DrawField();
 	DrawGoal();
 	DrawBall();
+	DrawRocket();
 
 	SetDepthEnable(false);
 	light.lightEnable = false;
 	Shader_SetLight(light);	
 
-	DrawScore();
+	// DrawScore();
+	DrawStroke();
 	DrawMouse();
 	
 }

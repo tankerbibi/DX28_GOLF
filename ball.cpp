@@ -7,6 +7,8 @@
 #include "field.h"
 #include "goal.h"
 #include "main.h"
+#include "stroke.h"
+#include "ranking.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -14,10 +16,18 @@ static XMFLOAT3 g_Pos;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
 
+enum BALL_STATE
+{
+	BALL_STATE_MOVE,
+	BALL_STATE_GOAL,
+};
+static BALL_STATE g_State;
+static int g_StateCount;
+
 static constexpr float g_BallRadius = 0.2f;
 
 void BallHitCheck();
-
+void MoveBall();
 
 void InitializeBall()
 {
@@ -26,6 +36,9 @@ void InitializeBall()
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
+
+	g_State = BALL_STATE_MOVE;
+	g_StateCount = 0;
 }
 
 void FinalizeBall()
@@ -34,6 +47,25 @@ void FinalizeBall()
 }
 
 void UpdateBall()
+{
+	// ステートマシン
+	switch (g_State)
+	{
+	case BALL_STATE_MOVE:
+		MoveBall();
+		break;
+	case BALL_STATE_GOAL:
+		g_StateCount++;
+		if (g_StateCount > 60)
+		{
+			SetScene(SCENE_RESULT);
+		}
+		break;
+	default:
+		break;
+	}
+}
+void MoveBall()
 {
 	float deltaTime = 1.0f / 60.0f;
 
@@ -98,7 +130,15 @@ void UpdateBall()
 	// ショット
 	if (Keyboard_IsKeyTrigger(KK_SPACE))
 	{
+		g_Velocity.x += cameraForward.x * 5.0f;
+		g_Velocity.z += cameraForward.z * 5.0f;
+
 		g_Velocity.y += 5.0f;  // 撃力
+
+		// 打数加算
+		AddStroke(1);
+		
+		SetRankingScore(GetStroke());
 	}
 
 	// 重力
@@ -132,7 +172,10 @@ void UpdateBall()
 	// ゴール衝突判定
 	if (goalLength < g_BallRadius * 4.0f)
 	{
-		SetScene(SCENE_RESULT);
+		SetRankingScore(GetStroke());
+
+		g_State = BALL_STATE_GOAL;
+		g_StateCount = 0;
 	}
 }
 

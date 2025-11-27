@@ -32,74 +32,74 @@ void FinalizeCamera()
 
 void UpdateCamera()
 {
-	/*/////////////////////////////////////////////////////////////
-	XMFLOAT2 mousePosDif = GetMousePosDif();
+	//////////////////////////////////////////////////////////////
+	//XMFLOAT2 mousePosDif = GetMousePosDif();
 
-	g_CameraYaw += mousePosDif.x * 0.0018f;
-	g_CameraPitch += mousePosDif.y * 0.0018f;
+	//g_CameraYaw += mousePosDif.x * 0.0018f;
+	//g_CameraPitch += mousePosDif.y * 0.0018f;
 
-	const float pitchLimit = XM_PIDIV2 * 0.99f;  // 限りなく90度に近い数値を取得(90 * 0.99)
-		
-	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; else if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
+	//const float pitchLimit = XM_PIDIV2 * 0.99f;  // 限りなく90度に近い数値を取得(90 * 0.99)
+	//	
+	//if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; else if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // 最大値・最小値制限
 
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
-	// --- 1. W/S (前後) 用の前方ベクトルを計算 (ピッチを考慮する) ---
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
-	XMVECTOR forwardVec_WS = XMVector3TransformNormal(forwardBase, rotationMatrix);
+	//const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
+	//// --- 1. W/S (前後) 用の前方ベクトルを計算 (ピッチを考慮する) ---
+	//XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
+	//XMVECTOR forwardVec_WS = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
-	// --- 2. A/D (左右) 用の"水平"前方ベクトルを計算 (ピッチを 0.0f にする) ---
-	XMMATRIX horizontalRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, g_CameraYaw, 0.0f);
-	XMVECTOR forwardVec_AD = XMVector3TransformNormal(forwardBase, horizontalRotationMatrix);
+	//// --- 2. A/D (左右) 用の"水平"前方ベクトルを計算 (ピッチを 0.0f にする) ---
+	//XMMATRIX horizontalRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, g_CameraYaw, 0.0f);
+	//XMVECTOR forwardVec_AD = XMVector3TransformNormal(forwardBase, horizontalRotationMatrix);
 
-	XMVECTOR velocity = XMVectorZero();
+	//XMVECTOR velocity = XMVectorZero();
 
-	if (Keyboard_IsKeyDown(KK_UP))
-	{
-		velocity = XMVectorAdd(velocity, forwardVec_WS);
-	}
-	else if (Keyboard_IsKeyDown(KK_DOWN))
-	{
-		velocity = XMVectorAdd(velocity, XMVectorNegate(forwardVec_WS));
-	}
+	//if (Keyboard_IsKeyDown(KK_UP))
+	//{
+	//	velocity = XMVectorAdd(velocity, forwardVec_WS);
+	//}
+	//else if (Keyboard_IsKeyDown(KK_DOWN))
+	//{
+	//	velocity = XMVectorAdd(velocity, XMVectorNegate(forwardVec_WS));
+	//}
 
-	if (Keyboard_IsKeyDown(KK_LEFT))
-	{
-		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // 回転マトリクスを取得
-		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // 前方ベクトルを回転
-		velocity = XMVectorAdd(velocity, left);
-	}
-	else if (Keyboard_IsKeyDown(KK_RIGHT))
-	{
-		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2, 0);  // 回転マトリクスを取得
-		XMVECTOR right = XMVector3TransformNormal(forwardVec_AD, rightRotationMatrix);  // 前方ベクトルを回転
-		velocity = XMVectorAdd(velocity, right);
-	}
+	//if (Keyboard_IsKeyDown(KK_LEFT))
+	//{
+	//	XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // 回転マトリクスを取得
+	//	XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // 前方ベクトルを回転
+	//	velocity = XMVectorAdd(velocity, left);
+	//}
+	//else if (Keyboard_IsKeyDown(KK_RIGHT))
+	//{
+	//	XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2, 0);  // 回転マトリクスを取得
+	//	XMVECTOR right = XMVector3TransformNormal(forwardVec_AD, rightRotationMatrix);  // 前方ベクトルを回転
+	//	velocity = XMVectorAdd(velocity, right);
+	//}
 
-	if (Keyboard_IsKeyDown(KK_E))
-	{
-		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
-		XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // 前方ベクトルを回転
-		velocity = XMVectorAdd(velocity, up);
-	}
-	else if (Keyboard_IsKeyDown(KK_Q))
-	{
-		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
-		XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // 前方ベクトルを回転
-		velocity = XMVectorAdd(velocity, down);
-	}
+	//if (Keyboard_IsKeyDown(KK_E))
+	//{
+	//	XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+	//	XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // 前方ベクトルを回転
+	//	velocity = XMVectorAdd(velocity, up);
+	//}
+	//else if (Keyboard_IsKeyDown(KK_Q))
+	//{
+	//	XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // 回転マトリクスを取得
+	//	XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // 前方ベクトルを回転
+	//	velocity = XMVectorAdd(velocity, down);
+	//}
 
-	velocity = XMVector3Normalize(velocity);
+	//velocity = XMVector3Normalize(velocity);
 
-	velocity = XMVectorScale(velocity, 0.2f);
+	//velocity = XMVectorScale(velocity, 0.2f);
 
-	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
-	velocity = XMVectorAdd(cameraPosVec, velocity);  //
-	XMStoreFloat3(&g_CameraPos, velocity);
+	//XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
+	//velocity = XMVectorAdd(cameraPosVec, velocity);  //
+	//XMStoreFloat3(&g_CameraPos, velocity);
 
-	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPos), forwardVec_WS);  // 注視点ベクトルを導き出す
-	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
+	//XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPos), forwardVec_WS);  // 注視点ベクトルを導き出す
+	//XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
 
-	*//////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
 
 	XMFLOAT3 ballPos = GetBallPos();
 	g_CameraPos = ballPos;

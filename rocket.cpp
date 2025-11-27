@@ -13,9 +13,10 @@ static MODEL* g_Model = nullptr;
 static XMFLOAT3 g_Pos;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
+static XMFLOAT3 g_TargetPos;
 
-static XMFLOAT3 g_Pitch;
-static XMFLOAT3 g_Yaw;
+static float g_Pitch;
+static float g_Yaw;
 
 static constexpr float g_RocketRadius = 0.2f;
 
@@ -26,11 +27,11 @@ void InitializeRocket()
 {
 	g_Model = ModelLoad("asset\\model\\Rocket.fbx");
 	g_Pos = { 0.0f, 10.0f, 0.0f };
-	// g_RocketPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
-	g_Pitch = {0.0f, 0.0f, 0.0f};
-	g_Yaw = {0.0f, 0.0f, 0.0f};
+	// g_TargetPos = { g_Pos.x, , 0.0f };
+	g_Pitch = 0.0f;
+	g_Yaw = 0.0f;
 }
 
 void FinalizeRocket()
@@ -40,86 +41,59 @@ void FinalizeRocket()
 
 void UpdateRocket()
 {
-	float deltaTime = 1.0f / 60.0f;
+	const float deltaTime = 1.0f / 60.0f;
 
-	XMFLOAT3 cameraForward = GetCameraForward();
+	// 限りなく90度に近い数値を取得(90 * 0.99)
+	const float pitchLimit = XM_PIDIV2 * 0.99f;
 
-	cameraForward.y = 0.0f;  // y成分を消す
-
-	// sqrtfはルート 三平方の定理
-	float length = sqrtf(cameraForward.x * cameraForward.x
-		+ cameraForward.y * cameraForward.y
-		+ cameraForward.z * cameraForward.z);
-
-	// Normalize 正規化(長さを１にする) 長さ３のベクトルを長さ３で割るので１になる
-	cameraForward.x /= length;
-	cameraForward.y /= length;
-	cameraForward.z /= length;
-
-	// 力
-	XMFLOAT3 force = { 0.0f, 0.0f, 0.0f };
-
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // 方向ベクトル取得
-	// --- 1. W/S (前後) 用の前方ベクトルを計算 (ピッチを考慮する) ---
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
-	XMVECTOR forwardVec_WS = XMVector3TransformNormal(forwardBase, rotationMatrix);
-
-	// --- 2. A/D (左右) 用の"水平"前方ベクトルを計算 (ピッチを 0.0f にする) ---
-	XMMATRIX horizontalRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, g_Yaw, 0.0f);
-	XMVECTOR forwardVec_AD = XMVector3TransformNormal(forwardBase, horizontalRotationMatrix);
-
-	// 回転させる
 	if (Keyboard_IsKeyDown(KK_A))
 	{
-		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // 回転マトリクスを取得
-		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // 前方ベクトルを回転
-		g_Veloci = XMVectorAdd(velocity, left);
+		// 左回転
+		g_Yaw -= 0.05f;
 	}
 	else if (Keyboard_IsKeyDown(KK_D))
 	{
+		// 右回転
+		g_Yaw += 0.05f;
 	}
 	if (Keyboard_IsKeyDown(KK_W))
 	{
+		// 上回転
+		g_Pitch += 0.05f;
 	}
 	else if (Keyboard_IsKeyDown(KK_S))
 	{
+		// 下回転
+		g_Pitch -= 0.05f;
 	}
 
-	// 力ベクトルの長さ
-	float forceLength = sqrtf(force.x * force.x
-		+ force.y * force.y
-		+ force.z * force.z);
+	// ピッチを制限
+	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit; else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;  // 最大値・最小値制限
 
-	// 正規化（長さを１にする）
-	if (forceLength > 1.0f)
-	{
-		force.x /= forceLength;
-		force.y /= forceLength;
-		force.z /= forceLength;
-	}
+	// 方向ベクトル取得
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
-	g_Velocity.x += force.x * 10.0f * deltaTime;
-	g_Velocity.z += force.z * 10.0f * deltaTime;
+	// 進むベクトルを取得
+	XMVECTOR goVec = XMVectorZero();
 
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
+	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
-	// ショット
-	if (Keyboard_IsKeyTrigger(KK_SPACE))
-	{
-		g_Velocity.y += 5.0f;  // 撃力
-	}
+	// goVecに加算
+	goVec = XMVectorAdd(goVec, forwardVec);
 
-	// 重力
-	g_Velocity.y -= 9.8f * deltaTime;
+	// 正規化
+	goVec = XMVector3Normalize(goVec);
 
-	// 抵抗
-	g_Velocity.x -= g_Velocity.x * 2.0f * deltaTime;
-	g_Velocity.y -= g_Velocity.y * 0.5f * deltaTime;
-	g_Velocity.z -= g_Velocity.z * 2.0f * deltaTime;
+	// ベクトルの長さを調整
+	goVec = XMVectorScale(goVec, 0.2f);
 
-	// 移動
-	g_Pos.x += g_Velocity.x * deltaTime;
-	g_Pos.y += g_Velocity.y * deltaTime;
-	g_Pos.z += g_Velocity.z * deltaTime;
+	// 自分のベクトル取得
+	XMVECTOR posVec = XMLoadFloat3(&g_Pos);
+
+	// 自分のベクトルに加算
+	goVec = XMVectorAdd(posVec, goVec);
+	XMStoreFloat3(&g_Pos, goVec);
 
 	// 衝突判定
 	RocketHitCheck();
