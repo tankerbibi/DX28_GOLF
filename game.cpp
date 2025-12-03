@@ -11,6 +11,7 @@
 #include "goal.h"
 #include "stroke.h"
 #include "rocket.h"
+#include "effect.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -28,6 +29,7 @@ void InitializeGame()
 	InitializeRocket();
 	InitializeField();
 	InitializeGoal();
+	InitializeEffect();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -55,6 +57,7 @@ void FinalizeGame()
 	FinalizeBall();
 	FinalizeRocket();
 	FinalizeGoal();
+	FinalizeEffect();
 }
 
 void UpdateGame()
@@ -69,10 +72,15 @@ void UpdateGame()
 		// UpdateScore();
 		UpdateStroke();
 		UpdateField();
-		UpdateMouse();
+		if (GetCameraMode() == CameraMode::DEBUG)
+		{
+			UpdateMouse();
+		}
 		UpdateBall();
 		UpdateRocket();
 		UpdateGoal();
+		UpdateEffect();
+
 		/*if (g_LightDirection.y > 1.0f)
 		{
 			g_LightDirection.y -= 0.01f;
@@ -98,10 +106,15 @@ void DrawGame()
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
-
-	SetDepthEnable(false);
+	
+	// ライトをオフにする
 	light.lightEnable = false;
 	Shader_SetLight(light);	
+
+	DrawEffect();
+
+	// 2D描画するときの設定
+	SetDepthEnable(false);
 
 	// DrawScore();
 	DrawStroke();

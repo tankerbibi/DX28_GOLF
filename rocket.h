@@ -5,4 +5,8 @@ void FinalizeRocket();
 void UpdateRocket();
 void DrawRocket();
 
+float GetRocketYaw();
+
+float GetRocketPitch();
+
 XMFLOAT3 GetRocketPos();

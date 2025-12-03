@@ -25,7 +25,7 @@ void RocketHitCheck();
 
 void InitializeRocket()
 {
-	g_Model = ModelLoad("asset\\model\\Rocket.fbx");
+	g_Model = ModelLoad("asset\\model\\cube.fbx");
 	g_Pos = { 0.0f, 10.0f, 0.0f };
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
@@ -46,56 +46,41 @@ void UpdateRocket()
 	// 限りなく90度に近い数値を取得(90 * 0.99)
 	const float pitchLimit = XM_PIDIV2 * 0.99f;
 
-	if (Keyboard_IsKeyDown(KK_A))
-	{
-		// 左回転
-		g_Yaw -= 0.05f;
-	}
-	else if (Keyboard_IsKeyDown(KK_D))
-	{
-		// 右回転
-		g_Yaw += 0.05f;
-	}
-	if (Keyboard_IsKeyDown(KK_W))
-	{
-		// 上回転
-		g_Pitch += 0.05f;
-	}
-	else if (Keyboard_IsKeyDown(KK_S))
-	{
-		// 下回転
-		g_Pitch -= 0.05f;
-	}
+	// --- 角度の入力処理 ---
+	if (Keyboard_IsKeyDown(KK_A)) g_Yaw -= 0.05f;      // 左
+	else if (Keyboard_IsKeyDown(KK_D)) g_Yaw += 0.05f; // 右
+
+	if (Keyboard_IsKeyDown(KK_W)) g_Pitch += 0.05f;    // 上
+	else if (Keyboard_IsKeyDown(KK_S)) g_Pitch -= 0.05f; // 下
 
 	// ピッチを制限
-	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit; else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;  // 最大値・最小値制限
+	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit; 
+	else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;
 
-	// 方向ベクトル取得
+	// 角度を変数に反映
+	g_Rotation.x = g_Pitch;
+	g_Rotation.y = g_Yaw;
+
+	// --- 移動ベクトルの計算 ---
+	// 方向ベクトル取得 (Z+ が正面と仮定)
 	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
-	// 進むベクトルを取得
-	XMVECTOR goVec = XMVectorZero();
-
+	// 現在の角度から回転行列を作成
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
+
+	// 正面ベクトルを回転させる
 	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
-	// goVecに加算
-	goVec = XMVectorAdd(goVec, forwardVec);
+	// 正規化して速度（0.2f）を掛ける
+	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
+	moveVec = XMVectorScale(moveVec, 0.1f); // 0.2f は移動スピード
 
-	// 正規化
-	goVec = XMVector3Normalize(goVec);
-
-	// ベクトルの長さを調整
-	goVec = XMVectorScale(goVec, 0.2f);
-
-	// 自分のベクトル取得
+	// --- 座標更新 ---
 	XMVECTOR posVec = XMLoadFloat3(&g_Pos);
+	posVec = XMVectorAdd(posVec, moveVec);
+	XMStoreFloat3(&g_Pos, posVec);
 
-	// 自分のベクトルに加算
-	goVec = XMVectorAdd(posVec, goVec);
-	XMStoreFloat3(&g_Pos, goVec);
-
-	// 衝突判定
+	// 衝突判定（押し出し処理のみ機能する）
 	RocketHitCheck();
 }
 
@@ -125,6 +110,16 @@ void DrawRocket()
 XMFLOAT3 GetRocketPos()
 {
 	return g_Pos;
+}
+
+float GetRocketYaw()
+{
+	return g_Yaw;
+}
+
+float GetRocketPitch()
+{
+	return g_Pitch;
 }
 
 void RocketHitCheck()

@@ -131,6 +131,7 @@
     <ClInclude Include="cube.h" />
     <ClInclude Include="debug_ostream.h" />
     <ClInclude Include="directX.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="field.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="goal.h" />
@@ -156,6 +157,7 @@
     <ClCompile Include="cube.cpp" />
     <ClCompile Include="debug_ostream.cpp" />
     <ClCompile Include="directX.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="field.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="goal.cpp" />

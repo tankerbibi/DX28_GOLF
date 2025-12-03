@@ -9,6 +9,7 @@
 #include "main.h"
 #include "stroke.h"
 #include "ranking.h"
+#include "effect.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -48,7 +49,7 @@ void FinalizeBall()
 
 void UpdateBall()
 {
-	// ステートマシン
+	// ステートマシン ステートパターンというものもあるらしい。
 	switch (g_State)
 	{
 	case BALL_STATE_MOVE:
@@ -71,7 +72,8 @@ void MoveBall()
 
 	XMFLOAT3 cameraForward = GetCameraForward();
 
-	cameraForward.y = 0.0f;  // y成分を消す
+	// y成分を消す
+	cameraForward.y = 0.0f;
 
 	// sqrtfはルート 三平方の定理
 	float length = sqrtf(cameraForward.x * cameraForward.x
@@ -139,6 +141,8 @@ void MoveBall()
 		AddStroke(1);
 		
 		SetRankingScore(GetStroke());
+
+		CreateEffect(g_Pos);
 	}
 
 	// 重力
