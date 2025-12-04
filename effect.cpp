@@ -118,7 +118,7 @@ void DrawEffect()
 		if (!g_Effect[i].enable)
 		{
 			continue;  // 入れ子構造が減らせるので、こっちのほうが良い
-		}
+		} 
 
 		int num = g_Effect[i].frame;
 
@@ -171,6 +171,8 @@ void DrawEffect()
 		// 頂点シェーダーに変換行列を設定
 		XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+
+		matrixWorld += XMMatrixScaling(5.0f, 5.0f,5.0f);
 
 		// 回転マトリクス（ビルボード処理）
 		matrixWorld *= invView;

@@ -27,7 +27,7 @@ enum BALL_STATE
 static BALL_STATE g_State;
 static int g_StateCount;
 
-static constexpr float g_BallRadius = 0.2f;
+static constexpr float g_BallRadius = 0.5f;
 
 void BallHitCheck();
 void MoveBall();
@@ -115,7 +115,6 @@ void MoveBall()
 			force.z -= cameraForward.z;
 		}
 	}
-	
 
 	// 力ベクトルの長さ
 	float forceLength = sqrtf(force.x * force.x
@@ -198,7 +197,7 @@ void DrawBall()
 	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 	matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
+	matrix.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);  // 拡大縮小マトリクス
 	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
 	matrix.matrixWorld *= XMMatrixTranslation(g_Pos.x, g_Pos.y, g_Pos.z);  // 移動マトリクス。gpuで計算されている。
 
@@ -287,7 +286,11 @@ void BallHitCheck()
 						{
 							// 上
 							g_Pos.y = block[i].pos.y + blockRadius + g_BallRadius;
-
+							
+							if (g_Velocity.y < -3.0f)
+							{
+								CreateEffect(g_Pos);
+							}
 						}
 						else
 						{
@@ -304,7 +307,7 @@ void BallHitCheck()
 
 void AddForce(XMFLOAT3 force)
 {
-	g_Velocity.x += force.x * 10.0f * deltaTime;
-	g_Velocity.y += force.y * 10.0f * deltaTime;
-	g_Velocity.z += force.z * 10.0f * deltaTime;
+	g_Velocity.x += force.x;
+	g_Velocity.y += force.y;
+	g_Velocity.z += force.z;
 }

@@ -154,8 +154,8 @@ void FollowRocket()
 	float rocketPitch = GetRocketPitch();
 
 	// カメラとロケットの距離（オフセット）
-	const float distance = 1.0f;
-	const float height = 1.0f;
+	const float distance = 2.0f;
+	const float height = 2.0f;
 
 	XMFLOAT3 rocketPos = GetRocketPos();
 

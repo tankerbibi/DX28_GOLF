@@ -8,6 +8,7 @@
 #include "goal.h"
 #include "main.h"
 #include "ball.h"
+#include "effect.h"
 
 
 enum ROCKET_STATE
@@ -31,6 +32,8 @@ static constexpr float g_RocketRadius = 0.2f;
 
 static ROCKET_STATE rocketState;
 static int stateCount;
+
+static constexpr float explosionPower = 10.0f;
 
 void RocketHitCheck();
 bool RocketIsHit();
@@ -61,9 +64,10 @@ void UpdateRocket()
 	{
 	case ROCKET_STATE_START:
 		stateCount++;
-		if (stateCount > 180)
+		if (stateCount > 60)
 		{
 			rocketState = ROCKET_STATE_MOVE;
+			stateCount = 0;
 		}
 		break;
 	case ROCKET_STATE_MOVE:
@@ -73,22 +77,23 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
-		}
-		break;
-	case ROCKET_STATE_EXPLODED:
-		stateCount++;
-		if (stateCount > 120)
-		{
-			stateCount = 0;
-
 			XMFLOAT3 ballPos = GetBallPos();
 
 			float length = sqrtf((ballPos.x - g_Pos.x) * (ballPos.x - g_Pos.x) + (ballPos.y - g_Pos.y) * (ballPos.y - g_Pos.y) + (ballPos.z - g_Pos.z) * (ballPos.z - g_Pos.z));
 			if (length <= 20)
 			{
 				// ƒ{[ƒ‹‚É—Í‚ð‰Á‚¦‚éB
-				AddForce({ ballPos.x - g_Pos.x, ballPos.y - g_Pos.y, ballPos.z - g_Pos.z });
+				AddForce({ 10.0f * (ballPos.x - g_Pos.x), 10.0f * (ballPos.y - g_Pos.y), 10.0f * (ballPos.z - g_Pos.z) });
+				CreateEffect(g_Pos);
 			}
+		}
+		break;
+	case ROCKET_STATE_EXPLODED:
+		stateCount++;
+		if (stateCount > 60)
+		{
+			stateCount = 0;
+
 			g_Pos = { 0.0f, 10.0f, 0.0f };
 			rocketState = ROCKET_STATE_START;
 		}
