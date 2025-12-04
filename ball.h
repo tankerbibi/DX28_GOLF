@@ -6,3 +6,4 @@ void UpdateBall();
 void DrawBall();
 
 XMFLOAT3 GetBallPos();
+void AddForce(XMFLOAT3 force);

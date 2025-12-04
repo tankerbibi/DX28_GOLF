@@ -16,6 +16,8 @@ static MODEL* g_Model = nullptr;
 static XMFLOAT3 g_Pos;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
+// 外部的な力
+static XMFLOAT3 g_OutForce;
 
 enum BALL_STATE
 {
@@ -68,8 +70,6 @@ void UpdateBall()
 }
 void MoveBall()
 {
-	float deltaTime = 1.0f / 60.0f;
-
 	XMFLOAT3 cameraForward = GetCameraForward();
 
 	// y成分を消す
@@ -89,28 +89,33 @@ void MoveBall()
 	XMFLOAT3 force = { 0.0f, 0.0f, 0.0f };
 
 	// 加速
-	if (Keyboard_IsKeyDown(KK_A))
+	CameraMode cameraMode = GetCameraMode();
+	if (cameraMode == CameraMode::BALL)
 	{
-		// 例のベクトルの回転の公式
-		force.x -= cameraForward.z; // xとzを返ればいいだけ
-		force.z += cameraForward.x;
-		
+		if (Keyboard_IsKeyDown(KK_A))
+		{
+			// 例のベクトルの回転の公式
+			force.x -= cameraForward.z; // xとzを返ればいいだけ
+			force.z += cameraForward.x;
+
+		}
+		else if (Keyboard_IsKeyDown(KK_D))
+		{
+			force.x += cameraForward.z;
+			force.z -= cameraForward.x;
+		}
+		if (Keyboard_IsKeyDown(KK_W))
+		{
+			force.x += cameraForward.x;
+			force.z += cameraForward.z;
+		}
+		else if (Keyboard_IsKeyDown(KK_S))
+		{
+			force.x -= cameraForward.x;
+			force.z -= cameraForward.z;
+		}
 	}
-	else if (Keyboard_IsKeyDown(KK_D))
-	{
-		force.x += cameraForward.z;
-		force.z -= cameraForward.x;
-	}
-	if (Keyboard_IsKeyDown(KK_W))
-	{
-		force.x += cameraForward.x;
-		force.z += cameraForward.z;
-	}
-	else if (Keyboard_IsKeyDown(KK_S))
-	{
-		force.x -= cameraForward.x;
-		force.z -= cameraForward.z;
-	}
+	
 
 	// 力ベクトルの長さ
 	float forceLength = sqrtf(force.x * force.x
@@ -295,4 +300,11 @@ void BallHitCheck()
 			}
 		}
 	}
+}
+
+void AddForce(XMFLOAT3 force)
+{
+	g_Velocity.x += force.x * 10.0f * deltaTime;
+	g_Velocity.y += force.y * 10.0f * deltaTime;
+	g_Velocity.z += force.z * 10.0f * deltaTime;
 }

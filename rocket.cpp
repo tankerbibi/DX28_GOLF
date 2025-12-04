@@ -7,6 +7,15 @@
 #include "field.h"
 #include "goal.h"
 #include "main.h"
+#include "ball.h"
+
+
+enum ROCKET_STATE
+{
+	ROCKET_STATE_START,
+	ROCKET_STATE_MOVE,
+	ROCKET_STATE_EXPLODED,
+};
 
 static MODEL* g_Model = nullptr;
 
@@ -20,8 +29,12 @@ static float g_Yaw;
 
 static constexpr float g_RocketRadius = 0.2f;
 
-void RocketHitCheck();
+static ROCKET_STATE rocketState;
+static int stateCount;
 
+void RocketHitCheck();
+bool RocketIsHit();
+void RocketMove();
 
 void InitializeRocket()
 {
@@ -32,6 +45,8 @@ void InitializeRocket()
 	// g_TargetPos = { g_Pos.x, , 0.0f };
 	g_Pitch = 0.0f;
 	g_Yaw = 0.0f;
+	rocketState = ROCKET_STATE_MOVE;
+	stateCount = 0;
 }
 
 void FinalizeRocket()
@@ -41,47 +56,46 @@ void FinalizeRocket()
 
 void UpdateRocket()
 {
-	const float deltaTime = 1.0f / 60.0f;
+	if (GetCameraMode() != CameraMode::ROCKET) return;
+	switch (rocketState)
+	{
+	case ROCKET_STATE_START:
+		stateCount++;
+		if (stateCount > 180)
+		{
+			rocketState = ROCKET_STATE_MOVE;
+		}
+		break;
+	case ROCKET_STATE_MOVE:
+		// ロケットを動かす。
+		RocketMove();
+		// ロケットが当たったら爆発させる処理
+		if (RocketIsHit())
+		{
+			rocketState = ROCKET_STATE_EXPLODED;
+		}
+		break;
+	case ROCKET_STATE_EXPLODED:
+		stateCount++;
+		if (stateCount > 120)
+		{
+			stateCount = 0;
 
-	// 限りなく90度に近い数値を取得(90 * 0.99)
-	const float pitchLimit = XM_PIDIV2 * 0.99f;
+			XMFLOAT3 ballPos = GetBallPos();
 
-	// --- 角度の入力処理 ---
-	if (Keyboard_IsKeyDown(KK_A)) g_Yaw -= 0.05f;      // 左
-	else if (Keyboard_IsKeyDown(KK_D)) g_Yaw += 0.05f; // 右
-
-	if (Keyboard_IsKeyDown(KK_W)) g_Pitch += 0.05f;    // 上
-	else if (Keyboard_IsKeyDown(KK_S)) g_Pitch -= 0.05f; // 下
-
-	// ピッチを制限
-	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit; 
-	else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;
-
-	// 角度を変数に反映
-	g_Rotation.x = g_Pitch;
-	g_Rotation.y = g_Yaw;
-
-	// --- 移動ベクトルの計算 ---
-	// 方向ベクトル取得 (Z+ が正面と仮定)
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-
-	// 現在の角度から回転行列を作成
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
-
-	// 正面ベクトルを回転させる
-	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
-
-	// 正規化して速度（0.2f）を掛ける
-	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
-	moveVec = XMVectorScale(moveVec, 0.1f); // 0.2f は移動スピード
-
-	// --- 座標更新 ---
-	XMVECTOR posVec = XMLoadFloat3(&g_Pos);
-	posVec = XMVectorAdd(posVec, moveVec);
-	XMStoreFloat3(&g_Pos, posVec);
-
-	// 衝突判定（押し出し処理のみ機能する）
-	RocketHitCheck();
+			float length = sqrtf((ballPos.x - g_Pos.x) * (ballPos.x - g_Pos.x) + (ballPos.y - g_Pos.y) * (ballPos.y - g_Pos.y) + (ballPos.z - g_Pos.z) * (ballPos.z - g_Pos.z));
+			if (length <= 20)
+			{
+				// ボールに力を加える。
+				AddForce({ ballPos.x - g_Pos.x, ballPos.y - g_Pos.y, ballPos.z - g_Pos.z });
+			}
+			g_Pos = { 0.0f, 10.0f, 0.0f };
+			rocketState = ROCKET_STATE_START;
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void DrawRocket()
@@ -120,6 +134,48 @@ float GetRocketYaw()
 float GetRocketPitch()
 {
 	return g_Pitch;
+}
+
+void RocketMove()
+{
+	const float deltaTime = 1.0f / 60.0f;
+
+	// 限りなく90度に近い数値を取得(90 * 0.99)
+	const float pitchLimit = XM_PIDIV2 * 0.99f;
+
+	// --- 角度の入力処理 ---
+	if (Keyboard_IsKeyDown(KK_A)) g_Yaw -= 0.05f;      // 左
+	else if (Keyboard_IsKeyDown(KK_D)) g_Yaw += 0.05f; // 右
+
+	if (Keyboard_IsKeyDown(KK_W)) g_Pitch += 0.05f;    // 上
+	else if (Keyboard_IsKeyDown(KK_S)) g_Pitch -= 0.05f; // 下
+
+	// ピッチを制限
+	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit;
+	else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;
+
+	// 角度を変数に反映
+	g_Rotation.x = g_Pitch;
+	g_Rotation.y = g_Yaw;
+
+	// --- 移動ベクトルの計算 ---
+	// 方向ベクトル取得 (Z+ が正面と仮定)
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
+	// 現在の角度から回転行列を作成
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
+
+	// 正面ベクトルを回転させる
+	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
+
+	// 正規化して速度（0.2f）を掛ける
+	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
+	moveVec = XMVectorScale(moveVec, 0.1f); // 0.2f は移動スピード
+
+	// --- 座標更新 ---
+	XMVECTOR posVec = XMLoadFloat3(&g_Pos);
+	posVec = XMVectorAdd(posVec, moveVec);
+	XMStoreFloat3(&g_Pos, posVec);
 }
 
 void RocketHitCheck()
@@ -206,4 +262,97 @@ void RocketHitCheck()
 			}
 		}
 	}
+}
+// ロケットがブロックに当たったらtrueを返す関数
+bool RocketIsHit()
+{
+	BLOCK* block = GetFieldBlock();
+	float blockRadius = 0.5f;
+
+
+	float e = 0.5f;  // 跳ね返り係数
+
+	for (int i = 0; i < blockMax; i++)
+	{
+		// 横方向の当たり判定処理
+		if (block[i].pos.y - blockRadius < g_Pos.y &&
+			g_Pos.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
+		{
+			// x方向
+			if (block[i].pos.z - blockRadius < g_Pos.z &&
+				g_Pos.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
+			{
+				if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
+					g_Pos.x - g_RocketRadius < block[i].pos.x + blockRadius)
+				{
+					if (block[i].pos.x < g_Pos.x)
+					{
+						// 右
+						g_Pos.x = block[i].pos.x + blockRadius + g_RocketRadius;
+						return true;
+					}
+					else
+					{
+						// 左
+						g_Pos.x = block[i].pos.x - blockRadius - g_RocketRadius;
+						return true;
+					}
+					g_Velocity.x *= -e;
+				}
+			}
+			// z方向
+			else if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
+				g_Pos.x < block[i].pos.x + blockRadius)
+			{
+				if (block[i].pos.z - blockRadius < g_Pos.z + g_RocketRadius &&
+					g_Pos.z - g_RocketRadius < block[i].pos.z + blockRadius)
+				{
+					if (block[i].pos.z < g_Pos.z)
+					{
+						// 奥
+						g_Pos.z = block[i].pos.z + blockRadius + g_RocketRadius;
+						return true;
+					}
+					else
+					{
+						// 手前
+						g_Pos.z = block[i].pos.z - blockRadius - g_RocketRadius;
+						return true;
+					}
+				}
+			}
+		}
+		else
+			// 縦方向の当たり判定処理
+		{
+			// 手前　奥
+			if (block[i].pos.z - blockRadius < g_Pos.z &&
+				g_Pos.z < block[i].pos.z + blockRadius)
+			{
+				if (block[i].pos.x - blockRadius < g_Pos.x &&
+					g_Pos.x < block[i].pos.x + blockRadius)
+				{
+					if (block[i].pos.y - blockRadius < g_Pos.y + g_RocketRadius &&
+						g_Pos.y - g_RocketRadius < block[i].pos.y + blockRadius)
+					{
+						if (g_Pos.y > block[i].pos.y)
+						{
+							// 上
+							g_Pos.y = block[i].pos.y + blockRadius + g_RocketRadius;
+							return true;
+
+						}
+						else
+						{
+							// 下
+							g_Pos.y = block[i].pos.y - blockRadius - g_RocketRadius;
+							return true;
+						}
+						g_Velocity.y *= -e;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }

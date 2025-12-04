@@ -28,6 +28,7 @@ static constexpr float pieceHeight = 80.0f;
 static constexpr int blockCols = 6;
 static constexpr int blockRows = 13;
 
+static constexpr float deltaTime = 1.0f / 60.0f;
 
 void DirectXInitialize(HWND hWnd); //HWNDとはウインドウの識別子。ウィンドウハンドル hwndがないと呼び出せない。
 void DirectXFinalize(void);
