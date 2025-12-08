@@ -4,161 +4,61 @@
 #include "model.h"
 #include "camera.h"
 #include "shader.h"
+#include <fstream>  // ファイル読み込み用
+#include <string>
+#include <sstream>
 
 
-static BLOCK g_Block[blockMax]
+// 固定配列を維持
+static BLOCK g_Block[blockMax];
+
+// 実際にロードされたブロックの数を保持する変数
+static unsigned int g_BlockCount = 0;
+
+static XMFLOAT3 g_Rotation;
+static MODEL* g_Model[10];
+
+
+// CSVをロードする関数 (固定配列バージョン)
+void LoadFieldData(const char* filename)
 {
-	{{0.0f, 0.0f, 0.0f}, 0 },
+	g_BlockCount = 0; // カウントをリセット
 
-	{{0.0f, 1.0f, 0.0f}, 0 },
-	{{1.0f, 1.0f, 0.0f}, 0 },
-	{{2.0f, 1.0f, 0.0f}, 0 },
-	{{3.0f, 1.0f, 0.0f}, 0 },
-	{{4.0f, 1.0f, 0.0f}, 0 },
-	{{5.0f, 1.0f, 0.0f}, 0 },
-	{{6.0f, 1.0f, 0.0f}, 0 },
-	{{7.0f, 1.0f, 0.0f}, 0 },
-	{{8.0f, 1.0f, 0.0f}, 0 },
-	{{9.0f, 1.0f, 0.0f}, 0 },
-	{{10.0f, 1.0f, 0.0f}, 0 },
-	{{11.0f, 1.0f, 0.0f}, 0 },
-	{{12.0f, 1.0f, 0.0f}, 0 },
-	{{0.0f, 1.0f, 1.0f}, 0 },
-	{{1.0f, 1.0f, 1.0f}, 0 },
-	{{2.0f, 1.0f, 1.0f}, 0 },
-	{{3.0f, 1.0f, 1.0f}, 0 },
-	{{4.0f, 1.0f, 1.0f}, 0 },
-	{{5.0f, 1.0f, 1.0f}, 0 },
-	{{6.0f, 1.0f, 1.0f}, 0 },
-	{{7.0f, 1.0f, 1.0f}, 0 },
-	{{8.0f, 1.0f, 1.0f}, 0 },
-	{{9.0f, 1.0f, 1.0f}, 0 },
-	{{10.0f, 1.0f, 1.0f}, 0 },
-	{{11.0f, 1.0f, 1.0f}, 0 },
-	{{12.0f, 1.0f, 1.0f}, 0 },
-	{{0.0f, 1.0f, 2.0f}, 0 },
-	{{1.0f, 1.0f, 2.0f}, 0 },
-	{{2.0f, 1.0f, 2.0f}, 0 },
-	{{3.0f, 1.0f, 2.0f}, 0 },
-	{{4.0f, 1.0f, 2.0f}, 0 },
-	{{5.0f, 1.0f, 2.0f}, 0 },
-	{{6.0f, 1.0f, 2.0f}, 0 },
-	{{7.0f, 1.0f, 2.0f}, 0 },
-	{{8.0f, 1.0f, 2.0f}, 0 },
-	{{9.0f, 1.0f, 2.0f}, 0 },
-	{{10.0f, 1.0f, 2.0f}, 0 },
-	{{11.0f, 1.0f, 2.0f}, 0 },
-	{{12.0f, 1.0f, 2.0f}, 0 },
-	{{0.0f, 1.0f, 3.0f}, 0 },
-	{{1.0f, 1.0f, 3.0f}, 0 },
-	{{2.0f, 1.0f, 3.0f}, 0 },
-	{{3.0f, 1.0f, 3.0f}, 0 },
-	{{4.0f, 1.0f, 3.0f}, 0 },
-	{{5.0f, 1.0f, 3.0f}, 0 },
-	{{6.0f, 1.0f, 3.0f}, 0 },
-	{{7.0f, 1.0f, 3.0f}, 0 },
-	{{8.0f, 1.0f, 3.0f}, 0 },
-	{{9.0f, 1.0f, 3.0f}, 0 },
-	{{10.0f, 1.0f, 3.0f}, 0 },
-	{{11.0f, 1.0f, 3.0f}, 0 },
-	{{12.0f, 1.0f, 3.0f}, 0 },
+	std::ifstream file(filename);
+	if (!file)
+	{
+		// ファイルが見つからない場合のエラー処理
+		return;
+	}
 
-	{{0.0f, 1.0f, 6.0f}, 0 },
-	{{1.0f, 1.0f, 6.0f}, 0 },
-	{{2.0f, 1.0f, 6.0f}, 0 },
-	{{3.0f, 1.0f, 6.0f}, 0 },
-	{{4.0f, 1.0f, 6.0f}, 0 },
-	{{5.0f, 1.0f, 6.0f}, 0 },
-	{{6.0f, 1.0f, 6.0f}, 0 },
-	{{7.0f, 1.0f, 6.0f}, 0 },
-	{{8.0f, 1.0f, 6.0f}, 0 },
-	{{9.0f, 1.0f, 6.0f}, 0 },
-	{{10.0f, 1.0f, 6.0f}, 0 },
-	{{11.0f, 1.0f, 6.0f}, 0 },
-	{{12.0f, 1.0f, 6.0f}, 0 },
-	{{0.0f, 1.0f, 7.0f}, 0 },
-	{{1.0f, 1.0f, 7.0f}, 0 },
-	{{2.0f, 1.0f, 7.0f}, 0 },
-	{{3.0f, 1.0f, 7.0f}, 0 },
-	{{4.0f, 1.0f, 7.0f}, 0 },
-	{{5.0f, 1.0f, 7.0f}, 0 },
+	std::string line;
+	// ファイルから1行ずつ読み込む
+	while (std::getline(file, line) && g_BlockCount < blockMax)
+	{
+		std::stringstream ss(line);
+		std::string segment;
+		std::vector<std::string> seglist;
 
-	{{5.0f, 5.0f, 7.0f}, 0 },
-	{{6.0f, 5.0f, 7.0f}, 0 },
-	{{6.0f, 2.0f, 7.0f}, 0 },
-	{{7.0f, 5.0f, 7.0f}, 0 },
+		// カンマ区切りで分解
+		while (std::getline(ss, segment, ','))
+		{
+			seglist.push_back(segment);
+		}
 
-	{{6.0f, 1.0f, 7.0f}, 0 },
-	{{7.0f, 1.0f, 7.0f}, 0 },
-	{{8.0f, 1.0f, 7.0f}, 0 },
-	{{9.0f, 1.0f, 7.0f}, 0 },
-	{{10.0f, 1.0f, 7.0f}, 0 },
-	{{11.0f, 1.0f, 7.0f}, 0 },
-	{{12.0f, 1.0f, 7.0f}, 0 },
-	{{0.0f, 1.0f, 8.0f}, 0 },
-	{{1.0f, 1.0f, 8.0f}, 0 },
-	{{2.0f, 1.0f, 8.0f}, 0 },
-	{{3.0f, 1.0f, 8.0f}, 0 },
-	{{4.0f, 1.0f, 8.0f}, 0 },
-	{{5.0f, 1.0f, 8.0f}, 0 },
-	{{6.0f, 1.0f, 8.0f}, 0 },
-	{{7.0f, 1.0f, 8.0f}, 0 },
-	{{8.0f, 1.0f, 8.0f}, 0 },
-	{{9.0f, 1.0f, 8.0f}, 0 },
-	{{10.0f, 1.0f, 8.0f}, 0 },
-	{{11.0f, 1.0f, 8.0f}, 0 },
-	{{12.0f, 1.0f, 8.0f}, 0 },
-	{{0.0f, 1.0f, 9.0f}, 0 },
-	{{1.0f, 1.0f, 9.0f}, 0 },
-	{{2.0f, 1.0f, 9.0f}, 0 },
-	{{3.0f, 1.0f, 9.0f}, 0 },
-	{{4.0f, 1.0f, 9.0f}, 0 },
-	{{5.0f, 1.0f, 9.0f}, 0 },
-	{{6.0f, 1.0f, 9.0f}, 0 },
-	{{7.0f, 1.0f, 9.0f}, 0 },
-	{{8.0f, 1.0f, 9.0f}, 0 },
-	{{9.0f, 1.0f, 9.0f}, 0 },
-	{{10.0f, 1.0f, 9.0f}, 0 },
-	{{11.0f, 1.0f, 9.0f}, 0 },
-	{{12.0f, 1.0f, 9.0f}, 0 },
+		if (seglist.size() >= 4)
+		{
+			// 固定配列にデータを格納
+			g_Block[g_BlockCount].type = std::stoi(seglist[0]);     // Type
+			g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
+			g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
+			g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
 
+			g_BlockCount++; // 読み込んだ数をインクリメント
+		}
+	}
 
-	{ {0.0f, 1.5f, 4.0f}, 1 },
-	{ {1.0f, 1.5f, 4.0f}, 1 },
-	{ {2.0f, 1.5f, 4.0f}, 1 },
-	{ {3.0f, 1.5f, 4.0f}, 1 },
-	{ {4.0f, 1.5f, 4.0f}, 1 },
-	{ {5.0f, 1.5f, 4.0f}, 1 },
-	{ {6.0f, 1.5f, 4.0f}, 1 },
-	{ {7.0f, 1.5f, 4.0f}, 1 },
-	{ {8.0f, 1.5f, 4.0f}, 1 },
-	{ {9.0f, 1.5f, 4.0f}, 1 },
-	{ {10.0f, 1.5f, 4.0f}, 1 },
-	{ {11.0f, 1.5f, 4.0f}, 1 },
-	{ {12.0f, 1.5f, 4.0f}, 1 },
-
-	{ {0.0f, 1.5f, 5.0f}, 1 },
-	{ {1.0f, 1.5f, 5.0f}, 1 },
-	{ {2.0f, 1.5f, 5.0f}, 1 },
-	{ {3.0f, 1.5f, 5.0f}, 1 },
-	{ {4.0f, 1.5f, 5.0f}, 1 },
-	{ {5.0f, 1.5f, 5.0f}, 1 },
-	{ {6.0f, 1.5f, 5.0f}, 1 },
-	{ {7.0f, 1.5f, 5.0f}, 1 },
-	{ {8.0f, 1.5f, 5.0f}, 1 },
-	{ {9.0f, 1.5f, 5.0f}, 1 },
-	{ {10.0f, 1.5f, 5.0f}, 1 },
-	{ {11.0f, 1.5f, 5.0f}, 1 },
-	{ {12.0f, 1.5f, 5.0f}, 1 },
-	{ {12.0f, 1.5f, 5.0f}, 1 },
-
-	{ {12.0f, 1.5f, 12.0f}, 2 },
-};
-
-static XMFLOAT3 g_Rotation;  // pi
-
-static MODEL* g_Model[3];
-
+	// DEBUG: 読み込まれなかった残りの配列要素を初期化したい場合はここでループを回す
+}
 
 BLOCK* GetFieldBlock()
 {
@@ -167,11 +67,13 @@ BLOCK* GetFieldBlock()
 
 void InitializeField()
 {
-	g_Model[0] = ModelLoad("asset\\model\\cube.fbx");
-	g_Model[1] = ModelLoad("asset\\model\\tree.fbx");
-	g_Model[2] = ModelLoad("asset\\model\\Kirby2.fbx");
-	g_Rotation = {0.0f, 0.0f, 0.0f};
-	// g_FieldPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
+	g_Model[1] = ModelLoad("asset\\model\\cube.fbx");
+	g_Model[2] = ModelLoad("asset\\model\\tree.fbx");
+	g_Model[3] = ModelLoad("asset\\model\\Kirby2.fbx");
+	g_Rotation = { 0.0f, 0.0f, 0.0f };
+
+	// ここでファイルを読み込む
+	LoadFieldData("asset\\data\\level_data.csv");
 }
 
 void FinalizeField()
@@ -189,45 +91,51 @@ void UpdateField()
 
 void DrawField()
 {
-	Shader_Begin();  // シェーダーの設定
-	// 頂点シェーダーに変換行列を設定
+	Shader_Begin();
 
-	for (int i = 0; i < blockMax; i++)
+	// blockMax ではなく、実際に読み込んだ g_BlockCount の数だけループを回します。
+	for (int i = 0; i < g_BlockCount; i++)
 	{
 		MATRIX matrix;
+		matrix.matrix = XMMatrixIdentity();
+		matrix.matrixWorld = XMMatrixIdentity();
 
-		matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-		matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-
-		if (i == 0)  // 広い床の時
+		// 元のコードにあった「i == 0 の時だけ広い床」というロジックを Type 0 で判定する形に置き換える
+		// ※ UnityでType 0（Floor）としてエクスポートされたブロックが対象
+		if (g_Block[i].type == 0)
 		{
-			matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);  // 拡大縮小マトリクス
-			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);  // 移動マトリクス。gpuで計算されている。
+			matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);
+			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);
+			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 		}
 		else
 		{
-			if (g_Block[i].type == 2)  // カービーの時
+			// カービィ
+			if (g_Block[i].type == 2)
 			{
 				matrix.matrixWorld *= XMMatrixScaling(0.6f, 0.6f, 0.6f);
 				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0.0f, 0.0f);
-				matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 			}
-			else
+			else // 木や通常のブロック (Type 1 など)
 			{
 				matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-				matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 			}
-			
+
+			// 共通の移動処理
+			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 		}
 
 		matrix.matrix = matrix.matrixWorld;
-
-		matrix.matrix *= GetCameraViewMatrix();  // ビューマトリクス
-		matrix.matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
+		matrix.matrix *= GetCameraViewMatrix();
+		matrix.matrix *= GetCameraProjectionMatrix();
 
 		Shader_SetMatrix(matrix);
-		ModelDraw(g_Model[g_Block[i].type]);
+
+		int modelIndex = g_Block[i].type;
+		if (modelIndex >= 0 && modelIndex < 3)
+		{
+			ModelDraw(g_Model[modelIndex]);
+		}
 	}
 }
