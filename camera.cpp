@@ -11,7 +11,7 @@
 static XMMATRIX g_ViewMatrix;
 static XMMATRIX g_ProjectionMatrix;
 
-static XMFLOAT3 g_CameraPos;
+static XMFLOAT3 g_CameraPosition;
 static XMFLOAT3 g_CameraTargetPos;
 static XMFLOAT3 g_CameraRotation;
 
@@ -26,7 +26,7 @@ void ReflectsDebugKeyOperations();
 
 void InitializeCamera()
 {
-	g_CameraPos = { 0.0f, 1.0f, -10.0f };
+	g_CameraPosition = { 0.0f, 1.0f, -10.0f };
 	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
 	g_CameraRotation = {0.0f, 0.0f,0.0f};
 	g_CameraYaw = 0.0f;
@@ -81,7 +81,7 @@ void UpdateCamera()
 void DrawCamera()
 {
 	const XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // カメラの上方向
-	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_CameraPos), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
+	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_CameraPosition), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
 
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス （新規）
 	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 1.0f/*見ることができる一番近い距離*/, 1000.0f/*見ることができる一番遠い距離*/);
@@ -101,10 +101,15 @@ XMFLOAT3 GetCameraForward()
 {
 	// 終点から始点を引く
 	XMFLOAT3 forward;
-	forward.x = g_CameraTargetPos.x - g_CameraPos.x;
-	forward.y = g_CameraTargetPos.y - g_CameraPos.y;
-	forward.z = g_CameraTargetPos.z - g_CameraPos.z;
+	forward.x = g_CameraTargetPos.x - g_CameraPosition.x;
+	forward.y = g_CameraTargetPos.y - g_CameraPosition.y;
+	forward.z = g_CameraTargetPos.z - g_CameraPosition.z;
 	return forward;
+}
+
+XMFLOAT3 GetCameraPosition()
+{
+	return g_CameraPosition;
 }
 
 CameraMode GetCameraMode()
@@ -117,9 +122,9 @@ void FollowBall()
 {
 	XMFLOAT3 ballPos = GetBallPos();
 
-	g_CameraPos = ballPos;
-	g_CameraPos.z -= 5.0f;
-	g_CameraPos.y += 5.0f;
+	g_CameraPosition = ballPos;
+	g_CameraPosition.z -= 5.0f;
+	g_CameraPosition.y += 5.0f;
 
 	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
@@ -144,8 +149,8 @@ void FollowBall()
 		g_CameraRotation.y -= 0.1f;
 	}
 
-	g_CameraPos.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
-	g_CameraPos.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
+	g_CameraPosition.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
+	g_CameraPosition.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
 }
 
 void FollowRocket()
@@ -179,9 +184,9 @@ void FollowRocket()
 	newCameraPos.y += height;
 	
 	// カメラの位置を補間する
-	g_CameraPos.x += (newCameraPos.x - g_CameraPos.x) * 0.1f;
-	g_CameraPos.y += (newCameraPos.y - g_CameraPos.y) * 0.1f;
-	g_CameraPos.z += (newCameraPos.z - g_CameraPos.z) * 0.1f;
+	g_CameraPosition.x += (newCameraPos.x - g_CameraPosition.x) * 0.1f;
+	g_CameraPosition.y += (newCameraPos.y - g_CameraPosition.y) * 0.1f;
+	g_CameraPosition.z += (newCameraPos.z - g_CameraPosition.z) * 0.1f;
 
 	// 注視点（ターゲット）をロケットの位置の少し上に設定。
 	g_CameraTargetPos.x = rocketPos.x;
@@ -250,10 +255,10 @@ void ReflectsDebugKeyOperations()
 
 	velocity = XMVectorScale(velocity, 0.2f);
 
-	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPos);
+	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPosition);
 	velocity = XMVectorAdd(cameraPosVec, velocity);  //
-	XMStoreFloat3(&g_CameraPos, velocity);
+	XMStoreFloat3(&g_CameraPosition, velocity);
 
-	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPos), forwardVec_WS);  // 注視点ベクトルを導き出す
+	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPosition), forwardVec_WS);  // 注視点ベクトルを導き出す
 	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
 }

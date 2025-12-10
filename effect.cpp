@@ -14,7 +14,7 @@ struct EFFECT
 	int frame;
 };
 
-EFFECT g_Effect[100];
+static EFFECT g_Effect[100];
 
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
 
@@ -78,7 +78,7 @@ void InitializeEffect()
 
 void FinalizeEffect()
 {
-
+	SAFE_RELEASE(g_VertexBuffer);
 }
 
 void UpdateEffect()

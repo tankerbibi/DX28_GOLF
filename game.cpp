@@ -12,6 +12,7 @@
 #include "stroke.h"
 #include "rocket.h"
 #include "effect.h"
+#include "trail.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -30,6 +31,7 @@ void InitializeGame()
 	InitializeField();
 	InitializeGoal();
 	InitializeEffect();
+	InitializeTrail();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -58,6 +60,7 @@ void FinalizeGame()
 	FinalizeRocket();
 	FinalizeGoal();
 	FinalizeEffect();
+	FinalizeTrail();
 }
 
 void UpdateGame()
@@ -80,6 +83,7 @@ void UpdateGame()
 		UpdateRocket();
 		UpdateGoal();
 		UpdateEffect();
+		UpdateTrail();
 
 		/*if (g_LightDirection.y > 1.0f)
 		{
@@ -112,6 +116,7 @@ void DrawGame()
 	Shader_SetLight(light);	
 
 	DrawEffect();
+	DrawTrail();
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

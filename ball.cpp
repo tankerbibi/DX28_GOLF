@@ -10,6 +10,7 @@
 #include "stroke.h"
 #include "ranking.h"
 #include "effect.h"
+#include "trail.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -165,6 +166,7 @@ void MoveBall()
 	// 衝突判定
 	BallHitCheck();
 
+	SetTrailPosition(g_Pos);
 
 	// 終点から始点を引くことで、ベクトルを求める
 	XMFLOAT3 goalVec;

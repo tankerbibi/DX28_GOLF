@@ -16,7 +16,7 @@ static float g_Alpha;
 
 void InitializeTitle()
 {
-	g_BGTexture = TextureLoad(L"asset\\texture\\PROGOLFERTitle.png");
+	g_BGTexture = TextureLoad(L"asset\\texture\\GOLFTitle.png");
 	g_TitleTexture = TextureLoad(L"asset\\texture\\Title.png");
 	g_PressKeyTexture = TextureLoad(L"asset\\texture\\PressKey.png");
 	g_FrameCount = 0;
@@ -41,7 +41,7 @@ void UpdateTitle()
 void DrawTitle()
 {
 	SpriteDraw(screenWidth * 0.5f, screenHeight * 0.5f, screenWidth, screenHeight, 0,0,1.0f,1.0f,g_BGTexture);
-	SpriteDraw(screenWidth * 0.5f, screenHeight * 2.0f / 5.0f, screenWidth * 0.5f, screenHeight * 2 / 3.0f, 0,0,1.0f,1.0f,g_TitleTexture);
+	// SpriteDraw(screenWidth * 0.5f, screenHeight * 2.0f / 5.0f, screenWidth * 0.5f, screenHeight * 2 / 3.0f, 0,0,1.0f,1.0f,g_TitleTexture);
 	SetAlpha(g_Alpha);
 	SpriteDraw(screenWidth * 0.5f, screenHeight * 6.0f / 7.0f, screenWidth * 3.0f / 5.0f, screenHeight / 7.0f, 0,0,1.0f,1.0f, g_PressKeyTexture);
 }
