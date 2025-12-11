@@ -20,7 +20,7 @@ enum ROCKET_STATE
 
 static MODEL* g_Model = nullptr;
 
-static XMFLOAT3 g_Pos;
+static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
 static XMFLOAT3 g_TargetPos;
@@ -33,7 +33,8 @@ static constexpr float g_RocketRadius = 0.2f;
 static ROCKET_STATE rocketState;
 static int stateCount;
 
-static constexpr float explosionPower = 10.0f;
+static constexpr float explosionMaxPower = 30.0f;
+static constexpr float explosionLength = 20.0f;
 
 void RocketHitCheck();
 bool RocketIsHit();
@@ -42,7 +43,7 @@ void RocketMove();
 void InitializeRocket()
 {
 	g_Model = ModelLoad("asset\\model\\cube.fbx");
-	g_Pos = { 0.0f, 10.0f, 0.0f };
+	g_Position = { 0.0f, 10.0f, 0.0f };
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
 	// g_TargetPos = { g_Pos.x, , 0.0f };
@@ -77,25 +78,39 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
-			XMFLOAT3 ballPos = GetBallPos();
+			XMFLOAT3 ballPosition = GetBallPosition();
 
-			float length = sqrtf((ballPos.x - g_Pos.x) * (ballPos.x - g_Pos.x) + (ballPos.y - g_Pos.y) * (ballPos.y - g_Pos.y) + (ballPos.z - g_Pos.z) * (ballPos.z - g_Pos.z));
-			if (length <= 20)
+			float length = sqrtf((ballPosition.x - g_Position.x) * (ballPosition.x - g_Position.x)
+				+ (ballPosition.y - g_Position.y) * (ballPosition.y - g_Position.y)
+				+ (ballPosition.z - g_Position.z) * (ballPosition.z - g_Position.z));
+
+			// 長さが１以上の時は
+			if (length > 1.0f)
 			{
-				// ボールに力を加える。
-				AddForce({ 10.0f * (ballPos.x - g_Pos.x), 10.0f * (ballPos.y - g_Pos.y), 10.0f * (ballPos.z - g_Pos.z) });
-				CreateEffect(g_Pos);
+
 			}
+			XMFLOAT3 direction;
+			direction.x = (ballPosition.x - g_Position.x) / length;
+			direction.y = (ballPosition.y - g_Position.y) / length;
+			direction.z = (ballPosition.z - g_Position.z) / length;
+			SetCameraMode(CameraMode::LOOKBALL);
+
+			float power = explosionMaxPower * (1.0f - (length / explosionLength));
+
+			// ボールに力を加える。
+			AddForce({ 10.0f * (ballPosition.x - g_Position.x), 10.0f * (ballPosition.y - g_Position.y), 10.0f * (ballPosition.z - g_Position.z) });
+			CreateEffect(g_Position);
 		}
 		break;
 	case ROCKET_STATE_EXPLODED:
 		stateCount++;
-		if (stateCount > 60)
+		if (stateCount > 120)
 		{
 			stateCount = 0;
 
-			g_Pos = { 0.0f, 10.0f, 0.0f };
+			g_Position = { 0.0f, 10.0f, 0.0f };
 			rocketState = ROCKET_STATE_START;
+			SetCameraMode(CameraMode::BALL);
 		}
 		break;
 	default:
@@ -115,7 +130,7 @@ void DrawRocket()
 
 	matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
 	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-	matrix.matrixWorld *= XMMatrixTranslation(g_Pos.x, g_Pos.y, g_Pos.z);  // 移動マトリクス。gpuで計算されている。
+	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);  // 移動マトリクス。gpuで計算されている。
 
 	matrix.matrix = matrix.matrixWorld;
 
@@ -128,7 +143,7 @@ void DrawRocket()
 
 XMFLOAT3 GetRocketPos()
 {
-	return g_Pos;
+	return g_Position;
 }
 
 float GetRocketYaw()
@@ -178,9 +193,9 @@ void RocketMove()
 	moveVec = XMVectorScale(moveVec, 0.1f); // 0.2f は移動スピード
 
 	// --- 座標更新 ---
-	XMVECTOR posVec = XMLoadFloat3(&g_Pos);
+	XMVECTOR posVec = XMLoadFloat3(&g_Position);
 	posVec = XMVectorAdd(posVec, moveVec);
-	XMStoreFloat3(&g_Pos, posVec);
+	XMStoreFloat3(&g_Position, posVec);
 }
 
 void RocketHitCheck()
@@ -194,45 +209,45 @@ void RocketHitCheck()
 	for (int i = 0; i < blockMax; i++)
 	{
 		// 横方向の当たり判定処理
-		if (block[i].pos.y - blockRadius < g_Pos.y &&
-			g_Pos.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
+		if (block[i].pos.y - blockRadius < g_Position.y &&
+			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
 		{
 			// x方向
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
-					g_Pos.x - g_RocketRadius < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
+					g_Position.x - g_RocketRadius < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.x < g_Pos.x)
+					if (block[i].pos.x < g_Position.x)
 					{
 						// 右
-						g_Pos.x = block[i].pos.x + blockRadius + g_RocketRadius;
+						g_Position.x = block[i].pos.x + blockRadius + g_RocketRadius;
 					}
 					else
 					{
 						// 左
-						g_Pos.x = block[i].pos.x - blockRadius - g_RocketRadius;
+						g_Position.x = block[i].pos.x - blockRadius - g_RocketRadius;
 					}
 					g_Velocity.x *= -e;
 				}
 			}
 			// z方向
-			else if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
-				g_Pos.x < block[i].pos.x + blockRadius)
+			else if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
+				g_Position.x < block[i].pos.x + blockRadius)
 			{
-				if (block[i].pos.z - blockRadius < g_Pos.z + g_RocketRadius &&
-					g_Pos.z - g_RocketRadius < block[i].pos.z + blockRadius)
+				if (block[i].pos.z - blockRadius < g_Position.z + g_RocketRadius &&
+					g_Position.z - g_RocketRadius < block[i].pos.z + blockRadius)
 				{
-					if (block[i].pos.z < g_Pos.z)
+					if (block[i].pos.z < g_Position.z)
 					{
 						// 奥
-						g_Pos.z = block[i].pos.z + blockRadius + g_RocketRadius;
+						g_Position.z = block[i].pos.z + blockRadius + g_RocketRadius;
 					}
 					else
 					{
 						// 手前
-						g_Pos.z = block[i].pos.z - blockRadius - g_RocketRadius;
+						g_Position.z = block[i].pos.z - blockRadius - g_RocketRadius;
 					}
 				}
 			}
@@ -241,25 +256,25 @@ void RocketHitCheck()
 			// 縦方向の当たり判定処理
 		{
 			// 手前　奥
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x &&
-					g_Pos.x < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x &&
+					g_Position.x < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.y - blockRadius < g_Pos.y + g_RocketRadius &&
-						g_Pos.y - g_RocketRadius < block[i].pos.y + blockRadius)
+					if (block[i].pos.y - blockRadius < g_Position.y + g_RocketRadius &&
+						g_Position.y - g_RocketRadius < block[i].pos.y + blockRadius)
 					{
-						if (g_Pos.y > block[i].pos.y)
+						if (g_Position.y > block[i].pos.y)
 						{
 							// 上
-							g_Pos.y = block[i].pos.y + blockRadius + g_RocketRadius;
+							g_Position.y = block[i].pos.y + blockRadius + g_RocketRadius;
 
 						}
 						else
 						{
 							// 下
-							g_Pos.y = block[i].pos.y - blockRadius - g_RocketRadius;
+							g_Position.y = block[i].pos.y - blockRadius - g_RocketRadius;
 						}
 						g_Velocity.y *= -e;
 					}
@@ -280,48 +295,48 @@ bool RocketIsHit()
 	for (int i = 0; i < blockMax; i++)
 	{
 		// 横方向の当たり判定処理
-		if (block[i].pos.y - blockRadius < g_Pos.y &&
-			g_Pos.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
+		if (block[i].pos.y - blockRadius < g_Position.y &&
+			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
 		{
 			// x方向
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
-					g_Pos.x - g_RocketRadius < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
+					g_Position.x - g_RocketRadius < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.x < g_Pos.x)
+					if (block[i].pos.x < g_Position.x)
 					{
 						// 右
-						g_Pos.x = block[i].pos.x + blockRadius + g_RocketRadius;
+						g_Position.x = block[i].pos.x + blockRadius + g_RocketRadius;
 						return true;
 					}
 					else
 					{
 						// 左
-						g_Pos.x = block[i].pos.x - blockRadius - g_RocketRadius;
+						g_Position.x = block[i].pos.x - blockRadius - g_RocketRadius;
 						return true;
 					}
 					g_Velocity.x *= -e;
 				}
 			}
 			// z方向
-			else if (block[i].pos.x - blockRadius < g_Pos.x + g_RocketRadius &&
-				g_Pos.x < block[i].pos.x + blockRadius)
+			else if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
+				g_Position.x < block[i].pos.x + blockRadius)
 			{
-				if (block[i].pos.z - blockRadius < g_Pos.z + g_RocketRadius &&
-					g_Pos.z - g_RocketRadius < block[i].pos.z + blockRadius)
+				if (block[i].pos.z - blockRadius < g_Position.z + g_RocketRadius &&
+					g_Position.z - g_RocketRadius < block[i].pos.z + blockRadius)
 				{
-					if (block[i].pos.z < g_Pos.z)
+					if (block[i].pos.z < g_Position.z)
 					{
 						// 奥
-						g_Pos.z = block[i].pos.z + blockRadius + g_RocketRadius;
+						g_Position.z = block[i].pos.z + blockRadius + g_RocketRadius;
 						return true;
 					}
 					else
 					{
 						// 手前
-						g_Pos.z = block[i].pos.z - blockRadius - g_RocketRadius;
+						g_Position.z = block[i].pos.z - blockRadius - g_RocketRadius;
 						return true;
 					}
 				}
@@ -331,26 +346,26 @@ bool RocketIsHit()
 			// 縦方向の当たり判定処理
 		{
 			// 手前　奥
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x &&
-					g_Pos.x < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x &&
+					g_Position.x < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.y - blockRadius < g_Pos.y + g_RocketRadius &&
-						g_Pos.y - g_RocketRadius < block[i].pos.y + blockRadius)
+					if (block[i].pos.y - blockRadius < g_Position.y + g_RocketRadius &&
+						g_Position.y - g_RocketRadius < block[i].pos.y + blockRadius)
 					{
-						if (g_Pos.y > block[i].pos.y)
+						if (g_Position.y > block[i].pos.y)
 						{
 							// 上
-							g_Pos.y = block[i].pos.y + blockRadius + g_RocketRadius;
+							g_Position.y = block[i].pos.y + blockRadius + g_RocketRadius;
 							return true;
 
 						}
 						else
 						{
 							// 下
-							g_Pos.y = block[i].pos.y - blockRadius - g_RocketRadius;
+							g_Position.y = block[i].pos.y - blockRadius - g_RocketRadius;
 							return true;
 						}
 						g_Velocity.y *= -e;

@@ -5,7 +5,9 @@ enum class CameraMode
 	PLAY,
 	ROCKET,
 	BALL,
+	LOOKBALL,
 	DEBUG,
+	COUNT
 };
 
 void InitializeCamera();
@@ -18,4 +20,5 @@ XMMATRIX GetCameraProjectionMatrix();
 XMFLOAT3 GetCameraForward();
 XMFLOAT3 GetCameraPosition();
 
+void SetCameraMode(CameraMode newCameraMode);
 CameraMode GetCameraMode();

@@ -5,5 +5,5 @@ void FinalizeBall();
 void UpdateBall();
 void DrawBall();
 
-XMFLOAT3 GetBallPos();
+XMFLOAT3 GetBallPosition();
 void AddForce(XMFLOAT3 force);

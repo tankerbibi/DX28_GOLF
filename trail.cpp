@@ -29,7 +29,6 @@ void InitializeTrail()
 
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer); //g_VertexBufferはGPUのメモリなのでアクセスできない。
 	}
-
 	g_Texture = TextureLoad(L"asset\\texture\\LightEffect.png");
 }
 
@@ -146,4 +145,12 @@ void SetTrailPosition(XMFLOAT3 position)
 
 	// 一番最後のインデックスに最新のポジションを入れる。
 	g_TrailPosition[trailLength - 1] = position;
+}
+
+void ResetTrailPosition(XMFLOAT3 position)
+{
+	for (int i = 0; i < trailLength - 1; i++)
+	{
+		g_TrailPosition[i] = position;
+	}
 }

@@ -14,7 +14,7 @@
 
 static MODEL* g_Model = nullptr;
 
-static XMFLOAT3 g_Pos;
+static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
 // 外部的な力
@@ -36,13 +36,15 @@ void MoveBall();
 void InitializeBall()
 {
 	g_Model = ModelLoad("asset\\model\\Ball.fbx");
-	g_Pos = {0.0f, 10.0f, 0.0f};
+	g_Position = {0.0f, 10.0f, 0.0f};
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
 
 	g_State = BALL_STATE_MOVE;
 	g_StateCount = 0;
+
+	ResetTrailPosition(g_Position);
 }
 
 void FinalizeBall()
@@ -123,7 +125,7 @@ void MoveBall()
 		+ force.z * force.z);
 
 	// 正規化（長さを１にする）
-	if (forceLength > 1.0f)
+	if (forceLength > 1.0f)  // じゃあ、長さが１以下のときはどうなる？
 	{
 		force.x /= forceLength;
 		force.y /= forceLength;
@@ -147,7 +149,7 @@ void MoveBall()
 		
 		SetRankingScore(GetStroke());
 
-		CreateEffect(g_Pos);
+		CreateEffect(g_Position);
 	}
 
 	// 重力
@@ -159,21 +161,21 @@ void MoveBall()
 	g_Velocity.z -= g_Velocity.z * 2.0f * deltaTime;
 
 	// 移動
-	g_Pos.x += g_Velocity.x * deltaTime;
-	g_Pos.y += g_Velocity.y * deltaTime;
-	g_Pos.z += g_Velocity.z * deltaTime;
+	g_Position.x += g_Velocity.x * deltaTime;
+	g_Position.y += g_Velocity.y * deltaTime;
+	g_Position.z += g_Velocity.z * deltaTime;
 
 	// 衝突判定
 	BallHitCheck();
 
-	SetTrailPosition(g_Pos);
+	SetTrailPosition(g_Position);
 
 	// 終点から始点を引くことで、ベクトルを求める
 	XMFLOAT3 goalVec;
 	XMFLOAT3 goalPosition = GetGoalPosition();
-	goalVec.x = goalPosition.x - g_Pos.x;
-	goalVec.y = goalPosition.y - g_Pos.y;
-	goalVec.z = goalPosition.z - g_Pos.z;
+	goalVec.x = goalPosition.x - g_Position.x;
+	goalVec.y = goalPosition.y - g_Position.y;
+	goalVec.z = goalPosition.z - g_Position.z;
 
 	float goalLength = sqrtf(goalVec.x * goalVec.x
 		+ goalVec.y * goalVec.y
@@ -201,7 +203,7 @@ void DrawBall()
 
 	matrix.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);  // 拡大縮小マトリクス
 	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-	matrix.matrixWorld *= XMMatrixTranslation(g_Pos.x, g_Pos.y, g_Pos.z);  // 移動マトリクス。gpuで計算されている。
+	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);  // 移動マトリクス。gpuで計算されている。
 
 	matrix.matrix = matrix.matrixWorld;
 
@@ -212,9 +214,9 @@ void DrawBall()
 	ModelDraw(g_Model);
 }
 
-XMFLOAT3 GetBallPos()
+XMFLOAT3 GetBallPosition()
 {
-	return g_Pos;
+	return g_Position;
 }
 
 void BallHitCheck()
@@ -228,45 +230,45 @@ void BallHitCheck()
 	for (int i = 0; i < blockMax; i++)
 	{
 		// 横方向の当たり判定処理
-		if (block[i].pos.y - blockRadius < g_Pos.y &&
-			g_Pos.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
+		if (block[i].pos.y - blockRadius < g_Position.y &&
+			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
 		{
 			// x方向
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x + g_BallRadius &&
-					g_Pos.x - g_BallRadius < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
+					g_Position.x - g_BallRadius < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.x < g_Pos.x)
+					if (block[i].pos.x < g_Position.x)
 					{
 						// 右
-						g_Pos.x = block[i].pos.x + blockRadius + g_BallRadius;
+						g_Position.x = block[i].pos.x + blockRadius + g_BallRadius;
 					}
 					else
 					{
 						// 左
-						g_Pos.x = block[i].pos.x - blockRadius - g_BallRadius;
+						g_Position.x = block[i].pos.x - blockRadius - g_BallRadius;
 					}
 					g_Velocity.x *= -e;
 				}
 			}
 			// z方向
-			else if(block[i].pos.x - blockRadius < g_Pos.x + g_BallRadius &&
-				g_Pos.x < block[i].pos.x + blockRadius)
+			else if(block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
+				g_Position.x < block[i].pos.x + blockRadius)
 			{
-				if (block[i].pos.z - blockRadius < g_Pos.z + g_BallRadius &&
-					g_Pos.z - g_BallRadius < block[i].pos.z + blockRadius)
+				if (block[i].pos.z - blockRadius < g_Position.z + g_BallRadius &&
+					g_Position.z - g_BallRadius < block[i].pos.z + blockRadius)
 				{
-					if (block[i].pos.z < g_Pos.z)
+					if (block[i].pos.z < g_Position.z)
 					{
 						// 奥
-						g_Pos.z = block[i].pos.z + blockRadius + g_BallRadius;
+						g_Position.z = block[i].pos.z + blockRadius + g_BallRadius;
 					}
 					else
 					{
 						// 手前
-						g_Pos.z = block[i].pos.z - blockRadius - g_BallRadius;
+						g_Position.z = block[i].pos.z - blockRadius - g_BallRadius;
 					}
 				}
 			}
@@ -275,29 +277,29 @@ void BallHitCheck()
 		// 縦方向の当たり判定処理
 		{
 			// 手前　奥
-			if (block[i].pos.z - blockRadius < g_Pos.z &&
-				g_Pos.z < block[i].pos.z + blockRadius)
+			if (block[i].pos.z - blockRadius < g_Position.z &&
+				g_Position.z < block[i].pos.z + blockRadius)
 			{
-				if (block[i].pos.x - blockRadius < g_Pos.x &&
-					g_Pos.x < block[i].pos.x + blockRadius)
+				if (block[i].pos.x - blockRadius < g_Position.x &&
+					g_Position.x < block[i].pos.x + blockRadius)
 				{
-					if (block[i].pos.y - blockRadius < g_Pos.y + g_BallRadius &&
-						g_Pos.y - g_BallRadius < block[i].pos.y + blockRadius)
+					if (block[i].pos.y - blockRadius < g_Position.y + g_BallRadius &&
+						g_Position.y - g_BallRadius < block[i].pos.y + blockRadius)
 					{
-						if (g_Pos.y > block[i].pos.y)
+						if (g_Position.y > block[i].pos.y)
 						{
 							// 上
-							g_Pos.y = block[i].pos.y + blockRadius + g_BallRadius;
+							g_Position.y = block[i].pos.y + blockRadius + g_BallRadius;
 							
 							if (g_Velocity.y < -3.0f)
 							{
-								CreateEffect(g_Pos);
+								CreateEffect(g_Position);
 							}
 						}
 						else
 						{
 							// 下
-							g_Pos.y = block[i].pos.y - blockRadius - g_BallRadius;
+							g_Position.y = block[i].pos.y - blockRadius - g_BallRadius;
 						}
 						g_Velocity.y *= -e;
 					}
