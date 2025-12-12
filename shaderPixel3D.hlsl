@@ -11,11 +11,15 @@ float4 main(in float4 position : SV_Position, // ˆê–œŒÂƒsƒNƒZƒ‹‚ª‚ ‚é‚È‚çAˆê–œ‰
             in float2 texcoord : TEXCOORD0,
             in float4 color : COLOR0) : SV_TARGET
 {
-    float4 c = tex.Sample(samplerState, texcoord) * color;
+    float4 outColor = tex.Sample(samplerState, texcoord) * color;
+    
+    // ƒAƒ‹ƒtƒ@ƒNƒŠƒbƒv “§–¾“x‚ª’á‚¢‚Æ‚±‚ë‚Í•`‰æ‚µ‚È‚¢İ’è‚Ås‚­B
+    clip(outColor.a - 0.1);
+    
     //color.r *= 1.0f;
     //color.g *= 1.0f;
     //color.b *= 1.0f;
     // color.a *= alpha;
     
-    return c; //F‚ğsamplerStateİ’è‚Å’…F‚µ‚ÄI
+    return outColor; //F‚ğsamplerStateİ’è‚Å’…F‚µ‚ÄI
 }

@@ -115,8 +115,10 @@ void DrawGame()
 	light.lightEnable = false;
 	Shader_SetLight(light);	
 
-	DrawEffect();
 	DrawTrail();
+	// 先にトレイルを描画しちゃえば、zバッファなんて関係ない。
+	// DrawGirl();
+	DrawEffect();
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

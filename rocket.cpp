@@ -33,7 +33,8 @@ static constexpr float g_RocketRadius = 0.2f;
 static ROCKET_STATE rocketState;
 static int stateCount;
 
-static constexpr float explosionPower = 10.0f;
+static constexpr float explosionMaxPower = 30.0f;
+static constexpr float explosionLength = 20.0f;
 
 void RocketHitCheck();
 bool RocketIsHit();
@@ -77,7 +78,7 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
-			XMFLOAT3 ballPos = GetBallPos();
+			XMFLOAT3 ballPosition = GetBallPosition();
 
 			float length = sqrtf((ballPos.x - g_Position.x) * (ballPos.x - g_Position.x) + (ballPos.y - g_Position.y) * (ballPos.y - g_Position.y) + (ballPos.z - g_Position.z) * (ballPos.z - g_Position.z));
 			if (length <= 20)
@@ -90,12 +91,13 @@ void UpdateRocket()
 		break;
 	case ROCKET_STATE_EXPLODED:
 		stateCount++;
-		if (stateCount > 60)
+		if (stateCount > 120)
 		{
 			stateCount = 0;
 
 			g_Position = { 0.0f, 10.0f, 0.0f };
 			rocketState = ROCKET_STATE_START;
+			SetCameraMode(CameraMode::BALL);
 		}
 		break;
 	default:

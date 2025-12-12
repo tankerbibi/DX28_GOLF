@@ -6,7 +6,7 @@ struct BLOCK
 	int type;
 };
 
-static constexpr unsigned int blockMax = 500;
+static constexpr unsigned int blockMax = 4000;
 
 void InitializeField();
 void FinalizeField();

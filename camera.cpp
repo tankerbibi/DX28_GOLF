@@ -22,6 +22,7 @@ static CameraMode g_CameraMode = CameraMode::BALL;
 
 void FollowBall();
 void FollowRocket();
+void LookBall();
 void ReflectsDebugKeyOperations();
 
 void InitializeCamera()
@@ -68,6 +69,9 @@ void UpdateCamera()
 	case CameraMode::BALL:
 		FollowBall();
 		break;
+	case CameraMode::LOOKBALL:
+		LookBall();
+		break;
 	case CameraMode::DEBUG:
 		ReflectsDebugKeyOperations();
 		break;
@@ -112,6 +116,11 @@ XMFLOAT3 GetCameraPosition()
 	return g_CameraPosition;
 }
 
+void SetCameraMode(CameraMode newCameraMode)
+{
+	g_CameraMode = newCameraMode;
+}
+
 CameraMode GetCameraMode()
 {
 	return g_CameraMode;
@@ -120,7 +129,7 @@ CameraMode GetCameraMode()
 
 void FollowBall()
 {
-	XMFLOAT3 ballPos = GetBallPos();
+	XMFLOAT3 ballPos = GetBallPosition();
 
 	g_CameraPosition = ballPos;
 	g_CameraPosition.z -= 5.0f;
@@ -261,4 +270,13 @@ void ReflectsDebugKeyOperations()
 
 	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPosition), forwardVec_WS);  // 注視点ベクトルを導き出す
 	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
+}
+
+void LookBall()
+{
+	XMFLOAT3 ballPos = GetBallPosition();
+
+	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
+	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
+	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
 }

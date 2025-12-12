@@ -43,6 +43,8 @@ void InitializeBall()
 
 	g_State = BALL_STATE_MOVE;
 	g_StateCount = 0;
+
+	ResetTrailPosition(g_Position);
 }
 
 void FinalizeBall()
@@ -123,7 +125,7 @@ void MoveBall()
 		+ force.z * force.z);
 
 	// 正規化（長さを１にする）
-	if (forceLength > 1.0f)
+	if (forceLength > 1.0f)  // じゃあ、長さが１以下のときはどうなる？
 	{
 		force.x /= forceLength;
 		force.y /= forceLength;
@@ -212,7 +214,7 @@ void DrawBall()
 	ModelDraw(g_Model);
 }
 
-XMFLOAT3 GetBallPos()
+XMFLOAT3 GetBallPosition()
 {
 	return g_Position;
 }
