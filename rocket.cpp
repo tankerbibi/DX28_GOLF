@@ -39,6 +39,7 @@ static constexpr float explosionLength = 20.0f;
 void RocketHitCheck();
 bool RocketIsHit();
 void RocketMove();
+void PushBallWithRocket();
 
 void InitializeRocket()
 {
@@ -60,7 +61,7 @@ void FinalizeRocket()
 
 void UpdateRocket()
 {
-	if (GetCameraMode() != CameraMode::ROCKET) return;
+	if (GetCameraMode() == CameraMode::BALL) return;
 	switch (rocketState)
 	{
 	case ROCKET_STATE_START:
@@ -78,26 +79,19 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
-			XMFLOAT3 ballPosition = GetBallPosition();
-
-			float length = sqrtf((ballPos.x - g_Position.x) * (ballPos.x - g_Position.x) + (ballPos.y - g_Position.y) * (ballPos.y - g_Position.y) + (ballPos.z - g_Position.z) * (ballPos.z - g_Position.z));
-			if (length <= 20)
-			{
-				// ボールに力を加える。
-				AddForce({ 10.0f * (ballPos.x - g_Position.x), 10.0f * (ballPos.y - g_Position.y), 10.0f * (ballPos.z - g_Position.z) });
-				CreateEffect(g_Position);
-			}
+			SetCameraMode(CameraMode::LOOKBALL);
+			PushBallWithRocket();
 		}
 		break;
 	case ROCKET_STATE_EXPLODED:
 		stateCount++;
+		
 		if (stateCount > 120)
 		{
 			stateCount = 0;
-
 			g_Position = { 0.0f, 10.0f, 0.0f };
 			rocketState = ROCKET_STATE_START;
-			SetCameraMode(CameraMode::BALL);
+			SetCameraMode(CameraMode::ROCKET);
 		}
 		break;
 	default:
@@ -173,7 +167,7 @@ void RocketMove()
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
 
 	// 正面ベクトルを回転させる
-	XMVECTOR forwardVec = XMVector3Transformsormal(forwardBase, rotationMatrix);
+	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
 	// 正規化して速度（0.2f）を掛ける
 	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
@@ -368,7 +362,7 @@ bool RocketIsHit()
 
 void PushBallWithRocket()
 {
-	XMFLOAT3 ballPosition = GetBallPos();
+	XMFLOAT3 ballPosition = GetBallPosition();
 	XMFLOAT3 force;
 
 	force.x = ballPosition.x - g_Position.x;
@@ -379,6 +373,8 @@ void PushBallWithRocket()
 		+ (ballPosition.y - g_Position.y) * (ballPosition.y - g_Position.y)
 		+ (ballPosition.z - g_Position.z) * (ballPosition.z - g_Position.z));
 
+	float power = explosionMaxPower * (1.0f - (length / 20.0f));
+
 	if (length > 1.0f)
 	{
 		force.x /= length;
@@ -386,5 +382,11 @@ void PushBallWithRocket()
 		force.z /= length;
 	}
 
+	if (length <= 20.0f)
+	{
+		// ボールに力を加える。
+		AddForce({ force.x * power, force.y * power + 5.0f, force.z * power});
+		CreateEffect(g_Position);
+	}
 
 }

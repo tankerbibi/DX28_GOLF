@@ -18,7 +18,6 @@ static unsigned int g_BlockCount = 0;
 static XMFLOAT3 g_Rotation;
 static MODEL* g_Model[10];
 
-
 // CSVをロードする関数 (固定配列バージョン)
 void LoadFieldData(const char* filename)
 {

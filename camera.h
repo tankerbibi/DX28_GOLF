@@ -20,5 +20,5 @@ XMMATRIX GetCameraProjectionMatrix();
 XMFLOAT3 GetCameraForward();
 XMFLOAT3 GetCameraPosition();
 
-void SetCameraMode(CameraMode newCameraMode);
 CameraMode GetCameraMode();
+void SetCameraMode(CameraMode newCameraMode);
