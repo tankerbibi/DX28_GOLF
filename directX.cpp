@@ -15,6 +15,8 @@ static ID3D11BlendState* g_BlendState = NULL;
 static ID3D11DepthStencilState* g_DepthStencilStateDepthDisable = NULL;
 static ID3D11DepthStencilState* g_DepthStencilStateDepthEnable = NULL;  // DirectXは設定ごとにオブジェクトしなければならない。
 
+ID3D11Buffer* g_pInstanceBuffer = nullptr;
+
 void DirectXInitialize(HWND hWnd)
 {
 	//デバイスス、スワップチェイン（）、コンテキスト生成（メッセージを扱うために必要）
@@ -196,4 +198,15 @@ void SetDepthEnable(bool depthEnable)
 	{
 		g_DeviceContext->OMSetDepthStencilState(g_DepthStencilStateDepthDisable, NULL);
 	}
+}
+
+void CreateInstancceBuffer()
+{
+	D3D11_BUFFER_DESC desc = {};
+	desc.ByteWidth = sizeof(InstanceData) * blockMax;  // 4,000個分のサイズ
+	desc.Usage = D3D11_USAGE_DYNAMIC;  // 毎フレーム更新するため動的に設定
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;  // 頂点バッファとして扱う
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;  // CPUから書き込み可能にする
+
+	g_Device->CreateBuffer(&desc, nullptr, &g_pInstanceBuffer);
 }

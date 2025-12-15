@@ -17,6 +17,13 @@ struct Vertex //頂点データ　GPUメモリに保存する。
 	float bone_weights[4];  // 各ボーンからの影響度
 };
 
+
+// 各インスタンスが持つデータ
+struct InstanceData
+{
+	XMMATRIX worldMatrix; // 各ブロックのワールド行列
+};
+
 #define SAFE_RELEASE(o)		if (o) { (o)->Release(); o = NULL;}
 
 static constexpr float screenWidth = 1920.0f;
@@ -42,5 +49,7 @@ void Clear(void);
 void Present(void);
 
 void SetDepthEnable(bool depthEnable);
+
+void CreateInstanceBuffer();
 
 #endif

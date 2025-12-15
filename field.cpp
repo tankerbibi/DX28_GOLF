@@ -9,6 +9,7 @@
 #include <sstream>
 
 
+
 // ŒÅ’è”z—ñ‚ğˆÛ
 static BLOCK g_Block[blockMax];
 
