@@ -177,7 +177,7 @@ void Shader_SetLight(const LIGHT& light )  // gpu‚ÉA’è”ƒoƒbƒtƒ@‚ğŒo—R‚µ‚Äƒf[ƒ
 	g_pContext->UpdateSubresource(g_pVSLightBuffer, 0, nullptr, &light, 0, 0);
 }
 
-
+// ‚±‚ÌŠÖ”‚ÍA‘S‘Ì‚Åˆê‰ñ‚¾‚¯ŒÄ‚Ño‚·ŠÖ” DirectX‚Í‚Åˆê‰ñ‚â‚Á‚½İ’è‚ª‚¸[ƒb‚Æ•Û‘¶‚³‚ê‚é
 void Shader_Begin()
 {
 	// ’¸“_ƒVƒF[ƒ_[‚ÆƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚ğ•`‰æƒpƒCƒvƒ‰ƒCƒ“‚Éİ’è
