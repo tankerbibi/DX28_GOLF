@@ -61,7 +61,7 @@ void FinalizeRocket()
 
 void UpdateRocket()
 {
-	if (GetCameraMode() == CameraMode::BALL) return;
+	if (GetCameraMode() == CameraMode::BALL || GetCameraMode() == CameraMode::DEBUG) return;
 	switch (rocketState)
 	{
 	case ROCKET_STATE_START:

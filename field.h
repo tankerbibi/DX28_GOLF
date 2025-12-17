@@ -1,9 +1,10 @@
 #pragma once
+#include <string>
 
 struct BLOCK
 {
 	XMFLOAT3 pos;
-	int type;
+	std::string name;
 };
 
 static constexpr unsigned int blockMax = 4000;

@@ -8,69 +8,32 @@
 #include <string>
 #include <sstream>
 
-
+static constexpr unsigned int typeMax = 5;
 
 // 固定配列を維持
-static BLOCK g_Block[blockMax];
+static BLOCK g_Block[blockMax]{};
+
+static MODEL* g_Model[typeMax]{};
+static std::string g_ModelName[typeMax];
 
 // 実際にロードされたブロックの数を保持する変数
 static unsigned int g_BlockCount = 0;
 
-static XMFLOAT3 g_Rotation;
-static MODEL* g_Model[10];
 
 // CSVをロードする関数 (固定配列バージョン)
-void LoadFieldData(const char* filename)
-{
-	g_BlockCount = 0; // カウントをリセット
+void LoadFieldData(const char* filename);
 
-	std::ifstream file(filename);
-	if (!file)
-	{
-		// ファイルが見つからない場合のエラー処理
-		return;
-	}
+BLOCK* GetFieldBlock();
 
-	std::string line;
-	// ファイルから1行ずつ読み込む
-	while (std::getline(file, line) && g_BlockCount < blockMax)
-	{
-		std::stringstream ss(line);
-		std::string segment;
-		std::vector<std::string> seglist;
-
-		// カンマ区切りで分解
-		while (std::getline(ss, segment, ','))
-		{
-			seglist.push_back(segment);
-		}
-
-		if (seglist.size() >= 4)
-		{
-			// 固定配列にデータを格納
-			g_Block[g_BlockCount].type = std::stoi(seglist[0]);     // Type
-			g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
-			g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
-			g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
-
-			g_BlockCount++; // 読み込んだ数をインクリメント
-		}
-	}
-
-	// DEBUG: 読み込まれなかった残りの配列要素を初期化したい場合はここでループを回す
-}
-
-BLOCK* GetFieldBlock()
-{
-	return g_Block;
-}
 
 void InitializeField()
-{
-	g_Model[1] = ModelLoad("asset\\model\\cube.fbx");
-	g_Model[2] = ModelLoad("asset\\model\\tree.fbx");
-	g_Model[3] = ModelLoad("asset\\model\\Kirby2.fbx");
-	g_Rotation = { 0.0f, 0.0f, 0.0f };
+{	
+	g_ModelName[0] = "block";
+	g_ModelName[1] = "tree";
+	g_ModelName[2] = "kirby";
+	g_Model[0] = ModelLoad("asset\\model\\cube.fbx");
+	g_Model[1] = ModelLoad("asset\\model\\tree.fbx");
+	g_Model[2] = ModelLoad("asset\\model\\Kirby2.fbx");
 
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
@@ -80,7 +43,7 @@ void InitializeField()
 
 void FinalizeField()
 {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < typeMax; i++)
 	{
 		ModelRelease(g_Model[i]);
 	}
@@ -99,7 +62,7 @@ void DrawField()
 	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 
 	// (0:cube, 1:tree, 2:Kriby)
-	for (int modelType = 0; modelType < 3; modelType++)
+	for (int type = 0; type < typeMax; type++)
 	{
 		// バッファをロック
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -109,30 +72,29 @@ void DrawField()
 		// 今回描画する個数
 		int drawCount = 0;
 
-		for (int i = 0; i < g_BlockCount; i++)
+		for (int index = 0; index < g_BlockCount; index++)
 		{
-			if (g_Block[i].type == modelType)
+			if (g_Block[index].name == g_ModelName[type])
 			{
 				XMMATRIX world = XMMatrixIdentity();
 
-				if (modelType == 0)  // ground
+				if (g_ModelName[type] == "block")  // ground
 				{
 					
 				}
-				else if (modelType == 1)  // tree
+				else if (g_ModelName[type] == "tree")  // tree
 				{
-					world *= XMMatrixScaling(1.0f, 2.0f, 1.0f);
+					world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 				}
-				else if (modelType == 2)  // カービィ
+				else if (g_ModelName[type] == "kirby")  // カービィ
 				{
 
 				}
 
-				world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+				world *= XMMatrixTranslation(g_Block[index].pos.x, g_Block[index].pos.y, g_Block[index].pos.z);
 
-				data[drawCount].worldMatrix = XMMatrixTranspose(world);
+				// data[drawCount].worldMatrix = XMMatrixTranspose(world);
 				data[drawCount].worldMatrix = world;
-
 
 				drawCount++;
 			}
@@ -142,13 +104,14 @@ void DrawField()
 		if (drawCount > 0)
 		{
 			MATRIX commonMatrices;
+			// 単位行列に初期化
 			commonMatrices.matrixWorld = XMMatrixIdentity();
 			commonMatrices.matrix = XMMatrixIdentity();
 
 			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
 			Shader_SetMatrix(commonMatrices);
 
-			ModelDrawInstanced(g_Model[modelType], drawCount);
+			ModelDrawInstanced(g_Model[type], drawCount);
 		}
 	}
 
@@ -197,4 +160,49 @@ void DrawField()
 	//		ModelDraw(g_Model[modelIndex]);
 	//	}
 	//}
+}
+
+BLOCK* GetFieldBlock()
+{
+	return g_Block;
+}
+
+void LoadFieldData(const char* filename)
+{
+	g_BlockCount = 0; // カウントをリセット
+
+	std::ifstream file(filename);
+	if (!file)
+	{
+		// ファイルが見つからない場合のエラー処理
+		return;
+	}
+
+	std::string line;
+	// ファイルから1行ずつ読み込む
+	while (std::getline(file, line) && g_BlockCount < blockMax)
+	{
+		std::stringstream ss(line);
+		std::string segment;
+		std::vector<std::string> seglist;
+
+		// カンマ区切りで分解
+		while (std::getline(ss, segment, ','))
+		{
+			seglist.push_back(segment);
+		}
+
+		if (seglist.size() >= 4)
+		{
+			// 固定配列にデータを格納
+			g_Block[g_BlockCount].name = seglist[0];     // name
+			g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
+			g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
+			g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
+
+			g_BlockCount++; // 読み込んだ数をインクリメント
+		}
+	}
+
+	// DEBUG: 読み込まれなかった残りの配列要素を初期化したい場合はここでループを回す
 }

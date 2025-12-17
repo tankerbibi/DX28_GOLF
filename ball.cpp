@@ -196,25 +196,40 @@ void MoveBall()
 
 void DrawBall()
 {
-	Shader_Begin();  // シェーダーの設定
-	// 頂点シェーダーに変換行列を設定
+	ID3D11DeviceContext* context = DirectXGetDeviceContext();
+	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 
-	MATRIX matrix;
+	// バッファをロック
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	context->Map(pInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
-	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-	matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	InstanceData* data = (InstanceData*)mappedResource.pData;
 
-	matrix.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);  // 拡大縮小マトリクス
-	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);  // 移動マトリクス。gpuで計算されている。
+	XMMATRIX world = XMMatrixIdentity();
 
-	matrix.matrix = matrix.matrixWorld;
+	world *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
+	world *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
+	world *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
 
-	matrix.matrix *= GetCameraViewMatrix();  // ビューマトリクス
-	matrix.matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
+	data[0].worldMatrix = world;
 
-	Shader_SetMatrix(matrix);
-	ModelDraw(g_Model);
+	context->Unmap(pInstanceBuffer, 0);
+	
+
+	MATRIX commonMatrices;
+	// 行列を作成　float 4 x 4
+	commonMatrices.matrix = XMMatrixIdentity();
+	// 行列を作成　float 4 x 4
+	commonMatrices.matrixWorld = XMMatrixIdentity();
+
+	// ビューマトリクス
+	commonMatrices.matrix *= GetCameraViewMatrix();
+	// プロジェクションマトリクス
+	commonMatrices.matrix *= GetCameraProjectionMatrix();
+	
+	Shader_SetMatrix(commonMatrices);
+
+	ModelDrawInstanced(g_Model, 1);
 }
 
 XMFLOAT3 GetBallPosition()
