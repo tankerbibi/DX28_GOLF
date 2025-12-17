@@ -31,3 +31,5 @@ struct MODEL
 MODEL* ModelLoad(const char* FileName);
 void ModelRelease(MODEL* model);
 void ModelDraw(MODEL* model);
+void ModelDrawInstanced(MODEL* model, UINT instanceCount);
+

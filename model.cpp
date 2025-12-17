@@ -181,3 +181,52 @@ void ModelDraw(MODEL* model)
 		DirectXGetDeviceContext()->DrawIndexed(mesh->mNumFaces * 3, 0, 0);
 	}
 }
+
+void ModelDrawInstanced(MODEL* model, UINT instanceCount)
+{
+	if (model == nullptr || instanceCount == 0) return;
+
+	ID3D11DeviceContext* context = DirectXGetDeviceContext();
+
+	for (unsigned int m = 0; m < model->AiScene->mNumMeshes; m++)
+	{
+		aiMesh* mesh = model->AiScene->mMeshes[m];
+
+		// テクスチャ設定
+		aiString texture;
+		aiMaterial* aimaterial = model->AiScene->mMaterials[mesh->mMaterialIndex];
+		aimaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texture);
+
+		if (texture != aiString(""))
+			context->PSSetShaderResources(0, 1, &model->Texture[texture.data]);
+
+		// スロット０に頂点バッファを設定
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		context->IASetVertexBuffers(0, 1, &model->VertexBuffer[m], &stride, &offset);
+
+		// インデックスバッファ設定
+		context->IASetIndexBuffer(model->IndexBuffer[m], DXGI_FORMAT_R32_UINT, 0);
+
+		// スロット1にインスタンスバッファを設定
+		ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
+		UINT instanceStride = sizeof(InstanceData);
+		UINT instanceOffset = 0;
+		// スロット１にインスタンスバッファを設定
+		context->IASetVertexBuffers(1, 1, &pInstanceBuffer, &instanceStride, &instanceOffset);
+
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexedInstanced(
+			mesh->mNumFaces * 3,  // このメッシュのインデックス数
+			instanceCount,  // 描画するインスタンスの総数
+			0, 0, 0
+		);
+	}
+	
+	// スロット１をnullptrで上書きして、インスタンスバッファの設定を解除する
+	ID3D11Buffer* nullBuffer = nullptr;
+	UINT zeroStride = 0;
+	UINT zeroOffset = 0;
+	context->IASetVertexBuffers(1, 1, &nullBuffer, &zeroStride, &zeroOffset);
+}

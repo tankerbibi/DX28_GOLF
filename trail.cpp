@@ -72,7 +72,7 @@ void DrawTrail()
 			crossProduct.y = cameraDirection.z * trailDirection.x - cameraDirection.x * trailDirection.z;
 			crossProduct.z = cameraDirection.x * trailDirection.y - cameraDirection.y * trailDirection.x;
 
-			// 外積の長さを求める
+			// 外積の長さを求める 二つのベクトルから、垂直の新しいベクトルを導き出すことができる。
 			float crossProductLength = sqrtf(crossProduct.x * crossProduct.x
 				+ crossProduct.y * crossProduct.y
 				+ crossProduct.z * crossProduct.z);

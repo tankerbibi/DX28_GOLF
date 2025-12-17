@@ -90,6 +90,9 @@
     <ClInclude Include="trail.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug_ostream.cpp">
@@ -165,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="trail.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shadow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

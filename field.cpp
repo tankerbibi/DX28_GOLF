@@ -74,6 +74,8 @@ void InitializeField()
 
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
+
+	CreateInstanceBuffer(blockMax);
 }
 
 void FinalizeField()
@@ -93,49 +95,102 @@ void DrawField()
 {
 	Shader_Begin();
 
-	// blockMax ではなく、実際に読み込んだ g_BlockCount の数だけループを回します。
-	for (int i = 0; i < g_BlockCount; i++)
+	ID3D11DeviceContext* context = DirectXGetDeviceContext();
+	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
+
+	// (0:cube, 1:tree, 2:Kriby)
+	for (int modelType = 0; modelType < 3; modelType++)
 	{
-		MATRIX matrix;
-		matrix.matrix = XMMatrixIdentity();
-		matrix.matrixWorld = XMMatrixIdentity();
+		// バッファをロック
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		context->Map(pInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
-		// 元のコードにあった「i == 0 の時だけ広い床」というロジックを Type 0 で判定する形に置き換える
-		// ※ UnityでType 0（Floor）としてエクスポートされたブロックが対象
-		if (g_Block[i].type == 0)
+		InstanceData* data = (InstanceData*)mappedResource.pData;
+		// 今回描画する個数
+		int drawCount = 0;
+
+		for (int i = 0; i < g_BlockCount; i++)
 		{
-			matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);
-			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);
-			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
-		}
-		else
-		{
-			// カービィ
-			if (g_Block[i].type == 2)
+			if (g_Block[i].type == modelType)
 			{
-				matrix.matrixWorld *= XMMatrixScaling(0.6f, 0.6f, 0.6f);
-				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0.0f, 0.0f);
-			}
-			else // 木や通常のブロック (Type 1 など)
-			{
-				matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-				matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-			}
+				XMMATRIX world = XMMatrixIdentity();
 
-			// 共通の移動処理
-			matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+				if (modelType == 0)  // ground
+				{
+					
+				}
+				else if (modelType == 1)  // tree
+				{
+					world *= XMMatrixScaling(1.0f, 2.0f, 1.0f);
+				}
+				else if (modelType == 2)  // カービィ
+				{
+
+				}
+
+				world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+
+				data[drawCount].worldMatrix = XMMatrixTranspose(world);
+
+				drawCount++;
+			}
 		}
+		context->Unmap(pInstanceBuffer, 0);
 
-		matrix.matrix = matrix.matrixWorld;
-		matrix.matrix *= GetCameraViewMatrix();
-		matrix.matrix *= GetCameraProjectionMatrix();
-
-		Shader_SetMatrix(matrix);
-
-		int modelIndex = g_Block[i].type;
-		if (modelIndex >= 0 && modelIndex < 3)
+		if (drawCount > 0)
 		{
-			ModelDraw(g_Model[modelIndex]);
+			MATRIX commonMatrices;
+			commonMatrices.matrixWorld = XMMatrixIdentity();
+			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
+			Shader_SetMatrix(commonMatrices);
+
+			ModelDrawInstanced(g_Model[modelType], drawCount);
 		}
 	}
+
+	//// blockMax ではなく、実際に読み込んだ g_BlockCount の数だけループを回します。
+	//for (int i = 0; i < g_BlockCount; i++)
+	//{
+	//	MATRIX matrix;
+	//	matrix.matrix = XMMatrixIdentity();
+	//	matrix.matrixWorld = XMMatrixIdentity();
+
+	//	// 元のコードにあった「i == 0 の時だけ広い床」というロジックを Type 0 で判定する形に置き換える
+	//	// ※ UnityでType 0（Floor）としてエクスポートされたブロックが対象
+	//	if (g_Block[i].type == 0)
+	//	{
+	//		matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);
+	//		matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);
+	//		matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+	//	}
+	//	else
+	//	{
+	//		// カービィ
+	//		if (g_Block[i].type == 2)
+	//		{
+	//			matrix.matrixWorld *= XMMatrixScaling(0.6f, 0.6f, 0.6f);
+	//			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0.0f, 0.0f);
+	//		}
+	//		else // 木や通常のブロック (Type 1 など)
+	//		{
+	//			matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	//			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	//		}
+
+	//		// 共通の移動処理
+	//		matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+	//	}
+
+	//	matrix.matrix = matrix.matrixWorld;
+	//	matrix.matrix *= GetCameraViewMatrix();
+	//	matrix.matrix *= GetCameraProjectionMatrix();
+
+	//	Shader_SetMatrix(matrix);
+
+	//	int modelIndex = g_Block[i].type;
+	//	if (modelIndex >= 0 && modelIndex < 3)
+	//	{
+	//		ModelDraw(g_Model[modelIndex]);
+	//	}
+	//}
 }

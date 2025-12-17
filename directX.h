@@ -29,11 +29,7 @@ struct InstanceData
 static constexpr float screenWidth = 1920.0f;
 static constexpr float screenHeight = 1080.0f;
 
-static constexpr float pieceWidth = 80.0f;
-static constexpr float pieceHeight = 80.0f;
 
-static constexpr int blockCols = 6;
-static constexpr int blockRows = 13;
 
 static constexpr float deltaTime = 1.0f / 60.0f;
 
@@ -50,6 +46,7 @@ void Present(void);
 
 void SetDepthEnable(bool depthEnable);
 
-void CreateInstanceBuffer();
+void CreateInstanceBuffer(unsigned int maxInstanceCount);
+ID3D11Buffer* GetInstanceBuffer();
 
 #endif
