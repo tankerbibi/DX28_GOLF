@@ -131,6 +131,8 @@ void DrawField()
 				world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 
 				data[drawCount].worldMatrix = XMMatrixTranspose(world);
+				data[drawCount].worldMatrix = world;
+
 
 				drawCount++;
 			}
@@ -141,6 +143,8 @@ void DrawField()
 		{
 			MATRIX commonMatrices;
 			commonMatrices.matrixWorld = XMMatrixIdentity();
+			commonMatrices.matrix = XMMatrixIdentity();
+
 			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
 			Shader_SetMatrix(commonMatrices);
 

@@ -11,6 +11,7 @@
 #include "ranking.h"
 #include "effect.h"
 #include "trail.h"
+#include "shadow.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -169,6 +170,8 @@ void MoveBall()
 	BallHitCheck();
 
 	SetTrailPosition(g_Position);
+
+	SetShadowPosition(g_Position);
 
 	// 終点から始点を引くことで、ベクトルを求める
 	XMFLOAT3 goalVec;
