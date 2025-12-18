@@ -56,8 +56,6 @@ void UpdateField()
 
 void DrawField()
 {
-	Shader_Begin();
-
 	ID3D11DeviceContext* context = DirectXGetDeviceContext();
 	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 

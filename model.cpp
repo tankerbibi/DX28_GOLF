@@ -212,7 +212,6 @@ void ModelDrawInstanced(MODEL* model, UINT instanceCount)
 		ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 		UINT instanceStride = sizeof(InstanceData);
 		UINT instanceOffset = 0;
-		// スロット１にインスタンスバッファを設定
 		context->IASetVertexBuffers(1, 1, &pInstanceBuffer, &instanceStride, &instanceOffset);
 
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

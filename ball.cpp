@@ -207,7 +207,7 @@ void DrawBall()
 
 	XMMATRIX world = XMMatrixIdentity();
 
-	world *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
+	world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	world *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
 	world *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
 

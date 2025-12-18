@@ -223,6 +223,7 @@ void Initialize(HWND hWnd)
 	//テクスチャ初期化
 	TextureInitialize(DirectXGetDevice());
 
+	Shader_Begin();
 	//スプライト初期化
 	SpriteInitialize();
 
