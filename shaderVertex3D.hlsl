@@ -1,70 +1,3 @@
-
-//定数バッファ  gpuとcpuはまったく別なので、情報のやりとりにはこれを使う。
-cbuffer MatrixBuffer : register(b0)  // b0はスロット番号　shader.cppで引数として送った数字と連携している。
-{
-    // View * Projection 行列
-    float4x4 mtx;
-    // ※ここはインスタンシングでは単位行列が入っている
-    float4x4 mtxWorld;
-}
-
-cbuffer LightBuffer : register(b1)
-{
-    bool lightEnable;  // 2D描画の時にはFalseにする  float4つ分区切り
-    float3 dummy0;
-    
-    float3 lightDirection;
-    float dummy1;  // ダミー 16バイト区切りにしなければならないルールを遵守するために存在する。
-}
-// hlslはc言語ベース
-// グローバルイルミネーション すべての物体から反射する光を計算して影を作ることをいう。
-
-//頂点シェーダ
-float4 main(in float4 position : POSITION0,
-            in float2 texcoord : TEXCOORD0,
-            in float3 normal : NORMAL0,  // セマンティクスの名前は自分で設定できるが、ある程度のルールがあるので、最初からあるやつを使ったほうが良い。
-
-              // (Slot 1から来るデータ)
-            in row_major float4x4 mtxInstance : INSTANCE,
-
-            out float2 outTexcoord : TEXCOORD0,
-            out float4 outColor : COLOR0) : SV_Position  //inは入力用の引数。　POSITION0、TEXCOORD0はセマンティクス。変数の役割を設定できる。  outは出力用の引数。
-{
-    // ライト方向ベクトル 長さが１を超えないように正規化する。
-    // float3 lightDirection = normalize(float3(0.5, -1.0, 1.0));  // c言語ではfが必要だった。しかしシェーダではいらない。シェーダーでは全部float。容量がどれくらいかはGPU次第。
-
-    float3 N = normalize(normal);
-    float4 worldPos;
-    // float4 worldNormal = mul(float4(N, 0, 0), mtxInstance).xyz;
-    
-    if (lightEnable)
-    {
-        // maxInstanceで法線ベクトルを回転させる処理
-        float3 worldNormal = mul(float4(N, 0.0), mtxInstance).xyz;
-        
-        float3 L = normalize(lightDirection);
-        float d = dot(normalize(worldNormal), -L);
-        float power = max(0, d) * 0.5 + 0.5;
-        outColor = float4(power, power, power, 1.0);
-        
-        worldPos = mul(position, mtxInstance);
-    }
-    else
-    {
-        outColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-        
-        worldPos = mul(position, mtxInstance);
-
-    }
-    
-    outTexcoord = texcoord;
-    
-    return mul(worldPos, mtx);  //行列の掛け算で回転している。
-}
-
-
-/*/////////////////////
-
 //定数バッファ  gpuとcpuはまったく別なので、情報のやりとりにはこれを使う。
 cbuffer MatrixBuffer : register(b0)  // b0はスロット番号　shader.cppで引数として送った数字と連携している。
 {
@@ -97,6 +30,7 @@ float4 main(in float4 position : POSITION0,
     {
         // 法線ベクトルの座標変換(回転)
         normal = mul(float4(normal, 0.0), mtxWorld);  // normalを回転させる
+        normal = normalize(normal);
         
          // ランバート拡散照明(直接光)
         outColor.rgb = saturate(-dot(lightDirection, normal)); // lightDirectionは長さが１でなければならない。
@@ -115,4 +49,3 @@ float4 main(in float4 position : POSITION0,
     outTexcoord = texcoord;
     return mul(position, mtx);  //行列の掛け算で回転している。
 }
-*/

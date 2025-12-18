@@ -110,11 +110,15 @@ void DrawGame()
 	Shader_SetLight(light);
 
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
+
+	Shader_SetPipeline(true);
 	DrawField();
+
+	Shader_SetPipeline(false);
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
-	
+
 	// ライトをオフにする
 	light.lightEnable = false;
 	Shader_SetLight(light);	

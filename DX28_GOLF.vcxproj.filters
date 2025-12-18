@@ -187,5 +187,8 @@
     <FxCompile Include="shaderPixel3D.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="shaderVertex3DInstance.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

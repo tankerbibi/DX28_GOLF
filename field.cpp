@@ -19,6 +19,9 @@ static std::string g_ModelName[typeMax];
 // 実際にロードされたブロックの数を保持する変数
 static unsigned int g_BlockCount = 0;
 
+static ID3D11Buffer* g_InstanceBuffer;
+
+
 
 // CSVをロードする関数 (固定配列バージョン)
 void LoadFieldData(const char* filename);
@@ -38,7 +41,17 @@ void InitializeField()
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
 
-	CreateInstanceBuffer(blockMax);
+	D3D11_BUFFER_DESC desc = {};
+	// 4,000個分のサイズ
+	desc.ByteWidth = sizeof(InstanceData) * blockMax;
+	// 毎フレーム更新するため動的に設定
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	// 頂点バッファとして扱う
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	// CPUから書き込み可能にする
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	DirectXGetDevice()->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
 }
 
 void FinalizeField()
@@ -57,14 +70,13 @@ void UpdateField()
 void DrawField()
 {
 	ID3D11DeviceContext* context = DirectXGetDeviceContext();
-	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 
 	// (0:cube, 1:tree, 2:Kriby)
 	for (int type = 0; type < typeMax; type++)
 	{
 		// バッファをロック
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		context->Map(pInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		context->Map(g_InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 		InstanceData* data = (InstanceData*)mappedResource.pData;
 		// 今回描画する個数
@@ -97,7 +109,7 @@ void DrawField()
 				drawCount++;
 			}
 		}
-		context->Unmap(pInstanceBuffer, 0);
+		context->Unmap(g_InstanceBuffer, 0);
 
 		if (drawCount > 0)
 		{
@@ -109,7 +121,7 @@ void DrawField()
 			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
 			Shader_SetMatrix(commonMatrices);
 
-			ModelDrawInstanced(g_Model[type], drawCount);
+			ModelDrawInstanced(g_Model[type], g_InstanceBuffer, drawCount);
 		}
 	}
 

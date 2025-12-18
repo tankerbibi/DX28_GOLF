@@ -31,6 +31,7 @@ void Shader_Finalize();
 
 void Shader_SetMatrix(const MATRIX& matrix);
 void Shader_SetLight(const LIGHT& light);
+void Shader_SetPipeline(bool isInstance);
 
 void Shader_Begin();
 

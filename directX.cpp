@@ -15,9 +15,6 @@ static ID3D11BlendState* g_BlendState = NULL;
 static ID3D11DepthStencilState* g_DepthStencilStateDepthDisable = NULL;
 static ID3D11DepthStencilState* g_DepthStencilStateDepthEnable = NULL;  // DirectXは設定ごとにオブジェクトしなければならない。
 
-// インスタンス描画用バッファ
-static ID3D11Buffer* g_InstanceBuffer = nullptr;
-
 void DirectXInitialize(HWND hWnd)
 {
 	//デバイスス、スワップチェイン（）、コンテキスト生成（メッセージを扱うために必要）
@@ -156,8 +153,6 @@ void DirectXFinalize(void) //DirectXの変数はいらなくなったら、リリースする。
 	SAFE_RELEASE(g_SwapChain);
 	SAFE_RELEASE(g_DeviceContext);
 	SAFE_RELEASE(g_Device);
-
-	SAFE_RELEASE(g_InstanceBuffer);
 }
 
 ID3D11Device* DirectXGetDevice(void)
@@ -202,29 +197,29 @@ void SetDepthEnable(bool depthEnable)
 	}
 }
 
-void CreateInstanceBuffer(unsigned int maxInstanceCount)
-{
-	// 既存のバッファがあれば解放
-	if (g_InstanceBuffer)
-	{
-		g_InstanceBuffer->Release();
-		g_InstanceBuffer = nullptr;
-	}
-
-	D3D11_BUFFER_DESC desc = {};
-	// 4,000個分のサイズ
-	desc.ByteWidth = sizeof(InstanceData) * maxInstanceCount;
-	// 毎フレーム更新するため動的に設定
-	desc.Usage = D3D11_USAGE_DYNAMIC;
-	// 頂点バッファとして扱う
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	// CPUから書き込み可能にする
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	g_Device->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
-}
-
-ID3D11Buffer* GetInstanceBuffer()
-{
-	return g_InstanceBuffer;
-}
+//void CreateInstanceBuffer(unsigned int maxInstanceCount)
+//{
+//	// 既存のバッファがあれば解放
+//	if (g_InstanceBuffer)
+//	{
+//		g_InstanceBuffer->Release();
+//		g_InstanceBuffer = nullptr;
+//	}
+//
+//	D3D11_BUFFER_DESC desc = {};
+//	// 4,000個分のサイズ
+//	desc.ByteWidth = sizeof(InstanceData) * maxInstanceCount;
+//	// 毎フレーム更新するため動的に設定
+//	desc.Usage = D3D11_USAGE_DYNAMIC;
+//	// 頂点バッファとして扱う
+//	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+//	// CPUから書き込み可能にする
+//	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+//
+//	g_Device->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
+//}
+//
+//ID3D11Buffer* GetInstanceBuffer()
+//{
+//	return g_InstanceBuffer;
+//}

@@ -16,9 +16,16 @@ using namespace DirectX;
 
 
 static ID3D11VertexShader* g_pVertexShader = nullptr;
+// インスタンス描画用頂点シェーダー
+static ID3D11VertexShader* g_pVertexShaderInstance = nullptr;
+
 static ID3D11InputLayout* g_pInputLayout = nullptr;
+// インスタンス用入力レイアウト
+static ID3D11InputLayout* g_pInputLayoutInstance = nullptr;
+
 static ID3D11Buffer* g_pVSConstantBuffer = nullptr;
-static ID3D11Buffer* g_pVSLightBuffer = nullptr;  // ライトにまつわる色々Buffer
+// ライトにまつわる色々Buffer
+static ID3D11Buffer* g_pVSLightBuffer = nullptr;
 static ID3D11PixelShader* g_pPixelShader = nullptr;
 static ID3D11SamplerState* g_SamplerState = nullptr;
 
@@ -26,7 +33,8 @@ static ID3D11SamplerState* g_SamplerState = nullptr;
 static ID3D11Device* g_pDevice = nullptr;
 static ID3D11DeviceContext* g_pContext = nullptr;
 
-
+bool Shader_LoadShaderVertex3D(HRESULT* hr);
+bool Shader_LoadShaderVertex3DInstance(HRESULT* hr);
 
 bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -42,57 +50,13 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	g_pDevice = pDevice;
 	g_pContext = pContext;
 
-
-	// 事前コンパイル済み頂点シェーダーの読み込み
-	std::ifstream ifs_vs("shaderVertex3D.cso", std::ios::binary);
-
-	if (!ifs_vs) {
-		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました\n\nshader_vertex_2d.cso", "エラー", MB_OK);
+	if (!Shader_LoadShaderVertex3D(&hr))
+	{
 		return false;
 	}
 
-	// ファイルサイズを取得
-	ifs_vs.seekg(0, std::ios::end); // ファイルポインタを末尾に移動
-	std::streamsize filesize = ifs_vs.tellg(); // ファイルポインタの位置を取得（つまりファイルサイズ）
-	ifs_vs.seekg(0, std::ios::beg); // ファイルポインタを先頭に戻す
-
-	// バイナリデータを格納するためのバッファを確保
-	unsigned char* vsbinary_pointer = new unsigned char[filesize];
-
-	ifs_vs.read((char*)vsbinary_pointer, filesize); // バイナリデータを読み込む
-	ifs_vs.close(); // ファイルを閉じる
-
-	// 頂点シェーダーの作成
-	hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
-
-	if (FAILED(hr)) {
-		hal::dout << "Shader_Initialize() : 頂点シェーダーの作成に失敗しました" << std::endl;
-		delete[] vsbinary_pointer; // メモリリークしないようにバイナリデータのバッファを解放
-		return false;
-	}
-
-
-	// 頂点レイアウトの定義
-	D3D11_INPUT_ELEMENT_DESC layout[] = {  // GPUに正しくデータを送るための設定
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 3要素32bitが入っている。rgbは関係ない。
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "INSTANCE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,  D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCE", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-		{ "INSTANCE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-	};
-
-	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
-
-	// 頂点レイアウトの作成
-	hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayout);
-
-	delete[] vsbinary_pointer; // バイナリデータのバッファを解放
-
-	if (FAILED(hr)) {
-		hal::dout << "Shader_Initialize() : 頂点レイアウトの作成に失敗しました" << std::endl;
+	if (!Shader_LoadShaderVertex3DInstance(&hr))
+	{
 		return false;
 	}
 
@@ -101,7 +65,7 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	buffer_desc.ByteWidth = sizeof(MATRIX); // バッファのサイズ
 	buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // バインドフラグ
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSConstantBuffer);
-	
+
 	buffer_desc.ByteWidth = sizeof(LIGHT);  // directX11には16バイト区切りでなければいけないルールがある。GPU都合。
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pVSLightBuffer);
 
@@ -113,7 +77,7 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	}
 
 	ifs_ps.seekg(0, std::ios::end);
-	filesize = ifs_ps.tellg();
+	std::streamsize filesize = ifs_ps.tellg();
 	ifs_ps.seekg(0, std::ios::beg);
 
 	unsigned char* psbinary_pointer = new unsigned char[filesize];
@@ -154,8 +118,10 @@ void Shader_Finalize()
 	SAFE_RELEASE(g_SamplerState);
 	SAFE_RELEASE(g_pPixelShader);
 	SAFE_RELEASE(g_pVSConstantBuffer);
+	SAFE_RELEASE(g_pVSLightBuffer);
 	SAFE_RELEASE(g_pInputLayout);
 	SAFE_RELEASE(g_pVertexShader);
+	SAFE_RELEASE(g_pVertexShaderInstance);
 }
 
 void Shader_SetMatrix(const MATRIX& matrix)  // gpuに、定数バッファを経由してデータを送る
@@ -190,4 +156,130 @@ void Shader_Begin()
 	// 定数バッファを描画パイプラインに設定(ここを経由して描画してほしい)
 	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer);  // 引数の一個目は、どこからメモリを入れるか設定できる。
 	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
+}
+
+void Shader_SetPipeline(bool isInstance)
+{
+	if (isInstance)
+	{
+		g_pContext->VSSetShader(g_pVertexShaderInstance, nullptr, 0);
+		g_pContext->IASetInputLayout(g_pInputLayoutInstance);  // 入力レイアウト
+	}
+	else
+	{
+		g_pContext->VSSetShader(g_pVertexShader, nullptr, 0);
+		g_pContext->IASetInputLayout(g_pInputLayout);
+	}
+	g_pContext->PSSetShader(g_pPixelShader, nullptr, 0);
+
+	// 定数バッファを描画パイプラインに設定(ここを経由して描画してほしい)
+	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer);  // 引数の一個目は、どこからメモリを入れるか設定できる。
+	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
+}
+
+bool Shader_LoadShaderVertex3D(HRESULT* hr)
+{
+	// 事前コンパイル済み頂点シェーダーの読み込み
+	std::ifstream ifs_vs("shaderVertex3D.cso", std::ios::binary);
+
+	if (!ifs_vs) {
+		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました\n\nshader_vertex_3d.cso", "エラー", MB_OK);
+		return false;
+	}
+
+	// ファイルサイズを取得
+	ifs_vs.seekg(0, std::ios::end); // ファイルポインタを末尾に移動
+	std::streamsize filesize = ifs_vs.tellg(); // ファイルポインタの位置を取得（つまりファイルサイズ）
+	ifs_vs.seekg(0, std::ios::beg); // ファイルポインタを先頭に戻す
+
+	// バイナリデータを格納するためのバッファを確保
+	unsigned char* vsbinary_pointer = new unsigned char[filesize];
+
+	ifs_vs.read((char*)vsbinary_pointer, filesize); // バイナリデータを読み込む
+	ifs_vs.close(); // ファイルを閉じる
+
+	// 頂点シェーダーの作成
+	*hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
+
+	if (FAILED(hr)) {
+		hal::dout << "Shader_Initialize() : 頂点シェーダーの作成に失敗しました" << std::endl;
+		delete[] vsbinary_pointer; // メモリリークしないようにバイナリデータのバッファを解放
+		return false;
+	}
+
+
+	// 頂点レイアウトの定義
+	D3D11_INPUT_ELEMENT_DESC layout[] = {  // GPUに正しくデータを送るための設定
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 3要素32bitが入っている。rgbは関係ない。
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
+
+	// 頂点レイアウトの作成
+	*hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayout);
+
+	delete[] vsbinary_pointer; // バイナリデータのバッファを解放
+
+	if (FAILED(hr)) {
+		hal::dout << "Shader_Initialize() : 頂点レイアウトの作成に失敗しました" << std::endl;
+		return false;
+	}
+}
+
+bool Shader_LoadShaderVertex3DInstance(HRESULT* hr)
+{
+// 事前コンパイル済み頂点シェーダーの読み込み
+	std::ifstream ifs_vs("shaderVertex3DInstance.cso", std::ios::binary);
+
+	if (!ifs_vs) {
+		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました\n\nshader_vertex_3d_instance.cso", "エラー", MB_OK);
+		return false;
+	}
+
+	// ファイルサイズを取得
+	ifs_vs.seekg(0, std::ios::end); // ファイルポインタを末尾に移動
+	std::streamsize filesize = ifs_vs.tellg(); // ファイルポインタの位置を取得（つまりファイルサイズ）
+	ifs_vs.seekg(0, std::ios::beg); // ファイルポインタを先頭に戻す
+
+	// バイナリデータを格納するためのバッファを確保
+	unsigned char* vsbinary_pointer = new unsigned char[filesize];
+
+	ifs_vs.read((char*)vsbinary_pointer, filesize); // バイナリデータを読み込む
+	ifs_vs.close(); // ファイルを閉じる
+
+	// 頂点シェーダーの作成
+	*hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
+
+	if (FAILED(hr)) {
+		hal::dout << "Shader_Initialize() : 頂点シェーダーの作成に失敗しました" << std::endl;
+		delete[] vsbinary_pointer; // メモリリークしないようにバイナリデータのバッファを解放
+		return false;
+	}
+
+
+	// 頂点レイアウトの定義
+	D3D11_INPUT_ELEMENT_DESC layout[] = {  // GPUに正しくデータを送るための設定
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },  // 3要素32bitが入っている。rgbは関係ない。
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,     0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+		{ "INSTANCE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,  D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCE", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCE", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "INSTANCE", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+	};
+
+	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
+
+	// 頂点レイアウトの作成
+	*hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayoutInstance);
+
+	delete[] vsbinary_pointer; // バイナリデータのバッファを解放
+
+	if (FAILED(hr)) {
+		hal::dout << "Shader_Initialize() : 頂点レイアウトの作成に失敗しました" << std::endl;
+		return false;
+	}
 }

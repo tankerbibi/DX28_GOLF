@@ -9,40 +9,23 @@
 
 static int g_Texture;
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
-static ID3D11Buffer* g_InstanceBuffer;
 static XMFLOAT3 g_Position;
 
 void ShadowHitCheck();
 
 void InitializeShadow()
 {
-	// インスタンスバッファ生成
-	{
-		D3D11_BUFFER_DESC desc = {};
-		// 1個分のサイズ
-		desc.ByteWidth = sizeof(InstanceData);
-		// 毎フレーム更新するため動的に設定
-		desc.Usage = D3D11_USAGE_DYNAMIC;
-		// 頂点バッファとして扱う
-		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		// CPUから書き込み可能にする
-		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-		DirectXGetDevice()->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
-	}
-
 	// 頂点バッファ生成
 	{
 		D3D11_BUFFER_DESC bd{};
 		bd.Usage = D3D11_USAGE_DYNAMIC;
 		// 1個分のサイズ
-		bd.ByteWidth = sizeof(Vertex);
+		bd.ByteWidth = sizeof(Vertex) * 4;
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer);
 	}
-
 
 	// 頂点バッファにデータを設定
 	{
@@ -81,7 +64,6 @@ void InitializeShadow()
 void FinalizeShadow()
 {
 	SAFE_RELEASE(g_VertexBuffer);
-	SAFE_RELEASE(g_InstanceBuffer);
 }
 
 void UpdateShadow()
@@ -95,52 +77,35 @@ void DrawShadow()
 
 	// テクスチャ設定
 	ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
-	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
-	
-	// バッファをロック
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	DirectXGetDeviceContext()->Map(g_InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-	auto* data = (InstanceData*)mappedResource.pData;
-
-	XMMATRIX world = XMMatrixIdentity();
-	world *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
-	world *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
-	// データを入れる
-	data[0].worldMatrix = world;
-
-	DirectXGetDeviceContext()->Unmap(g_InstanceBuffer, 0);
+	pContext->PSSetShaderResources(0, 1, &texture);
 
 	// 頂点バッファ設定
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	DirectXGetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
-
-	// インスタンスバッファ設定
-	UINT instanceStride = sizeof(InstanceData);
-	UINT instanceOffset = 0;
-	DirectXGetDeviceContext()->IASetVertexBuffers(1, 1, &g_InstanceBuffer, &instanceStride, &instanceOffset);
+	pContext->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
 
 	// プリミティブトポロジ設定
-	DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） つまりZの書き方
+	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） つまりZの書き方
 
 	// Identityは一番最初にしなければならない。
-	XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-	XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	MATRIX matrix;
+	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	matrix.matrixWorld = XMMatrixIdentity();
+
+	matrix.matrixWorld *= XMMatrixScaling(5.0f, 1.0f, 5.0f);
+	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
 
 	// ビューマトリクス
-	matrix *= GetCameraViewMatrix();
+	matrix.matrix *= GetCameraViewMatrix();
 
 	// プロジェクションマトリクス
-	matrix *= GetCameraProjectionMatrix();
+	matrix.matrix *= GetCameraProjectionMatrix();
 
 	// 頂点シェーダーに変換行列を設定
-	Shader_SetMatrix({ matrix, matrixWorld });
+	Shader_SetMatrix(matrix);
 
 	// ポリゴン描画
-	// pContext()->Draw(4, 0);
-
-	DirectXGetDeviceContext()->DrawInstanced(4, 1, 0, 0);
+	pContext->Draw(4, 0);
 }
 
 void SetShadowPosition(XMFLOAT3 position)

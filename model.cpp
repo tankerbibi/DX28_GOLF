@@ -182,7 +182,7 @@ void ModelDraw(MODEL* model)
 	}
 }
 
-void ModelDrawInstanced(MODEL* model, UINT instanceCount)
+void ModelDrawInstanced(MODEL* model, ID3D11Buffer* pInstanceBuffer,UINT instanceCount)
 {
 	if (model == nullptr || instanceCount == 0) return;
 
@@ -209,7 +209,7 @@ void ModelDrawInstanced(MODEL* model, UINT instanceCount)
 		context->IASetIndexBuffer(model->IndexBuffer[m], DXGI_FORMAT_R32_UINT, 0);
 
 		// スロット1にインスタンスバッファを設定
-		ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
+		//ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
 		UINT instanceStride = sizeof(InstanceData);
 		UINT instanceOffset = 0;
 		context->IASetVertexBuffers(1, 1, &pInstanceBuffer, &instanceStride, &instanceOffset);

@@ -29,7 +29,9 @@ enum BALL_STATE
 static BALL_STATE g_State;
 static int g_StateCount;
 
-static constexpr float g_BallRadius = 0.5f;
+static ID3D11Buffer* g_InstanceBuffer;
+
+static constexpr float g_BallRadius = 0.25f;
 
 void BallHitCheck();
 void MoveBall();
@@ -46,6 +48,18 @@ void InitializeBall()
 	g_StateCount = 0;
 
 	ResetTrailPosition(g_Position);
+
+	//D3D11_BUFFER_DESC desc = {};
+	//// 4,000個分のサイズ
+	//desc.ByteWidth = sizeof(InstanceData) * blockMax;
+	//// 毎フレーム更新するため動的に設定
+	//desc.Usage = D3D11_USAGE_DYNAMIC;
+	//// 頂点バッファとして扱う
+	//desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	//// CPUから書き込み可能にする
+	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	//DirectXGetDevice()->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
 }
 
 void FinalizeBall()
@@ -196,31 +210,15 @@ void MoveBall()
 
 void DrawBall()
 {
-	ID3D11DeviceContext* context = DirectXGetDeviceContext();
-	ID3D11Buffer* pInstanceBuffer = GetInstanceBuffer();
-
-	// バッファをロック
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	context->Map(pInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-	InstanceData* data = (InstanceData*)mappedResource.pData;
-
-	XMMATRIX world = XMMatrixIdentity();
-
-	world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	world *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
-	world *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
-
-	data[0].worldMatrix = world;
-
-	context->Unmap(pInstanceBuffer, 0);
-	
-
 	MATRIX commonMatrices;
 	// 行列を作成　float 4 x 4
 	commonMatrices.matrix = XMMatrixIdentity();
 	// 行列を作成　float 4 x 4
 	commonMatrices.matrixWorld = XMMatrixIdentity();
+
+	commonMatrices.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	commonMatrices.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
+	commonMatrices.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
 
 	// ビューマトリクス
 	commonMatrices.matrix *= GetCameraViewMatrix();
@@ -229,7 +227,7 @@ void DrawBall()
 	
 	Shader_SetMatrix(commonMatrices);
 
-	ModelDrawInstanced(g_Model, 1);
+	ModelDraw(g_Model);
 }
 
 XMFLOAT3 GetBallPosition()

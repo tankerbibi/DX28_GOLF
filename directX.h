@@ -46,7 +46,4 @@ void Present(void);
 
 void SetDepthEnable(bool depthEnable);
 
-void CreateInstanceBuffer(unsigned int maxInstanceCount);
-ID3D11Buffer* GetInstanceBuffer();
-
 #endif
