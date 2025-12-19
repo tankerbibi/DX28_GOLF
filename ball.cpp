@@ -38,7 +38,7 @@ void MoveBall();
 
 void InitializeBall()
 {
-	g_Model = ModelLoad("asset\\model\\Ball.fbx");
+	g_Model = ModelLoad("asset\\model\\Rocket.fbx");
 	g_Position = {0.0f, 10.0f, 0.0f};
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
@@ -210,15 +210,18 @@ void MoveBall()
 
 void DrawBall()
 {
+
 	MATRIX commonMatrices;
 	// 行列を作成　float 4 x 4
 	commonMatrices.matrix = XMMatrixIdentity();
 	// 行列を作成　float 4 x 4
 	commonMatrices.matrixWorld = XMMatrixIdentity();
 
-	commonMatrices.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	commonMatrices.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
 	commonMatrices.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
 	commonMatrices.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
+
+	commonMatrices.matrix = commonMatrices.matrixWorld;
 
 	// ビューマトリクス
 	commonMatrices.matrix *= GetCameraViewMatrix();

@@ -109,6 +109,7 @@ void DrawGame()
 	light.lightDirection = g_LightDirection;
 	Shader_SetLight(light);
 
+	Shader_SetPipeline(false);
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
 
 	Shader_SetPipeline(true);
@@ -125,10 +126,12 @@ void DrawGame()
 
 	DrawShadow();
 
+	Shader_SetPipeline(true);
 	DrawTrail();
 	// 先にトレイルを描画しちゃえば、zバッファなんて関係ない。
 	// DrawGirl();
 	DrawEffect();
+	Shader_SetPipeline(false);
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

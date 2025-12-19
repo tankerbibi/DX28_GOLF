@@ -32,7 +32,6 @@ void UpdateGoal()
 
 void DrawGoal()
 {
-	Shader_Begin();  // シェーダーの設定
 	// 頂点シェーダーに変換行列を設定
 
 	MATRIX matrix;

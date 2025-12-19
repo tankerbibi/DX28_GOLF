@@ -76,17 +76,27 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,  // ‚P”N¶‚Ì‚Éì‚Á‚Ä‚¢‚½mainŠÖ
 	ShowWindow(g_HWnd, SW_SHOW /*nCmdShow*/);
 	UpdateWindow(g_HWnd);
 
-	DWORD dwExecLastTime;
-	DWORD dwFPSLastTime;
-	DWORD dwCurrentTime;
-	DWORD dwFrameCount;
 
-	timeBeginPeriod(1);  // ¸“x‚ ‚°‚éB
-	dwExecLastTime = dwFPSLastTime = timeGetTime();
-	dwCurrentTime = dwFrameCount = 0;
+	LARGE_INTEGER queryPerformanceFrequency;
+	QueryPerformanceFrequency(&queryPerformanceFrequency);
 
+	LARGE_INTEGER queryPerformanceCounter;
+	QueryPerformanceCounter(&queryPerformanceCounter);
+	// LONGLONG lastTime = queryPerformanceCounter.QuadPart;
+
+	LARGE_INTEGER freq, lastTime;
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&lastTime);
+
+	double targetFrameTime = 1.0 / 60.0;
+	double accumulator = 0.0;
+
+	int dwFrameCount = 0;
 	/*ƒƒbƒZ[ƒWƒ‹[ƒv*/ //ƒvƒŒƒCƒ„[‚Ì“ü—Í‚àƒƒbƒZ[ƒW‚Å‚ ‚éB
 	MSG msg;
+
+	DWORD dwCurrentTime;
+	DWORD dwExecLastFpsUpdateTime = 0;
 
 	do {
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -96,30 +106,38 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,  // ‚P”N¶‚Ì‚Éì‚Á‚Ä‚¢‚½mainŠÖ
 		}
 		else
 		{
-			dwCurrentTime = timeGetTime();  // ƒpƒtƒH[ƒ}ƒ“ƒXƒJƒEƒ“ƒg‚Æ‚¢‚¤A‚³‚ç‚É×‚©‚¢¸“x‚ÌŠÖ”‚à‘¶İ‚·‚éB
+			LARGE_INTEGER currentTime;
+			QueryPerformanceCounter(&currentTime);
+
+			double deltaTime = static_cast<double>(currentTime.QuadPart - lastTime.QuadPart) / freq.QuadPart;
+			lastTime = currentTime;
+
+			accumulator += deltaTime;
+
+			if (accumulator >= targetFrameTime)
+			{
+				Update();
+				Draw();
+
+				accumulator = 0.0;
+
+				dwFrameCount++;
+			}
+
 
 			dwCurrentTime = timeGetTime();
-			if ((dwCurrentTime - dwFPSLastTime) >= 1000)
-			{
-#ifdef _DEBUG
-				g_CountFPS = dwFrameCount;
-#endif
 
-				dwFPSLastTime = dwCurrentTime;
-				dwFrameCount = 0;
-			}
-			if ((dwCurrentTime - dwExecLastTime) >= (1000 / 60))  // fps@‚U‚O•b‚ğ}‚Á‚Ä‚¢‚é
+			if ((dwCurrentTime - dwExecLastFpsUpdateTime) >= 1000)
 			{
-				dwExecLastTime = dwCurrentTime;
+				dwExecLastFpsUpdateTime = dwCurrentTime;
+				g_CountFPS = dwFrameCount;
+				dwExecLastFpsUpdateTime = dwCurrentTime;
+				dwFrameCount = 0;
 #ifdef _DEBUG
 				wsprintf(g_DebugStr, TITLE);
 				wsprintf(&g_DebugStr[strlen(g_DebugStr)], "FPS:%d", g_CountFPS);
 				SetWindowText(g_HWnd, g_DebugStr);  // “r’†‚Åƒ^ƒCƒgƒ‹ƒo[‚ğ•Ï‚¦‚é‚±‚Æ‚ª‚Å‚«‚é‚æI
 #endif
-				Update();
-				Draw();
-
-				dwFrameCount++;
 			}
 
 		}

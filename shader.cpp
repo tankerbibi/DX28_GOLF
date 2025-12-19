@@ -33,12 +33,11 @@ static ID3D11SamplerState* g_SamplerState = nullptr;
 static ID3D11Device* g_pDevice = nullptr;
 static ID3D11DeviceContext* g_pContext = nullptr;
 
-bool Shader_LoadShaderVertex3D(HRESULT* hr);
-bool Shader_LoadShaderVertex3DInstance(HRESULT* hr);
+bool Shader_LoadShaderVertex3D();
+bool Shader_LoadShaderVertex3DInstance();
 
 bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	HRESULT hr; // 戻り値格納用
 
 	// デバイスとデバイスコンテキストのチェック
 	if (!pDevice || !pContext) {
@@ -50,12 +49,12 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	g_pDevice = pDevice;
 	g_pContext = pContext;
 
-	if (!Shader_LoadShaderVertex3D(&hr))
+	if (!Shader_LoadShaderVertex3D())
 	{
 		return false;
 	}
 
-	if (!Shader_LoadShaderVertex3DInstance(&hr))
+	if (!Shader_LoadShaderVertex3DInstance())
 	{
 		return false;
 	}
@@ -83,6 +82,8 @@ bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	unsigned char* psbinary_pointer = new unsigned char[filesize];
 	ifs_ps.read((char*)psbinary_pointer, filesize);
 	ifs_ps.close();
+
+	HRESULT hr; // 戻り値格納用
 
 	// ピクセルシェーダーの作成
 	hr = g_pDevice->CreatePixelShader(psbinary_pointer, filesize, nullptr, &g_pPixelShader);
@@ -120,6 +121,7 @@ void Shader_Finalize()
 	SAFE_RELEASE(g_pVSConstantBuffer);
 	SAFE_RELEASE(g_pVSLightBuffer);
 	SAFE_RELEASE(g_pInputLayout);
+	SAFE_RELEASE(g_pInputLayoutInstance);
 	SAFE_RELEASE(g_pVertexShader);
 	SAFE_RELEASE(g_pVertexShaderInstance);
 }
@@ -177,8 +179,9 @@ void Shader_SetPipeline(bool isInstance)
 	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
 }
 
-bool Shader_LoadShaderVertex3D(HRESULT* hr)
+bool Shader_LoadShaderVertex3D()
 {
+	HRESULT hr;
 	// 事前コンパイル済み頂点シェーダーの読み込み
 	std::ifstream ifs_vs("shaderVertex3D.cso", std::ios::binary);
 
@@ -199,7 +202,7 @@ bool Shader_LoadShaderVertex3D(HRESULT* hr)
 	ifs_vs.close(); // ファイルを閉じる
 
 	// 頂点シェーダーの作成
-	*hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
+	hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
 
 	if (FAILED(hr)) {
 		hal::dout << "Shader_Initialize() : 頂点シェーダーの作成に失敗しました" << std::endl;
@@ -218,7 +221,7 @@ bool Shader_LoadShaderVertex3D(HRESULT* hr)
 	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
 
 	// 頂点レイアウトの作成
-	*hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayout);
+	hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayout);
 
 	delete[] vsbinary_pointer; // バイナリデータのバッファを解放
 
@@ -226,10 +229,13 @@ bool Shader_LoadShaderVertex3D(HRESULT* hr)
 		hal::dout << "Shader_Initialize() : 頂点レイアウトの作成に失敗しました" << std::endl;
 		return false;
 	}
+
+	return true;
 }
 
-bool Shader_LoadShaderVertex3DInstance(HRESULT* hr)
+bool Shader_LoadShaderVertex3DInstance()
 {
+	HRESULT hr;
 // 事前コンパイル済み頂点シェーダーの読み込み
 	std::ifstream ifs_vs("shaderVertex3DInstance.cso", std::ios::binary);
 
@@ -250,7 +256,7 @@ bool Shader_LoadShaderVertex3DInstance(HRESULT* hr)
 	ifs_vs.close(); // ファイルを閉じる
 
 	// 頂点シェーダーの作成
-	*hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShader);
+	hr = g_pDevice->CreateVertexShader(vsbinary_pointer, filesize, nullptr, &g_pVertexShaderInstance);
 
 	if (FAILED(hr)) {
 		hal::dout << "Shader_Initialize() : 頂点シェーダーの作成に失敗しました" << std::endl;
@@ -274,7 +280,7 @@ bool Shader_LoadShaderVertex3DInstance(HRESULT* hr)
 	UINT num_elements = ARRAYSIZE(layout); // 配列の要素数を取得
 
 	// 頂点レイアウトの作成
-	*hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayoutInstance);
+	hr = g_pDevice->CreateInputLayout(layout, num_elements, vsbinary_pointer, filesize, &g_pInputLayoutInstance);
 
 	delete[] vsbinary_pointer; // バイナリデータのバッファを解放
 
@@ -282,4 +288,6 @@ bool Shader_LoadShaderVertex3DInstance(HRESULT* hr)
 		hal::dout << "Shader_Initialize() : 頂点レイアウトの作成に失敗しました" << std::endl;
 		return false;
 	}
+
+	return true;
 }
