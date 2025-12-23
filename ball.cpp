@@ -38,7 +38,7 @@ void MoveBall();
 
 void InitializeBall()
 {
-	g_Model = ModelLoad("asset\\model\\Rocket.fbx");
+	g_Model = ModelLoad("asset\\model\\ball.fbx");
 	g_Position = {0.0f, 10.0f, 0.0f};
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  âΩÇ™à·Ç§ÅH
 	g_Rotation = { 0.0f, 0.0f, 0.0f };

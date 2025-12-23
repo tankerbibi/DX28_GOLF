@@ -29,7 +29,7 @@ void InitializeTrail()
 
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer); //g_VertexBufferはGPUのメモリなのでアクセスできない。
 	}
-	g_Texture = TextureLoad(L"asset\\texture\\LightEffect.png");
+	g_Texture = TextureLoad(L"asset\\texture\\shadow.png");
 }
 
 void FinalizeTrail()

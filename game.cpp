@@ -43,7 +43,7 @@ void InitializeGame()
 	g_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
 
 	//BGM再生
-	PlaySound(g_BGM, -1);  // －１で無限示すこの仕様は分かりづらいらしい。
+	// PlaySound(g_BGM, -1);  // －１で無限示すこの仕様は分かりづらいらしい。
 
 	//BGM音量設定
 	SetVolume(g_BGM, 0.2f);

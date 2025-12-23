@@ -43,7 +43,7 @@ void PushBallWithRocket();
 
 void InitializeRocket()
 {
-	g_Model = ModelLoad("asset\\model\\cube.fbx");
+	g_Model = ModelLoad("asset\\model\\Rocket2.fbx");
 	g_Position = { 0.0f, 10.0f, 0.0f };
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
@@ -109,7 +109,7 @@ void DrawRocket()
 	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 	matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);  // 拡大縮小マトリクス
+	matrix.matrixWorld *= XMMatrixScaling(10.0f, 10.0f, 10.0f);  // 拡大縮小マトリクス
 	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
 	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);  // 移動マトリクス。gpuで計算されている。
 
