@@ -160,9 +160,9 @@ void Shader_Begin()
 	g_pContext->VSSetConstantBuffers(1, 1, &g_pVSLightBuffer);
 }
 
-void Shader_SetPipeline(bool isInstance)
+void Shader_SetPipelineInstance(bool on)
 {
-	if (isInstance)
+	if (on)
 	{
 		g_pContext->VSSetShader(g_pVertexShaderInstance, nullptr, 0);
 		g_pContext->IASetInputLayout(g_pInputLayoutInstance);  // 入力レイアウト

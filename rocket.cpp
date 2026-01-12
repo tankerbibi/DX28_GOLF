@@ -9,6 +9,7 @@
 #include "main.h"
 #include "ball.h"
 #include "effect.h"
+#include "breakableBlock.h"
 
 
 enum ROCKET_STATE
@@ -61,6 +62,9 @@ void FinalizeRocket()
 
 void UpdateRocket()
 {
+	// ロケットの爆発状態用のブール
+	static bool rocketStateExplodedFlg = false;
+
 	if (GetCameraMode() == CameraMode::BALL || GetCameraMode() == CameraMode::DEBUG) return;
 	switch (rocketState)
 	{
@@ -79,12 +83,19 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
-			SetCameraMode(CameraMode::LOOKBALL);
-			PushBallWithRocket();
 		}
 		break;
 	case ROCKET_STATE_EXPLODED:
 		stateCount++;
+		if (stateCount > 60)
+		{
+			if (rocketStateExplodedFlg == false)
+			{
+				SetCameraMode(CameraMode::LOOKBALL);
+				PushBallWithRocket();
+				rocketStateExplodedFlg = true;
+			}
+		}
 		
 		if (stateCount > 120)
 		{
@@ -92,6 +103,7 @@ void UpdateRocket()
 			g_Position = { 0.0f, 10.0f, 0.0f };
 			rocketState = ROCKET_STATE_START;
 			SetCameraMode(CameraMode::ROCKET);
+			rocketStateExplodedFlg = false;
 		}
 		break;
 	default:
@@ -269,14 +281,21 @@ void RocketHitCheck()
 // ロケットがブロックに当たったらtrueを返す関数
 bool RocketIsHit()
 {
+	// 1. 破壊可能ブロックとの判定を先に行う
+	if (ResolveBreakableBlockCollision(g_Position, g_RocketRadius))
+	{
+		return true; // 破壊ブロックに当たったので爆発へ
+	}
+
 	BLOCK* block = GetFieldBlock();
 	float blockRadius = 0.5f;
 
-
-	float e = 0.5f;  // 跳ね返り係数
+	// 跳ね返り係数
+	float e = 0.5f;
 
 	for (int i = 0; i < blockMax; i++)
 	{
+		if (block[i].name != "block") continue;
 		// 横方向の当たり判定処理
 		if (block[i].pos.y - blockRadius < g_Position.y &&
 			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
@@ -343,7 +362,6 @@ bool RocketIsHit()
 							// 上
 							g_Position.y = block[i].pos.y + blockRadius + g_RocketRadius;
 							return true;
-
 						}
 						else
 						{
@@ -388,5 +406,4 @@ void PushBallWithRocket()
 		AddForce({ force.x * power, force.y * power + 5.0f, force.z * power});
 		CreateEffect(g_Position);
 	}
-
 }

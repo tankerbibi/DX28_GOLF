@@ -14,6 +14,7 @@
 #include "effect.h"
 #include "trail.h"
 #include "shadow.h"
+#include "breakableBlock.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -34,6 +35,7 @@ void InitializeGame()
 	InitializeEffect();
 	InitializeTrail();
 	InitializeShadow();
+	InitializeBreakableBlock();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -64,6 +66,7 @@ void FinalizeGame()
 	FinalizeEffect();
 	FinalizeTrail();
 	FinalizeShadow();
+	FinalizeBreakableBlock();
 }
 
 void UpdateGame()
@@ -88,6 +91,7 @@ void UpdateGame()
 		UpdateEffect();
 		UpdateTrail();
 		UpdateShadow();
+		UpdateBreakableBlock();
 
 		/*if (g_LightDirection.y > 1.0f)
 		{
@@ -109,13 +113,13 @@ void DrawGame()
 	light.lightDirection = g_LightDirection;
 	Shader_SetLight(light);
 
-	Shader_SetPipeline(false);
 	DrawCamera();  // カメラは一番最初に描画関連のデータを更新しなければならない。
 
-	Shader_SetPipeline(true);
+	Shader_SetPipelineInstance(true);
 	DrawField();
 
-	Shader_SetPipeline(false);
+	Shader_SetPipelineInstance(false);
+	DrawBreakableBlock();
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
@@ -126,12 +130,13 @@ void DrawGame()
 
 	DrawShadow();
 
-	Shader_SetPipeline(true);
+	Shader_SetPipelineInstance(true);
 	DrawTrail();
-	// 先にトレイルを描画しちゃえば、zバッファなんて関係ない。
 	// DrawGirl();
 	DrawEffect();
-	Shader_SetPipeline(false);
+
+
+	Shader_SetPipelineInstance(false);
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

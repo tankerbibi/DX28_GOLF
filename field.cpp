@@ -4,6 +4,7 @@
 #include "model.h"
 #include "camera.h"
 #include "shader.h"
+#include "breakableBlock.h"
 #include <fstream>  // ファイル読み込み用
 #include <string>
 #include <sstream>
@@ -41,6 +42,33 @@ void InitializeField()
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
 
+	// 破壊可能ブロックを登録
+	for (int type = 0; type < typeMax; type++)
+	{
+		for (int index = 0; index < g_BlockCount; index++)
+		{
+			if (g_Block[index].name == g_ModelName[type])
+			{
+				if (g_ModelName[type] == "block")  // ground
+				{
+
+				}
+				else if (g_ModelName[type] == "tree")  // tree
+				{
+					
+				}
+				else if (g_ModelName[type] == "kirby")  // カービィ
+				{
+
+				}
+				else if (g_ModelName[type] == "breakableBlock")
+				{
+					CreateBreakableBlock(g_Block[index].pos);
+				}
+			}
+		}
+	}
+
 	D3D11_BUFFER_DESC desc = {};
 	// 4,000個分のサイズ
 	desc.ByteWidth = sizeof(InstanceData) * blockMax;
@@ -60,6 +88,7 @@ void FinalizeField()
 	{
 		ModelRelease(g_Model[i]);
 	}
+	SAFE_RELEASE(g_InstanceBuffer);
 }
 
 void UpdateField()
@@ -102,10 +131,7 @@ void DrawField()
 				}
 
 				world *= XMMatrixTranslation(g_Block[index].pos.x, g_Block[index].pos.y, g_Block[index].pos.z);
-
-				// data[drawCount].worldMatrix = XMMatrixTranspose(world);
 				data[drawCount].worldMatrix = world;
-
 				drawCount++;
 			}
 		}
@@ -124,52 +150,6 @@ void DrawField()
 			ModelDrawInstanced(g_Model[type], g_InstanceBuffer, drawCount);
 		}
 	}
-
-	//// blockMax ではなく、実際に読み込んだ g_BlockCount の数だけループを回します。
-	//for (int i = 0; i < g_BlockCount; i++)
-	//{
-	//	MATRIX matrix;
-	//	matrix.matrix = XMMatrixIdentity();
-	//	matrix.matrixWorld = XMMatrixIdentity();
-
-	//	// 元のコードにあった「i == 0 の時だけ広い床」というロジックを Type 0 で判定する形に置き換える
-	//	// ※ UnityでType 0（Floor）としてエクスポートされたブロックが対象
-	//	if (g_Block[i].type == 0)
-	//	{
-	//		matrix.matrixWorld *= XMMatrixScaling(100.0f, 1.0f, 100.0f);
-	//		matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(XM_PI, g_Rotation.y, g_Rotation.z);
-	//		matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
-	//	}
-	//	else
-	//	{
-	//		// カービィ
-	//		if (g_Block[i].type == 2)
-	//		{
-	//			matrix.matrixWorld *= XMMatrixScaling(0.6f, 0.6f, 0.6f);
-	//			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0.0f, 0.0f);
-	//		}
-	//		else // 木や通常のブロック (Type 1 など)
-	//		{
-	//			matrix.matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	//			matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	//		}
-
-	//		// 共通の移動処理
-	//		matrix.matrixWorld *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
-	//	}
-
-	//	matrix.matrix = matrix.matrixWorld;
-	//	matrix.matrix *= GetCameraViewMatrix();
-	//	matrix.matrix *= GetCameraProjectionMatrix();
-
-	//	Shader_SetMatrix(matrix);
-
-	//	int modelIndex = g_Block[i].type;
-	//	if (modelIndex >= 0 && modelIndex < 3)
-	//	{
-	//		ModelDraw(g_Model[modelIndex]);
-	//	}
-	//}
 }
 
 BLOCK* GetFieldBlock()

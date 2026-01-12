@@ -127,6 +127,7 @@
   <ItemGroup>
     <ClInclude Include="animationFbx.h" />
     <ClInclude Include="ball.h" />
+    <ClInclude Include="breakableBlock.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="debug_ostream.h" />
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="animationFbx.cpp" />
     <ClCompile Include="ball.cpp" />
+    <ClCompile Include="breakableBlock.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cube.cpp" />
     <ClCompile Include="debug_ostream.cpp" />
