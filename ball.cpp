@@ -241,7 +241,7 @@ XMFLOAT3 GetBallPosition()
 void BallHitCheck()
 {
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 0.5f;
+	float blockRadius = 1.5f;
 	
 
 	float e = 0.5f;  // ’µ‚Ë•Ô‚èŒW”

@@ -29,13 +29,17 @@ static XMFLOAT3 g_TargetPos;
 static float g_Pitch;
 static float g_Yaw;
 
-static constexpr float g_RocketRadius = 0.2f;
+static constexpr float g_RocketRadius = 1.0f;
 
 static ROCKET_STATE rocketState;
 static int stateCount;
 
-static constexpr float explosionMaxPower = 30.0f;
-static constexpr float explosionLength = 20.0f;
+static XMFLOAT3 g_RocketStartPosition;
+
+static constexpr float explosionMaxPower = 20.0f;
+static constexpr float explosionRadius = 5.0f;
+
+static bool isDraw;
 
 void RocketHitCheck();
 bool RocketIsHit();
@@ -49,10 +53,12 @@ void InitializeRocket()
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
 	// g_TargetPos = { g_Pos.x, , 0.0f };
+	g_RocketStartPosition = { 0.0f, 10.0f, 0.0f };
 	g_Pitch = 0.0f;
 	g_Yaw = 0.0f;
 	rocketState = ROCKET_STATE_MOVE;
 	stateCount = 0;
+	isDraw = true;
 }
 
 void FinalizeRocket()
@@ -83,11 +89,13 @@ void UpdateRocket()
 		if (RocketIsHit())
 		{
 			rocketState = ROCKET_STATE_EXPLODED;
+			isDraw = false;
 		}
 		break;
 	case ROCKET_STATE_EXPLODED:
+		CreateEffectScale(g_Position, { explosionRadius, explosionRadius, explosionRadius });
 		stateCount++;
-		if (stateCount > 60)
+		if (stateCount > 30)
 		{
 			if (rocketStateExplodedFlg == false)
 			{
@@ -99,11 +107,14 @@ void UpdateRocket()
 		
 		if (stateCount > 120)
 		{
+			isDraw = true;
 			stateCount = 0;
-			g_Position = { 0.0f, 10.0f, 0.0f };
+			g_Position = g_RocketStartPosition;
 			rocketState = ROCKET_STATE_START;
 			SetCameraMode(CameraMode::ROCKET);
 			rocketStateExplodedFlg = false;
+			g_Pitch = 0.0f;
+			g_Yaw = 0.0f;
 		}
 		break;
 	default:
@@ -113,6 +124,7 @@ void UpdateRocket()
 
 void DrawRocket()
 {
+	if (isDraw == false) return;
 	Shader_Begin();  // シェーダーの設定
 	// 頂点シェーダーに変換行列を設定
 
@@ -137,6 +149,11 @@ void DrawRocket()
 XMFLOAT3 GetRocketPos()
 {
 	return g_Position;
+}
+
+void SetRocketStartPosition(XMFLOAT3 newPosition)
+{
+	g_RocketStartPosition = newPosition;
 }
 
 float GetRocketYaw()
@@ -391,7 +408,9 @@ void PushBallWithRocket()
 		+ (ballPosition.y - g_Position.y) * (ballPosition.y - g_Position.y)
 		+ (ballPosition.z - g_Position.z) * (ballPosition.z - g_Position.z));
 
-	float power = explosionMaxPower * (1.0f - (length / 20.0f));
+	float ratio = length / 20.0f;
+	if (ratio > 1.0f) ratio = 1.0f; // 1.0を超えないようにする
+	float power = explosionMaxPower * (1.0f - ratio);
 
 	if (length > 1.0f)
 	{
@@ -400,10 +419,9 @@ void PushBallWithRocket()
 		force.z /= length;
 	}
 
-	if (length <= 20.0f)
+	if (length <= explosionRadius)
 	{
 		// ボールに力を加える。
 		AddForce({ force.x * power, force.y * power + 5.0f, force.z * power});
-		CreateEffect(g_Position);
 	}
 }

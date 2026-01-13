@@ -9,10 +9,18 @@
 #include <string>
 #include <sstream>
 
-static constexpr unsigned int typeMax = 5;
+static constexpr unsigned int typeMax = 6;
 
 // 固定配列を維持
 static BLOCK g_Block[blockMax]{};
+
+struct FieldAssetData
+{
+	std::string modelName;
+	MODEL* model;
+};
+
+FieldAssetData g_FieldData[typeMax];
 
 static MODEL* g_Model[typeMax]{};
 static std::string g_ModelName[typeMax];
@@ -35,10 +43,11 @@ void InitializeField()
 	g_ModelName[0] = "block";
 	g_ModelName[1] = "tree";
 	g_ModelName[2] = "kirby";
+	g_ModelName[3] = "breakableBlock";
 	g_Model[0] = ModelLoad("asset\\model\\cube.fbx");
 	g_Model[1] = ModelLoad("asset\\model\\tree.fbx");
 	g_Model[2] = ModelLoad("asset\\model\\Kirby2.fbx");
-
+	g_Model[3] = ModelLoad("asset\\model\\rocket.fbx");
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
 

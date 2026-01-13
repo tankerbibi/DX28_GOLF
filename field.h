@@ -7,7 +7,7 @@ struct BLOCK
 	std::string name;
 };
 
-static constexpr unsigned int blockMax = 4000;
+static constexpr unsigned int blockMax = 40000;
 
 void InitializeField();
 void FinalizeField();

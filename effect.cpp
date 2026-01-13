@@ -11,6 +11,7 @@ struct EFFECT
 {
 	bool enable;
 	XMFLOAT3 position;
+	XMFLOAT3 scale;
 	int frame;
 };
 
@@ -73,6 +74,10 @@ void InitializeEffect()
 	for (int i = 0; i < 100; i++)
 	{
 		g_Effect[i].enable = false;
+		g_Effect[i].position = { 0.0f, 0.0f, 0.0f };
+		g_Effect[i].scale = { 0.0f, 0.0f, 0.0f };
+		g_Effect[i].frame = 0;
+		
 	}
 }
 
@@ -172,7 +177,7 @@ void DrawEffect()
 		XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-		matrixWorld += XMMatrixScaling(5.0f, 5.0f,5.0f);
+		matrixWorld *= XMMatrixScaling(g_Effect[i].scale.x, g_Effect[i].scale.y, g_Effect[i].scale.z);
 
 		// 回転マトリクス（ビルボード処理）
 		matrixWorld *= invView;
@@ -206,6 +211,22 @@ void CreateEffect(XMFLOAT3 position)
 		if (g_Effect[i].enable == false)
 		{
 			g_Effect[i].enable = true;
+			g_Effect[i].scale = { 1.0f, 1.0f, 1.0f };
+			g_Effect[i].position = position;
+			g_Effect[i].frame = 0;
+			break;
+		}
+	}
+}
+
+void CreateEffectScale(XMFLOAT3 position, XMFLOAT3 scale)
+{
+	for (int i = 0; i < 100; i++)
+	{
+		if (g_Effect[i].enable == false)
+		{
+			g_Effect[i].enable = true;
+			g_Effect[i].scale = scale;
 			g_Effect[i].position = position;
 			g_Effect[i].frame = 0;
 			break;

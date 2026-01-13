@@ -95,6 +95,8 @@ void DrawShadow()
 	matrix.matrixWorld *= XMMatrixScaling(5.0f, 1.0f, 5.0f);
 	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
 
+	matrix.matrix = matrix.matrixWorld;
+
 	// ビューマトリクス
 	matrix.matrix *= GetCameraViewMatrix();
 
@@ -125,7 +127,7 @@ void ShadowHitCheck()
 		if (block[i].pos.z - blockRadius < g_Position.z &&
 			g_Position.z < block[i].pos.z + blockRadius)
 		{
-			if (block[i].pos.x - blockRadius < g_Position.z &&
+			if (block[i].pos.x - blockRadius < g_Position.x &&
 				g_Position.x < block[i].pos.x + blockRadius)
 			{
 				if (block[i].pos.y + blockRadius < g_Position.y)

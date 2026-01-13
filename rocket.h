@@ -10,3 +10,4 @@ float GetRocketYaw();
 float GetRocketPitch();
 
 XMFLOAT3 GetRocketPos();
+void SetRocketStartPosition(XMFLOAT3 newPosition);
