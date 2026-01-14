@@ -9,7 +9,7 @@
 #include <string>
 #include <sstream>
 
-static constexpr unsigned int typeMax = 6;
+static constexpr unsigned int typeMax = 4;
 
 // 固定配列を維持
 static BLOCK g_Block[blockMax]{};
@@ -179,28 +179,26 @@ void LoadFieldData(const char* filename)
 			}
 			else if (seglist[0] == "tree")
 			{
-				value = BLOCKTYPE::BLOCK;
+				value = BLOCKTYPE::TREE;
 			}
 			else if (seglist[0] == "kirby")
 			{
-				value = BLOCKTYPE::BLOCK;
+				value = BLOCKTYPE::KIRBY;
 			}
 			else if (seglist[0] == "breakableBlock")
 			{
-				value = BLOCKTYPE::BLOCK;
+				value = BLOCKTYPE::BREAKABLEBLOCK;
 				CreateBreakableBlock({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
+				continue;
 			}
 
-			if (!(seglist[0] == "breakableBlock"))
-			{
-				// 固定配列にデータを格納
-				g_Block[g_BlockCount].blockType = value;
-				g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
-				g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
-				g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
+			// 固定配列にデータを格納
+			g_Block[g_BlockCount].blockType = value;
+			g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
+			g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
+			g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
 
-				g_BlockCount++; // 読み込んだ数をインクリメント
-			}
+			g_BlockCount++; // 読み込んだ数をインクリメント
 		}
 	}
 

@@ -231,9 +231,12 @@ void ModelDrawInstanced(MODEL* model, ID3D11Buffer* pInstanceBuffer,UINT instanc
 		);
 	}
 	
+
 	// スロット１をnullptrで上書きして、インスタンスバッファの設定を解除する
 	ID3D11Buffer* nullBuffer = nullptr;
 	UINT zeroStride = 0;
 	UINT zeroOffset = 0;
 	context->IASetVertexBuffers(1, 1, &nullBuffer, &zeroStride, &zeroOffset);
+
+	context->IASetVertexBuffers(0, 1, &nullBuffer, &zeroStride, &zeroOffset);
 }
