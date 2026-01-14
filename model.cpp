@@ -238,5 +238,5 @@ void ModelDrawInstanced(MODEL* model, ID3D11Buffer* pInstanceBuffer,UINT instanc
 	UINT zeroOffset = 0;
 	context->IASetVertexBuffers(1, 1, &nullBuffer, &zeroStride, &zeroOffset);
 
-	context->IASetVertexBuffers(0, 1, &nullBuffer, &zeroStride, &zeroOffset);
+	context->IASetVertexBuffers(0, 1, &nullBuffer, &zeroStride, &zeroOffset);  // スロット１の初期化はあってもなくても変わらない。
 }
