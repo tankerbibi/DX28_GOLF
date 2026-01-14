@@ -312,7 +312,7 @@ bool RocketIsHit()
 
 	for (int i = 0; i < blockMax; i++)
 	{
-		if (block[i].name != "block") continue;
+		if (block[i].blockType != BLOCKTYPE::BLOCK) continue;
 		// ‰¡•ûŒü‚Ì“–‚½‚è”»’èˆ—
 		if (block[i].pos.y - blockRadius < g_Position.y &&
 			g_Position.y < block[i].pos.y + blockRadius)  // ‰¡‚©‚ç‚Ý‚½}‚Ìó‹µ‚ðì‚èo‚µ‚Ä‚¢‚éII

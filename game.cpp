@@ -24,6 +24,7 @@ static XMFLOAT3 g_LightDirection;
 void InitializeGame()
 {
 	g_Pause = false;
+	InitializeBreakableBlock();
 	InitializeCamera();
 	InitializeScore();
 	InitializeStroke();
@@ -35,7 +36,6 @@ void InitializeGame()
 	InitializeEffect();
 	InitializeTrail();
 	InitializeShadow();
-	InitializeBreakableBlock();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -117,9 +117,9 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(true);
 	DrawField();
+	DrawBreakableBlock();
 
 	Shader_SetPipelineInstance(false);
-	DrawBreakableBlock();
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
@@ -130,13 +130,9 @@ void DrawGame()
 
 	DrawShadow();
 
-	Shader_SetPipelineInstance(true);
 	DrawTrail();
 	// DrawGirl();
 	DrawEffect();
-
-
-	Shader_SetPipelineInstance(false);
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

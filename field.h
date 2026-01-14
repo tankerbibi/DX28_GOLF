@@ -1,10 +1,21 @@
 #pragma once
 #include <string>
 
+enum class BLOCKTYPE
+{
+	BLOCK,
+	TREE,
+	KIRBY,
+	BREAKABLEBLOCK,
+	COUNT,
+};
+
+
+
 struct BLOCK
 {
 	XMFLOAT3 pos;
-	std::string name;
+	BLOCKTYPE blockType;
 };
 
 static constexpr unsigned int blockMax = 40000;

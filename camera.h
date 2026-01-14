@@ -22,3 +22,5 @@ XMFLOAT3 GetCameraPosition();
 
 CameraMode GetCameraMode();
 void SetCameraMode(CameraMode newCameraMode);
+
+void SetCameraShake(float shake);

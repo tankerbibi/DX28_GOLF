@@ -313,6 +313,7 @@ void BallHitCheck()
 							if (g_Velocity.y < -3.0f)
 							{
 								CreateEffect(g_Position);
+								SetCameraShake(1.0f);
 							}
 						}
 						else

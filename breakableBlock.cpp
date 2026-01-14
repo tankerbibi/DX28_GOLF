@@ -103,6 +103,7 @@ void DrawBreakableBlock()
 
 		// ワールド行列は個別に計算したので、ここではIdentityにしておく
 		commonMatrices.matrixWorld = XMMatrixIdentity();
+		commonMatrices.matrix = XMMatrixIdentity();
 
 		// ビュー・プロジェクション行列を計算
 		commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
@@ -124,7 +125,7 @@ void CreateBreakableBlock(XMFLOAT3 position)
 		g_BreakableBlock[i].position = position;
 		g_BreakableBlock[i].health = maxHealth;
 		g_BreakableBlock[i].use = true;
-			break;
+		break;
 	}
 }
 

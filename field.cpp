@@ -16,14 +16,18 @@ static BLOCK g_Block[blockMax]{};
 
 struct FieldAssetData
 {
-	std::string modelName;
+	BLOCKTYPE blockType;
 	MODEL* model;
 };
 
-FieldAssetData g_FieldData[typeMax];
+FieldAssetData g_FieldData[typeMax] = 
+{
+	{BLOCKTYPE::BLOCK, nullptr},
+	{BLOCKTYPE::TREE, nullptr},
+	{BLOCKTYPE::KIRBY, nullptr},
+	{BLOCKTYPE::BREAKABLEBLOCK, nullptr},
+};
 
-static MODEL* g_Model[typeMax]{};
-static std::string g_ModelName[typeMax];
 
 // 実際にロードされたブロックの数を保持する変数
 static unsigned int g_BlockCount = 0;
@@ -40,43 +44,18 @@ BLOCK* GetFieldBlock();
 
 void InitializeField()
 {	
-	g_ModelName[0] = "block";
-	g_ModelName[1] = "tree";
-	g_ModelName[2] = "kirby";
-	g_ModelName[3] = "breakableBlock";
-	g_Model[0] = ModelLoad("asset\\model\\cube.fbx");
-	g_Model[1] = ModelLoad("asset\\model\\tree.fbx");
-	g_Model[2] = ModelLoad("asset\\model\\Kirby2.fbx");
-	g_Model[3] = ModelLoad("asset\\model\\rocket.fbx");
+	FieldAssetData g_FieldDataDammy[typeMax] =
+	{
+		{BLOCKTYPE::BLOCK, ModelLoad("asset\\model\\cube.fbx")},
+		{BLOCKTYPE::TREE, ModelLoad("asset\\model\\tree.fbx")},
+		{BLOCKTYPE::KIRBY,  ModelLoad("asset\\model\\Kirby2.fbx")},
+		{BLOCKTYPE::BREAKABLEBLOCK,  ModelLoad("asset\\model\\rocket.fbx")},
+	};
+
+	std::swap_ranges(std::begin(g_FieldData), std::end(g_FieldData), std::begin(g_FieldDataDammy));
+
 	// ここでファイルを読み込む
 	LoadFieldData("asset\\data\\level_data.csv");
-
-	// 破壊可能ブロックを登録
-	for (int type = 0; type < typeMax; type++)
-	{
-		for (int index = 0; index < g_BlockCount; index++)
-		{
-			if (g_Block[index].name == g_ModelName[type])
-			{
-				if (g_ModelName[type] == "block")  // ground
-				{
-
-				}
-				else if (g_ModelName[type] == "tree")  // tree
-				{
-					
-				}
-				else if (g_ModelName[type] == "kirby")  // カービィ
-				{
-
-				}
-				else if (g_ModelName[type] == "breakableBlock")
-				{
-					CreateBreakableBlock(g_Block[index].pos);
-				}
-			}
-		}
-	}
 
 	D3D11_BUFFER_DESC desc = {};
 	// 4,000個分のサイズ
@@ -95,7 +74,7 @@ void FinalizeField()
 {
 	for (int i = 0; i < typeMax; i++)
 	{
-		ModelRelease(g_Model[i]);
+		ModelRelease(g_FieldData[i].model);
 	}
 	SAFE_RELEASE(g_InstanceBuffer);
 }
@@ -109,7 +88,6 @@ void DrawField()
 {
 	ID3D11DeviceContext* context = DirectXGetDeviceContext();
 
-	// (0:cube, 1:tree, 2:Kriby)
 	for (int type = 0; type < typeMax; type++)
 	{
 		// バッファをロック
@@ -120,26 +98,26 @@ void DrawField()
 		// 今回描画する個数
 		int drawCount = 0;
 
-		for (int index = 0; index < g_BlockCount; index++)
+		for (int i = 0; i < g_BlockCount; i++)
 		{
-			if (g_Block[index].name == g_ModelName[type])
+			if (g_Block[i].blockType == g_FieldData[type].blockType)
 			{
 				XMMATRIX world = XMMatrixIdentity();
 
-				if (g_ModelName[type] == "block")  // ground
+				if (g_FieldData[type].blockType == BLOCKTYPE::BLOCK)  // ground
 				{
 					
 				}
-				else if (g_ModelName[type] == "tree")  // tree
+				else if (g_FieldData[type].blockType == BLOCKTYPE::TREE)  // tree
 				{
 					world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 				}
-				else if (g_ModelName[type] == "kirby")  // カービィ
+				else if (g_FieldData[type].blockType == BLOCKTYPE::KIRBY)  // カービィ
 				{
 
 				}
 
-				world *= XMMatrixTranslation(g_Block[index].pos.x, g_Block[index].pos.y, g_Block[index].pos.z);
+				world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
 				data[drawCount].worldMatrix = world;
 				drawCount++;
 			}
@@ -156,7 +134,7 @@ void DrawField()
 			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
 			Shader_SetMatrix(commonMatrices);
 
-			ModelDrawInstanced(g_Model[type], g_InstanceBuffer, drawCount);
+			ModelDrawInstanced(g_FieldData[type].model, g_InstanceBuffer, drawCount);
 		}
 	}
 }
@@ -193,13 +171,36 @@ void LoadFieldData(const char* filename)
 
 		if (seglist.size() >= 4)
 		{
-			// 固定配列にデータを格納
-			g_Block[g_BlockCount].name = seglist[0];     // name
-			g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
-			g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
-			g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
+			BLOCKTYPE value = BLOCKTYPE::BLOCK;
 
-			g_BlockCount++; // 読み込んだ数をインクリメント
+			if (seglist[0] == "block")
+			{
+				value = BLOCKTYPE::BLOCK;
+			}
+			else if (seglist[0] == "tree")
+			{
+				value = BLOCKTYPE::BLOCK;
+			}
+			else if (seglist[0] == "kirby")
+			{
+				value = BLOCKTYPE::BLOCK;
+			}
+			else if (seglist[0] == "breakableBlock")
+			{
+				value = BLOCKTYPE::BLOCK;
+				CreateBreakableBlock({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
+			}
+
+			if (!(seglist[0] == "breakableBlock"))
+			{
+				// 固定配列にデータを格納
+				g_Block[g_BlockCount].blockType = value;
+				g_Block[g_BlockCount].pos.x = std::stof(seglist[1]);    // X
+				g_Block[g_BlockCount].pos.y = std::stof(seglist[2]);    // Y
+				g_Block[g_BlockCount].pos.z = std::stof(seglist[3]);    // Z
+
+				g_BlockCount++; // 読み込んだ数をインクリメント
+			}
 		}
 	}
 

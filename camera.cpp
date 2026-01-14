@@ -1,4 +1,4 @@
-#include "directx.h"
+	#include "directx.h"
 #include "camera.h"
 
 #include <cmath>
@@ -7,11 +7,12 @@
 #include "mouse.h"
 #include "Keyboard.h"
 #include "rocket.h"
+#include "easing.h"
 
 static XMMATRIX g_ViewMatrix;
 static XMMATRIX g_ProjectionMatrix;
 
-static XMFLOAT3 g_CameraPosition;
+static XMFLOAT3 g_Position;
 static XMFLOAT3 g_CameraTargetPos;
 static XMFLOAT3 g_CameraRotation;
 
@@ -20,18 +21,38 @@ static float g_CameraPitch = 0.0f;
 
 static CameraMode g_CameraMode = CameraMode::BALL;
 
+static XMFLOAT3 g_FixCameraPosition[3]
+{
+	{-0.5f, 5.0f, 0.0f},
+	{5.0f, 5.0f, 5.0f},
+	{ 10.0f, 10.0f, 10.0f}
+};
+
+static int g_FixCameraIndex;
+static float g_FixCameraTime;
+static float g_ShakeTime;
+static float g_Shake;
+static XMFLOAT3 g_FixCameraOldPosition;
+
 void FollowBall();
 void FollowRocket();
 void LookBall();
+
 void ReflectsDebugKeyOperations();
 
 void InitializeCamera()
 {
-	g_CameraPosition = { 0.0f, 1.0f, -10.0f };
+	g_Position = { 0.0f, 1.0f, -10.0f };
 	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
 	g_CameraRotation = {0.0f, 0.0f,0.0f};
 	g_CameraYaw = 0.0f;
 	g_CameraPitch = 0.0f;
+
+	g_FixCameraIndex = 0;
+	g_FixCameraTime = 0;
+	g_ShakeTime = 0;
+	g_Shake = 0.0f;
+	g_FixCameraOldPosition = { 0.0f, 0.0f, 0.0f };
 }
 
 void FinalizeCamera()
@@ -40,11 +61,6 @@ void FinalizeCamera()
 
 void UpdateCamera()
 {
-	//////////////////////////////////////////////////////////////
-	
-
-	//////////////////////////////////////////////////////////////////
-
 	if (Keyboard_IsKeyTrigger(KK_D1))
 	{
 		g_CameraMode = CameraMode::BALL;
@@ -56,6 +72,19 @@ void UpdateCamera()
 	else if (Keyboard_IsKeyTrigger(KK_D3))
 	{
 		g_CameraMode = CameraMode::DEBUG;
+	}
+
+	g_FixCameraTime += 1.0f / 60.0f;
+	if (g_FixCameraTime > 1.0f)
+	{
+		g_FixCameraTime = 1.0f;
+	}
+
+	if (Keyboard_IsKeyTrigger(KK_D4))
+	{
+		g_FixCameraIndex = (g_FixCameraIndex + 1) % 3;
+		g_FixCameraTime = 0.0f;
+		g_FixCameraOldPosition = g_Position;
 	}
 
 	switch (g_CameraMode)
@@ -79,13 +108,30 @@ void UpdateCamera()
 		break;
 	}
 
-	///授業コード終わり///
+	//// イージング計算
+	//float ease = easeInOutCubic(g_FixCameraTime);
+
+	//// 線形補間
+	//g_Position.x = g_FixCameraOldPosition.x * (1.0f - ease)
+	//	+ g_FixCameraPosition[g_FixCameraIndex].x * ease;
+	//g_Position.y = g_FixCameraOldPosition.y * (1.0f - ease)
+	//	+ g_FixCameraPosition[g_FixCameraIndex].y * ease;
+	//g_Position.z = g_FixCameraOldPosition.z * (1.0f - ease)
+	//	+ g_FixCameraPosition[g_FixCameraIndex].z * ease;
+
+	//g_ShakeTime += 1.0f / 60.0f;
+	//if (g_ShakeTime > XM_2PI) g_ShakeTime = 0.0f;
+
+	//g_Shake -= 0.1f;
+	//if (g_Shake < 0.0f) g_Shake = 0.0f;
+
+	//g_Position.y += sinf(g_ShakeTime * 90.0f) * 0.1f * g_Shake;
 }
 
 void DrawCamera()
 {
 	const XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // カメラの上方向
-	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_CameraPosition), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
+	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_Position), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
 
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス （新規）
 	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 1.0f/*見ることができる一番近い距離*/, 1000.0f/*見ることができる一番遠い距離*/);
@@ -105,15 +151,15 @@ XMFLOAT3 GetCameraForward()
 {
 	// 終点から始点を引く
 	XMFLOAT3 forward;
-	forward.x = g_CameraTargetPos.x - g_CameraPosition.x;
-	forward.y = g_CameraTargetPos.y - g_CameraPosition.y;
-	forward.z = g_CameraTargetPos.z - g_CameraPosition.z;
+	forward.x = g_CameraTargetPos.x - g_Position.x;
+	forward.y = g_CameraTargetPos.y - g_Position.y;
+	forward.z = g_CameraTargetPos.z - g_Position.z;
 	return forward;
 }
 
 XMFLOAT3 GetCameraPosition()
 {
-	return g_CameraPosition;
+	return g_Position;
 }
 
 void SetCameraMode(CameraMode newCameraMode)
@@ -131,9 +177,9 @@ void FollowBall()
 {
 	XMFLOAT3 ballPos = GetBallPosition();
 
-	g_CameraPosition = ballPos;
-	g_CameraPosition.z -= 5.0f;
-	g_CameraPosition.y += 5.0f;
+	g_Position = ballPos;
+	g_Position.z -= 5.0f;
+	g_Position.y += 5.0f;
 
 	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
@@ -158,8 +204,8 @@ void FollowBall()
 		g_CameraRotation.y -= 0.1f;
 	}
 
-	g_CameraPosition.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
-	g_CameraPosition.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
+	g_Position.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
+	g_Position.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
 }
 
 void FollowRocket()
@@ -193,9 +239,9 @@ void FollowRocket()
 	newCameraPos.y += height;
 	
 	// カメラの位置を補間する
-	g_CameraPosition.x += (newCameraPos.x - g_CameraPosition.x) * 0.1f;
-	g_CameraPosition.y += (newCameraPos.y - g_CameraPosition.y) * 0.1f;
-	g_CameraPosition.z += (newCameraPos.z - g_CameraPosition.z) * 0.1f;
+	g_Position.x += (newCameraPos.x - g_Position.x) * 0.1f;
+	g_Position.y += (newCameraPos.y - g_Position.y) * 0.1f;
+	g_Position.z += (newCameraPos.z - g_Position.z) * 0.1f;
 
 	// 注視点（ターゲット）をロケットの位置の少し上に設定。
 	g_CameraTargetPos.x = rocketPos.x;
@@ -264,11 +310,11 @@ void ReflectsDebugKeyOperations()
 
 	velocity = XMVectorScale(velocity, 0.2f);
 
-	XMVECTOR cameraPosVec = XMLoadFloat3(&g_CameraPosition);
+	XMVECTOR cameraPosVec = XMLoadFloat3(&g_Position);
 	velocity = XMVectorAdd(cameraPosVec, velocity);  //
-	XMStoreFloat3(&g_CameraPosition, velocity);
+	XMStoreFloat3(&g_Position, velocity);
 
-	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_CameraPosition), forwardVec_WS);  // 注視点ベクトルを導き出す
+	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_Position), forwardVec_WS);  // 注視点ベクトルを導き出す
 	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // 注視点ベクトルを座標に変換
 }
 
@@ -279,4 +325,10 @@ void LookBall()
 	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
 	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
+}
+
+void SetCameraShake(float shake)
+{
+	g_Shake = shake;
+	g_ShakeTime = 0.0f;
 }
