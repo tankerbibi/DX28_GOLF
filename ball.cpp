@@ -12,6 +12,7 @@
 #include "effect.h"
 #include "trail.h"
 #include "shadow.h"
+#include "breakableBlock.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -31,7 +32,7 @@ static int g_StateCount;
 
 static ID3D11Buffer* g_InstanceBuffer;
 
-static constexpr float g_BallRadius = 0.25f;
+static constexpr float g_BallRadius = 1.0f;
 
 void BallHitCheck();
 void MoveBall();
@@ -171,9 +172,9 @@ void MoveBall()
 	g_Velocity.y -= 9.8f * deltaTime;
 
 	// íÔçR
-	g_Velocity.x -= g_Velocity.x * 2.0f * deltaTime;
+	g_Velocity.x -= g_Velocity.x * 1.0f * deltaTime;
 	g_Velocity.y -= g_Velocity.y * 0.5f * deltaTime;
-	g_Velocity.z -= g_Velocity.z * 2.0f * deltaTime;
+	g_Velocity.z -= g_Velocity.z * 1.0f * deltaTime;
 
 	// à⁄ìÆ
 	g_Position.x += g_Velocity.x * deltaTime;
@@ -240,93 +241,185 @@ XMFLOAT3 GetBallPosition()
 
 void BallHitCheck()
 {
-	BLOCK* block = GetFieldBlock();
-	float blockRadius = 1.5f;
-	
-
-	float e = 0.5f;  // íµÇÀï‘ÇËåWêî
-
-	for (int i = 0; i < blockMax; i++)
 	{
-		// â°ï˚å¸ÇÃìñÇΩÇËîªíËèàóù
-		if (block[i].pos.y - blockRadius < g_Position.y &&
-			g_Position.y < block[i].pos.y + blockRadius)  // â°Ç©ÇÁÇ›ÇΩê}ÇÃèÛãµÇçÏÇËèoÇµÇƒÇ¢ÇÈÅIÅI
+		BLOCK* block = GetFieldBlock();
+		float blockRadius = 0.5f;
+
+
+		float e = 0.5f;  // íµÇÀï‘ÇËåWêî
+
+		for (int i = 0; i < blockMax; i++)
 		{
-			// xï˚å¸
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)  // 3éüå≥ÇæÇ©ÇÁ2éüå≥Ç…çiÇÎÇ§ÅI
+			// â°ï˚å¸ÇÃìñÇΩÇËîªíËèàóù
+			if (block[i].pos.y - blockRadius < g_Position.y &&
+				g_Position.y < block[i].pos.y + blockRadius)  // â°Ç©ÇÁÇ›ÇΩê}ÇÃèÛãµÇçÏÇËèoÇµÇƒÇ¢ÇÈÅIÅI
 			{
-				if (block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
-					g_Position.x - g_BallRadius < block[i].pos.x + blockRadius)
+				// xï˚å¸
+				if (block[i].pos.z - blockRadius < g_Position.z &&
+					g_Position.z < block[i].pos.z + blockRadius)  // 3éüå≥ÇæÇ©ÇÁ2éüå≥Ç…çiÇÎÇ§ÅI
 				{
-					if (block[i].pos.x < g_Position.x)
+					if (block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
+						g_Position.x - g_BallRadius < block[i].pos.x + blockRadius)
 					{
-						// âE
-						g_Position.x = block[i].pos.x + blockRadius + g_BallRadius;
-					}
-					else
-					{
-						// ç∂
-						g_Position.x = block[i].pos.x - blockRadius - g_BallRadius;
-					}
-					g_Velocity.x *= -e;
-				}
-			}
-			// zï˚å¸
-			else if(block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
-				g_Position.x < block[i].pos.x + blockRadius)
-			{
-				if (block[i].pos.z - blockRadius < g_Position.z + g_BallRadius &&
-					g_Position.z - g_BallRadius < block[i].pos.z + blockRadius)
-				{
-					if (block[i].pos.z < g_Position.z)
-					{
-						// âú
-						g_Position.z = block[i].pos.z + blockRadius + g_BallRadius;
-					}
-					else
-					{
-						// éËëO
-						g_Position.z = block[i].pos.z - blockRadius - g_BallRadius;
-					}
-				}
-			}
-		}
-		else
-		// ècï˚å¸ÇÃìñÇΩÇËîªíËèàóù
-		{
-			// éËëOÅ@âú
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)
-			{
-				if (block[i].pos.x - blockRadius < g_Position.x &&
-					g_Position.x < block[i].pos.x + blockRadius)
-				{
-					if (block[i].pos.y - blockRadius < g_Position.y + g_BallRadius &&
-						g_Position.y - g_BallRadius < block[i].pos.y + blockRadius)
-					{
-						if (g_Position.y > block[i].pos.y)
+						if (block[i].pos.x < g_Position.x)
 						{
-							// è„
-							g_Position.y = block[i].pos.y + blockRadius + g_BallRadius;
-							
-							if (g_Velocity.y < -3.0f)
-							{
-								CreateEffect(g_Position);
-								SetCameraShake(1.0f);
-							}
+							// âE
+							g_Position.x = block[i].pos.x + blockRadius + g_BallRadius;
 						}
 						else
 						{
-							// â∫
-							g_Position.y = block[i].pos.y - blockRadius - g_BallRadius;
+							// ç∂
+							g_Position.x = block[i].pos.x - blockRadius - g_BallRadius;
 						}
-						g_Velocity.y *= -e;
+						g_Velocity.x *= -e;
+					}
+				}
+				// zï˚å¸
+				else if (block[i].pos.x - blockRadius < g_Position.x + g_BallRadius &&
+					g_Position.x < block[i].pos.x + blockRadius)
+				{
+					if (block[i].pos.z - blockRadius < g_Position.z + g_BallRadius &&
+						g_Position.z - g_BallRadius < block[i].pos.z + blockRadius)
+					{
+						if (block[i].pos.z < g_Position.z)
+						{
+							// âú
+							g_Position.z = block[i].pos.z + blockRadius + g_BallRadius;
+						}
+						else
+						{
+							// éËëO
+							g_Position.z = block[i].pos.z - blockRadius - g_BallRadius;
+						}
+					}
+				}
+			}
+			else
+				// ècï˚å¸ÇÃìñÇΩÇËîªíËèàóù
+			{
+				// éËëOÅ@âú
+				if (block[i].pos.z - blockRadius < g_Position.z &&
+					g_Position.z < block[i].pos.z + blockRadius)
+				{
+					if (block[i].pos.x - blockRadius < g_Position.x &&
+						g_Position.x < block[i].pos.x + blockRadius)
+					{
+						if (block[i].pos.y - blockRadius < g_Position.y + g_BallRadius &&
+							g_Position.y - g_BallRadius < block[i].pos.y + blockRadius)
+						{
+							if (g_Position.y > block[i].pos.y)
+							{
+								// è„
+								g_Position.y = block[i].pos.y + blockRadius + g_BallRadius;
+
+								if (g_Velocity.y < -3.0f)
+								{
+									CreateEffect(g_Position);
+									SetCameraShake(1.0f);
+								}
+							}
+							else
+							{
+								// â∫
+								g_Position.y = block[i].pos.y - blockRadius - g_BallRadius;
+							}
+							g_Velocity.y *= -e;
+						}
 					}
 				}
 			}
 		}
 	}
+	{
+		BreakableBlock* breakableBlock = GetBreakableBlock();
+
+		float blockRadius = 0.7f;
+
+
+		float e = 0.5f;  // íµÇÀï‘ÇËåWêî
+		for (int i = 0; i < maxBreakableBlock; i++)
+		{
+			// â°ï˚å¸ÇÃìñÇΩÇËîªíËèàóù
+			if (breakableBlock[i].position.y - blockRadius < g_Position.y &&
+				g_Position.y < breakableBlock[i].position.y + blockRadius)  // â°Ç©ÇÁÇ›ÇΩê}ÇÃèÛãµÇçÏÇËèoÇµÇƒÇ¢ÇÈÅIÅI
+			{
+				// xï˚å¸
+				if (breakableBlock[i].position.z - blockRadius < g_Position.z &&
+					g_Position.z < breakableBlock[i].position.z + blockRadius)  // 3éüå≥ÇæÇ©ÇÁ2éüå≥Ç…çiÇÎÇ§ÅI
+				{
+					if (breakableBlock[i].position.x - blockRadius < g_Position.x + g_BallRadius &&
+						g_Position.x - g_BallRadius < breakableBlock[i].position.x + blockRadius)
+					{
+						if (breakableBlock[i].position.x < g_Position.x)
+						{
+							// âE
+							g_Position.x = breakableBlock[i].position.x + blockRadius + g_BallRadius;
+						}
+						else
+						{
+							// ç∂
+							g_Position.x = breakableBlock[i].position.x - blockRadius - g_BallRadius;
+						}
+						g_Velocity.x *= -e;
+					}
+				}
+				// zï˚å¸
+				else if (breakableBlock[i].position.x - blockRadius < g_Position.x + g_BallRadius &&
+					g_Position.x < breakableBlock[i].position.x + blockRadius)
+				{
+					if (breakableBlock[i].position.z - blockRadius < g_Position.z + g_BallRadius &&
+						g_Position.z - g_BallRadius < breakableBlock[i].position.z + blockRadius)
+					{
+						if (breakableBlock[i].position.z < g_Position.z)
+						{
+							// âú
+							g_Position.z = breakableBlock[i].position.z + blockRadius + g_BallRadius;
+						}
+						else
+						{
+							// éËëO
+							g_Position.z = breakableBlock[i].position.z - blockRadius - g_BallRadius;
+						}
+					}
+				}
+			}
+			else
+				// ècï˚å¸ÇÃìñÇΩÇËîªíËèàóù
+			{
+				// éËëOÅ@âú
+				if (breakableBlock[i].position.z - blockRadius < g_Position.z &&
+					g_Position.z < breakableBlock[i].position.z + blockRadius)
+				{
+					if (breakableBlock[i].position.x - blockRadius < g_Position.x &&
+						g_Position.x < breakableBlock[i].position.x + blockRadius)
+					{
+						if (breakableBlock[i].position.y - blockRadius < g_Position.y + g_BallRadius &&
+							g_Position.y - g_BallRadius < breakableBlock[i].position.y + blockRadius)
+						{
+							if (g_Position.y > breakableBlock[i].position.y)
+							{
+								// è„
+								g_Position.y = breakableBlock[i].position.y + blockRadius + g_BallRadius;
+
+								if (g_Velocity.y < -3.0f)
+								{
+									CreateEffect(g_Position);
+									SetCameraShake(1.0f);
+								}
+							}
+							else
+							{
+								// â∫
+								g_Position.y = breakableBlock[i].position.y - blockRadius - g_BallRadius;
+							}
+							g_Velocity.y *= -e;
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
 void AddForce(XMFLOAT3 force)

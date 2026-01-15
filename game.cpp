@@ -15,6 +15,7 @@
 #include "trail.h"
 #include "shadow.h"
 #include "breakableBlock.h"
+#include "grass.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -36,6 +37,7 @@ void InitializeGame()
 	InitializeEffect();
 	InitializeTrail();
 	InitializeShadow();
+	InitializeGrass();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -67,6 +69,7 @@ void FinalizeGame()
 	FinalizeTrail();
 	FinalizeShadow();
 	FinalizeBreakableBlock();
+	FinalizeGrass();
 }
 
 void UpdateGame()
@@ -81,6 +84,8 @@ void UpdateGame()
 		// UpdateScore();
 		UpdateStroke();
 		UpdateField();
+		UpdateGrass();
+
 		if (GetCameraMode() == CameraMode::DEBUG)
 		{
 			UpdateMouse();
@@ -123,6 +128,7 @@ void DrawGame()
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
+	DrawGrass();
 
 	// ライトをオフにする
 	light.lightEnable = false;

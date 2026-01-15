@@ -29,7 +29,7 @@ static XMFLOAT3 g_TargetPos;
 static float g_Pitch;
 static float g_Yaw;
 
-static constexpr float g_RocketRadius = 1.0f;
+static constexpr float g_RocketRadius = 0.25f;
 
 static ROCKET_STATE rocketState;
 static int stateCount;
@@ -88,6 +88,8 @@ void UpdateRocket()
 		// ロケットが当たったら爆発させる処理
 		if (RocketIsHit())
 		{
+			// 爆風のコリジョンと破壊可能ブロックの判定を行う
+			ResolveBreakableBlockCollision(g_Position, 3.0f);
 			rocketState = ROCKET_STATE_EXPLODED;
 			isDraw = false;
 		}
@@ -298,7 +300,7 @@ void RocketHitCheck()
 // ロケットがブロックに当たったらtrueを返す関数
 bool RocketIsHit()
 {
-	// 1. 破壊可能ブロックとの判定を先に行う
+	// ロケットコリジョンと破壊可能ブロックの判定を行う。
 	if (ResolveBreakableBlockCollision(g_Position, g_RocketRadius))
 	{
 		return true; // 破壊ブロックに当たったので爆発へ
@@ -422,6 +424,6 @@ void PushBallWithRocket()
 	if (length <= explosionRadius)
 	{
 		// ボールに力を加える。
-		AddForce({ force.x * power, force.y * power + 5.0f, force.z * power});
+		AddForce({ force.x * power * 2.0f, force.y * power + 5.0f, force.z * power * 2.0f});
 	}
 }

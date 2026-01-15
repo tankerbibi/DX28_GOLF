@@ -10,15 +10,9 @@
 #include "ball.h"
 #include "effect.h"
 
-struct BreakableBlock
-{
-	XMFLOAT3 position;
-	int health;
-	bool use;
-};
 
 static constexpr int maxHealth = 1000;
-static constexpr unsigned int maxBreakableBlock = 1000;
+
 
 static MODEL* g_Model = nullptr;
 
@@ -37,7 +31,7 @@ void InitializeBreakableBlock()
 	}
 
 	// モデル読み込み
-	g_Model = ModelLoad("asset\\model\\tree.fbx"); // 元のコードの通りrocket.fbxを使用
+	g_Model = ModelLoad("asset\\model\\cube.fbx"); // 元のコードの通りrocket.fbxを使用
 
 	// --- インスタンスバッファの作成 (Field.cppと同様の処理) ---
 	D3D11_BUFFER_DESC desc = {};
@@ -85,7 +79,7 @@ void DrawBreakableBlock()
 
 		// 行列計算
 		XMMATRIX world = XMMatrixIdentity();
-		world *= XMMatrixScaling(10.0f, 10.0f, 10.0f); // 拡大縮小
+		world *= XMMatrixScaling(1.0f, 1.0f, 1.0f); // 拡大縮小
 		world *= XMMatrixTranslation(g_BreakableBlock[i].position.x, g_BreakableBlock[i].position.y, g_BreakableBlock[i].position.z); // 移動
 
 		// バッファに書き込み
@@ -143,7 +137,7 @@ bool ResolveBreakableBlockCollision(XMFLOAT3 position, float radius)
 		float dz = g_BreakableBlock[i].position.z - position.z;
 		float distanceSq = dx * dx + dy * dy + dz * dz;
 
-		float blockHitRadius = 5.0f; // スケールに合わせた判定サイズ
+		float blockHitRadius = 0.5f; // スケールに合わせた判定サイズ
 		float totalRadius = radius + blockHitRadius;
 
 		if (distanceSq < (totalRadius * totalRadius))
@@ -159,4 +153,9 @@ bool ResolveBreakableBlockCollision(XMFLOAT3 position, float radius)
 		}
 	}
 	return hitAny;
+}
+
+BreakableBlock* GetBreakableBlock()
+{
+	return g_BreakableBlock;
 }

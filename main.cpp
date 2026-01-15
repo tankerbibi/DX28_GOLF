@@ -130,10 +130,10 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,  // ‚P”N¶‚Ì‚Éì‚Á‚Ä‚¢‚½mainŠÖ
 			if ((dwCurrentTime - dwExecLastFpsUpdateTime) >= 1000)
 			{
 				dwExecLastFpsUpdateTime = dwCurrentTime;
-				g_CountFPS = dwFrameCount;
 				dwExecLastFpsUpdateTime = dwCurrentTime;
 				dwFrameCount = 0;
 #ifdef _DEBUG
+				g_CountFPS = dwFrameCount;
 				wsprintf(g_DebugStr, TITLE);
 				wsprintf(&g_DebugStr[strlen(g_DebugStr)], "FPS:%d", g_CountFPS);
 				SetWindowText(g_HWnd, g_DebugStr);  // “r’†‚Åƒ^ƒCƒgƒ‹ƒo[‚ğ•Ï‚¦‚é‚±‚Æ‚ª‚Å‚«‚é‚æI
