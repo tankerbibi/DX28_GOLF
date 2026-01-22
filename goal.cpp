@@ -65,9 +65,9 @@ XMFLOAT3 GetGoalPosition()
 	return g_Position;
 }
 
-XMFLOAT3 GetGoalPos()
+void SetGoalPosition(XMFLOAT3 position)
 {
-	return g_Position;
+	g_Position = position;
 }
 
 void SetGoalShake(float Shake)

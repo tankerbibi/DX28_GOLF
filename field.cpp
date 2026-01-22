@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "breakableBlock.h"
 #include "grass.h"
+#include "ball.h"
 #include <fstream>  // ファイル読み込み用
 #include <string>
 #include <sstream>
@@ -195,12 +196,12 @@ void LoadFieldData(const char* filename)
 			}
 			else if (seglist[0] == "Start")
 			{
-				CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				SetBallStartPosition({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
 				continue;
 			}
 			else if (seglist[0] == "Goal")
 			{
-				CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				
 				continue;
 			}
 			else if (seglist[0] == "BackGroundBlock")
