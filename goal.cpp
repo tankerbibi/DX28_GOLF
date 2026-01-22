@@ -16,7 +16,7 @@ static XMFLOAT3 g_Rotation;
 void InitializeGoal()
 {
 	g_Model = ModelLoad("asset\\model\\Goal.fbx");
-	g_Position = { 0.0f, 2.0f, 9.0f };
+	g_Position = { -2, -2, 85 };
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 }
 

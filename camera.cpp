@@ -47,7 +47,7 @@ void InitializeCamera()
 	g_CameraRotation = {0.0f, 0.0f,0.0f};
 	g_CameraYaw = 0.0f;
 	g_CameraPitch = 0.0f;
-
+	g_CameraMode = CameraMode::ROCKET;
 	g_FixCameraIndex = 0;
 	g_FixCameraTime = 0;
 	g_ShakeTime = 0;

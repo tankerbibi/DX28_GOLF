@@ -10,7 +10,8 @@
 #include "ball.h"
 #include "effect.h"
 #include "breakableBlock.h"
-
+#include "ranking.h"
+#include "stroke.h"
 
 enum ROCKET_STATE
 {
@@ -41,6 +42,8 @@ static constexpr float explosionRadius = 5.0f;
 
 static bool isDraw;
 
+static int score;
+
 void RocketHitCheck();
 bool RocketIsHit();
 void RocketMove();
@@ -49,16 +52,17 @@ void PushBallWithRocket();
 void InitializeRocket()
 {
 	g_Model = ModelLoad("asset\\model\\Rocket2.fbx");
-	g_Position = { 0.0f, 10.0f, 0.0f };
+	g_RocketStartPosition = { -2, 6, -40 };
+	g_Position = g_RocketStartPosition;
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
 	// g_TargetPos = { g_Pos.x, , 0.0f };
-	g_RocketStartPosition = { 0.0f, 10.0f, 0.0f };
 	g_Pitch = 0.0f;
 	g_Yaw = 0.0f;
 	rocketState = ROCKET_STATE_MOVE;
 	stateCount = 0;
 	isDraw = true;
+	score = 0;
 }
 
 void FinalizeRocket()
@@ -88,6 +92,9 @@ void UpdateRocket()
 		// ロケットが当たったら爆発させる処理
 		if (RocketIsHit())
 		{
+			score++;
+			SetRankingScore(score);
+			AddStroke(1);
 			// 爆風のコリジョンと破壊可能ブロックの判定を行う
 			ResolveBreakableBlockCollision(g_Position, 3.0f);
 			rocketState = ROCKET_STATE_EXPLODED;
@@ -117,6 +124,7 @@ void UpdateRocket()
 			rocketStateExplodedFlg = false;
 			g_Pitch = 0.0f;
 			g_Yaw = 0.0f;
+			g_Rotation = { 0.0f, 0.0f, 0.0f };
 		}
 		break;
 	default:
@@ -202,7 +210,7 @@ void RocketMove()
 
 	// 正規化して速度（0.2f）を掛ける
 	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
-	moveVec = XMVectorScale(moveVec, 0.1f); // 0.2f は移動スピード
+	moveVec = XMVectorScale(moveVec, 0.25f); // 0.2f は移動スピード
 
 	// --- 座標更新 ---
 	XMVECTOR posVec = XMLoadFloat3(&g_Position);
@@ -424,6 +432,6 @@ void PushBallWithRocket()
 	if (length <= explosionRadius)
 	{
 		// ボールに力を加える。
-		AddForce({ force.x * power * 2.0f, force.y * power + 5.0f, force.z * power * 2.0f});
+		AddForce({ force.x * power * 3.0f, force.y * power + 5.0f, force.z * power * 3.0f});
 	}
 }

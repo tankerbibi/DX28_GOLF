@@ -16,6 +16,7 @@
 
 static MODEL* g_Model = nullptr;
 
+static XMFLOAT3 g_StartPosition;
 static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
@@ -30,6 +31,8 @@ enum BALL_STATE
 static BALL_STATE g_State;
 static int g_StateCount;
 
+
+
 static ID3D11Buffer* g_InstanceBuffer;
 
 static constexpr float g_BallRadius = 1.0f;
@@ -40,7 +43,7 @@ void MoveBall();
 void InitializeBall()
 {
 	g_Model = ModelLoad("asset\\model\\ball.fbx");
-	g_Position = {0.0f, 10.0f, 0.0f};
+	g_Position = g_StartPosition;
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  âΩÇ™à·Ç§ÅH
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
@@ -66,6 +69,7 @@ void InitializeBall()
 void FinalizeBall()
 {
 	ModelRelease(g_Model);
+	g_StartPosition = { 0.0f, 0.0f, 0.0f };
 }
 
 void UpdateBall()
@@ -173,13 +177,20 @@ void MoveBall()
 
 	// íÔçR
 	g_Velocity.x -= g_Velocity.x * 1.0f * deltaTime;
-	g_Velocity.y -= g_Velocity.y * 0.5f * deltaTime;
+	g_Velocity.y -= g_Velocity.y * 1.0f * deltaTime;
 	g_Velocity.z -= g_Velocity.z * 1.0f * deltaTime;
 
 	// à⁄ìÆ
 	g_Position.x += g_Velocity.x * deltaTime;
 	g_Position.y += g_Velocity.y * deltaTime;
 	g_Position.z += g_Velocity.z * deltaTime;
+
+	if (g_Position.y < -7)
+	{
+		g_Position = g_StartPosition;
+		g_Rotation = { 0.0f, 0.0f, 0.0f };
+		g_Velocity = { 0.0f, 0.0f ,0.0f };
+	}
 
 	// è’ìÀîªíË
 	BallHitCheck();
@@ -202,7 +213,7 @@ void MoveBall()
 	// ÉSÅ[Éãè’ìÀîªíË
 	if (goalLength < g_BallRadius * 4.0f)
 	{
-		SetRankingScore(GetStroke());
+		// SetRankingScore(GetStroke());
 
 		g_State = BALL_STATE_GOAL;
 		g_StateCount = 0;
@@ -339,6 +350,7 @@ void BallHitCheck()
 		float e = 0.5f;  // íµÇÀï‘ÇËåWêî
 		for (int i = 0; i < maxBreakableBlock; i++)
 		{
+			if (breakableBlock[i].use == false) continue;
 			// â°ï˚å¸ÇÃìñÇΩÇËîªíËèàóù
 			if (breakableBlock[i].position.y - blockRadius < g_Position.y &&
 				g_Position.y < breakableBlock[i].position.y + blockRadius)  // â°Ç©ÇÁÇ›ÇΩê}ÇÃèÛãµÇçÏÇËèoÇµÇƒÇ¢ÇÈÅIÅI
@@ -427,4 +439,9 @@ void AddForce(XMFLOAT3 force)
 	g_Velocity.x += force.x;
 	g_Velocity.y += force.y;
 	g_Velocity.z += force.z;
+}
+
+void SetBallStartPosition(XMFLOAT3 position)
+{
+	g_StartPosition = position;
 }

@@ -102,6 +102,9 @@
     <ClInclude Include="grass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BackGroundBlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug_ostream.cpp">
@@ -189,6 +192,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="grass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BackGroundBlock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "shader.h"
 #include "breakableBlock.h"
+#include "grass.h"
 #include <fstream>  // ファイル読み込み用
 #include <string>
 #include <sstream>
@@ -173,23 +174,38 @@ void LoadFieldData(const char* filename)
 		{
 			BLOCKTYPE value = BLOCKTYPE::BLOCK;
 
-			if (seglist[0] == "block")
+			if (seglist[0] == "Block")
 			{
 				value = BLOCKTYPE::BLOCK;
+				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 1.0f,std::stof(seglist[3]) });
 			}
-			else if (seglist[0] == "tree")
+			else if (seglist[0] == "Tree")
 			{
 				value = BLOCKTYPE::TREE;
 			}
-			else if (seglist[0] == "kirby")
+			else if (seglist[0] == "Kirby")
 			{
 				value = BLOCKTYPE::KIRBY;
 			}
-			else if (seglist[0] == "breakableBlock")
+			else if (seglist[0] == "BreakableBlock")
 			{
 				value = BLOCKTYPE::BREAKABLEBLOCK;
 				CreateBreakableBlock({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
 				continue;
+			}
+			else if (seglist[0] == "Start")
+			{
+				CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
+			}
+			else if (seglist[0] == "Goal")
+			{
+				CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
+			}
+			else if (seglist[0] == "BackGroundBlock")
+			{
+
 			}
 
 			// 固定配列にデータを格納

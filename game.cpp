@@ -26,6 +26,7 @@ void InitializeGame()
 {
 	g_Pause = false;
 	InitializeBreakableBlock();
+	InitializeGrass();
 	InitializeCamera();
 	InitializeScore();
 	InitializeStroke();
@@ -37,7 +38,6 @@ void InitializeGame()
 	InitializeEffect();
 	InitializeTrail();
 	InitializeShadow();
-	InitializeGrass();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -84,7 +84,7 @@ void UpdateGame()
 		// UpdateScore();
 		UpdateStroke();
 		UpdateField();
-		UpdateGrass();
+		UpdateGrass();	
 
 		if (GetCameraMode() == CameraMode::DEBUG)
 		{
@@ -124,16 +124,20 @@ void DrawGame()
 	DrawField();
 	DrawBreakableBlock();
 
+
 	Shader_SetPipelineInstance(false);
 	DrawGoal();
 	DrawBall();
 	DrawRocket();
-	DrawGrass();
 
 	// ライトをオフにする
 	light.lightEnable = false;
 	Shader_SetLight(light);	
 
+	Shader_SetPipelineInstance(true);
+	DrawGrass();
+
+	Shader_SetPipelineInstance(false);
 	DrawShadow();
 
 	DrawTrail();
