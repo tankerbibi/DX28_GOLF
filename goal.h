@@ -6,3 +6,5 @@ void UpdateGoal();
 void DrawGoal();
 
 XMFLOAT3 GetGoalPosition();
+
+void SetGoalShake(float Shake);

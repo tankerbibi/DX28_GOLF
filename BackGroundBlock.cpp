@@ -1,7 +1,7 @@
-#include "BackGroundBlock.h"
+#include "directx.h"
 
 #include "main.h"
-#include "directx.h"
+#include "BackGroundBlock.h"
 #include "shader.h"
 #include "texture.h"
 #include "camera.h"
@@ -320,7 +320,7 @@ void DrawBackGroundBlock()
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // トライアングルリスト（独立）
 	}
 
-	context->DrawIndexedInstanced(36, backGroundBlockMax, 0, 0, 0);
+	context->DrawIndexedInstanced(36, drawCount, 0, 0, 0);
 }
 
 void CreateBackGroundBlock(XMFLOAT3 position)

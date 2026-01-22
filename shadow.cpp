@@ -8,7 +8,7 @@
 #include "field.h"
 
 static int g_Texture;
-static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
+static ID3D11Buffer* g_VertexBuffer = nullptr;  // 頂点バッファ
 static XMFLOAT3 g_Position;
 
 void ShadowHitCheck();

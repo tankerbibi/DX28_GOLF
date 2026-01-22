@@ -12,6 +12,8 @@ static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
 static XMFLOAT3 g_Rotation;
 
+static float g_Shake;
+static float g_ShakeTime;
 
 void InitializeGoal()
 {
@@ -27,7 +29,13 @@ void FinalizeGoal()
 
 void UpdateGoal()
 {
+	g_ShakeTime += 1.0f / 60.0f;
+	if (g_ShakeTime > XM_2PI) g_ShakeTime = 0.0f;
 
+	g_Shake -= 0.1f;
+	if (g_Shake < 0.0f) g_Shake = 0.0f;
+
+	g_Position.y += sinf(g_ShakeTime * 90.0f) * 0.1f * g_Shake;
 }
 
 void DrawGoal()
@@ -60,4 +68,10 @@ XMFLOAT3 GetGoalPosition()
 XMFLOAT3 GetGoalPos()
 {
 	return g_Position;
+}
+
+void SetGoalShake(float Shake)
+{
+	g_Shake = Shake;
+	g_ShakeTime = 0.0f;
 }

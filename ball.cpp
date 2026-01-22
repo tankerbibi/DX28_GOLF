@@ -13,6 +13,7 @@
 #include "trail.h"
 #include "shadow.h"
 #include "breakableBlock.h"
+#include "goal.h"
 
 static MODEL* g_Model = nullptr;
 
@@ -43,6 +44,7 @@ void MoveBall();
 void InitializeBall()
 {
 	g_Model = ModelLoad("asset\\model\\ball.fbx");
+	g_StartPosition = { -5.0f, 2.0f, -5.0f };
 	g_Position = g_StartPosition;
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  âΩÇ™à·Ç§ÅH
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
@@ -69,7 +71,7 @@ void InitializeBall()
 void FinalizeBall()
 {
 	ModelRelease(g_Model);
-	g_StartPosition = { 0.0f, 0.0f, 0.0f };
+	g_StartPosition = { -5.0f, 2.0f, -5.0f };
 }
 
 void UpdateBall()
@@ -217,6 +219,8 @@ void MoveBall()
 
 		g_State = BALL_STATE_GOAL;
 		g_StateCount = 0;
+
+		SetGoalShake(3.0f);
 	}
 }
 

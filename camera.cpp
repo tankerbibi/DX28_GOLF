@@ -1,4 +1,4 @@
-	#include "directx.h"
+#include "directx.h"
 #include "camera.h"
 
 #include <cmath>
@@ -108,7 +108,7 @@ void UpdateCamera()
 		break;
 	}
 
-	//// イージング計算
+	////// イージング計算
 	//float ease = easeInOutCubic(g_FixCameraTime);
 
 	//// 線形補間
@@ -119,13 +119,13 @@ void UpdateCamera()
 	//g_Position.z = g_FixCameraOldPosition.z * (1.0f - ease)
 	//	+ g_FixCameraPosition[g_FixCameraIndex].z * ease;
 
-	g_ShakeTime += 1.0f / 60.0f;
-	if (g_ShakeTime > XM_2PI) g_ShakeTime = 0.0f;
+	//g_ShakeTime += 1.0f / 60.0f;
+	//if (g_ShakeTime > XM_2PI) g_ShakeTime = 0.0f;
 
-	g_Shake -= 0.1f;
-	if (g_Shake < 0.0f) g_Shake = 0.0f;
+	//g_Shake -= 0.1f;
+	//if (g_Shake < 0.0f) g_Shake = 0.0f;
 
-	g_CameraTargetPos.y += sinf(g_ShakeTime * 90.0f) * 0.1f * g_Shake;
+	//g_CameraTargetPos.y += sinf(g_ShakeTime * 90.0f) * 0.1f * g_Shake;
 }
 
 void DrawCamera()
