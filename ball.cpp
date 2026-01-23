@@ -13,9 +13,11 @@
 #include "trail.h"
 #include "shadow.h"
 #include "breakableBlock.h"
+#include "texture.h"
 #include "goal.h"
 
 static MODEL* g_Model = nullptr;
+static int g_Texture = -1;
 
 static XMFLOAT3 g_StartPosition;
 static XMFLOAT3 g_Position;
@@ -32,9 +34,7 @@ enum BALL_STATE
 static BALL_STATE g_State;
 static int g_StateCount;
 
-
-
-static ID3D11Buffer* g_InstanceBuffer;
+static ID3D11Buffer* g_VertexBuffer;
 
 static constexpr float g_BallRadius = 1.0f;
 
@@ -49,28 +49,63 @@ void InitializeBall()
 	// g_BallPos = XMFLOAT3(0.0f, 0.0f, 0.0f);  何が違う？
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
-
+	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_green.png");
 	g_State = BALL_STATE_MOVE;
 	g_StateCount = 0;
 
 	ResetTrailPosition(g_Position);
 
-	//D3D11_BUFFER_DESC desc = {};
-	//// 4,000個分のサイズ
-	//desc.ByteWidth = sizeof(InstanceData) * blockMax;
-	//// 毎フレーム更新するため動的に設定
-	//desc.Usage = D3D11_USAGE_DYNAMIC;
-	//// 頂点バッファとして扱う
-	//desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	//// CPUから書き込み可能にする
-	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	{
+		// 頂点バッファの作成
+		D3D11_BUFFER_DESC bd{};
+		bd.Usage = D3D11_USAGE_DYNAMIC;
+		// 4頂点分
+		bd.ByteWidth = sizeof(Vertex) * 4;
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer);
+	}
 
-	//DirectXGetDevice()->CreateBuffer(&desc, nullptr, &g_InstanceBuffer);
+	///////////////////頂点バッファ設定開始///////////////////////
+	{
+		D3D11_MAPPED_SUBRESOURCE msr;
+		DirectXGetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr); //g_VertexBufferのありかを探す。
+
+		Vertex* v = (Vertex*)msr.pData;
+
+		// 3dにおいては、ピクセル単位ではなくメートル単位になる。
+		// xが横方向、yが縦方向、zが奥行方向
+		//四つの頂点を作る。頭の中でイメージ
+
+		float tx = 0.0;
+		float ty = 0.0f;
+		float tw = 1.0f;
+		float th = 1.0f;
+
+		v[0].position = { -0.5f, 0.5f, 0.0f };
+		v[1].position = { 0.5f, 0.5f, 0.0f };
+		v[2].position = { -0.5f, -0.5f, 0.0f };
+		v[3].position = { 0.5f, -0.5f, 0.0f };
+
+		v[0].texcoord = { tx,		ty };
+		v[1].texcoord = { tx + tw,	ty };
+		v[2].texcoord = { tx,		ty + th };
+		v[3].texcoord = { tx + tw,	ty + th };
+
+		v[0].normal = { 0.0f, 0.0f, -1.0f };
+		v[1].normal = { 0.0f, 0.0f, -1.0f };
+		v[2].normal = { 0.0f, 0.0f, -1.0f };
+		v[3].normal = { 0.0f, 0.0f, -1.0f };
+
+		DirectXGetDeviceContext()->Unmap(g_VertexBuffer, 0);
+	}
+	//////////////頂点バッファ設定終了////////////////////
 }
 
 void FinalizeBall()
 {
 	ModelRelease(g_Model);
+	SAFE_RELEASE(g_VertexBuffer);
 }
 
 void UpdateBall()
@@ -225,27 +260,75 @@ void MoveBall()
 
 void DrawBall()
 {
+	{
+		// 頂点バッファ設定
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		DirectXGetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
 
-	MATRIX commonMatrices;
-	// 行列を作成　float 4 x 4
-	commonMatrices.matrix = XMMatrixIdentity();
-	// 行列を作成　float 4 x 4
-	commonMatrices.matrixWorld = XMMatrixIdentity();
+		// プリミティブトポロジ設定
+		DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） つまりZの書き方
 
-	commonMatrices.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
-	commonMatrices.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
-	commonMatrices.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
+		ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
+		DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
 
-	commonMatrices.matrix = commonMatrices.matrixWorld;
+		// ビューマトリクスを取得 カメラのビューマトリクスはカメラが向いている方向そのもの。
+		XMMATRIX view = GetCameraViewMatrix();
+		// ビューマトリクスの逆行列を求める 掛け算の代わりに割り算をするみたいな感じ。
+		XMMATRIX invView = XMMatrixInverse(nullptr, view);
 
-	// ビューマトリクス
-	commonMatrices.matrix *= GetCameraViewMatrix();
-	// プロジェクションマトリクス
-	commonMatrices.matrix *= GetCameraProjectionMatrix();
-	
-	Shader_SetMatrix(commonMatrices);
+		// 移動成分を消去
+		invView.r[3].m128_f32[0] = 0.0f;
+		invView.r[3].m128_f32[1] = 0.0f;
+		invView.r[3].m128_f32[2] = 0.0f;
 
-	ModelDraw(g_Model);
+		// 頂点シェーダーに変換行列を設定
+		XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+
+		matrixWorld *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
+
+		// 回転マトリクス（ビルボード処理）
+		matrixWorld *= invView;
+
+		// 移動マトリクス。gpuで計算されている。
+		matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
+
+		matrix = matrixWorld;
+
+		// ビューマトリクス
+		matrix *= GetCameraViewMatrix();
+
+		// プロジェクションマトリクス
+
+		matrix *= GetCameraProjectionMatrix();
+
+		// vertex.hlslのmtxに値を送っている。
+		Shader_SetMatrix({ matrix, matrixWorld });
+
+		// ポリゴン描画
+		DirectXGetDeviceContext()->Draw(4, 0);
+	}
+	//MATRIX commonMatrices;
+	//// 行列を作成　float 4 x 4
+	//commonMatrices.matrix = XMMatrixIdentity();
+	//// 行列を作成　float 4 x 4
+	//commonMatrices.matrixWorld = XMMatrixIdentity();
+
+	//commonMatrices.matrixWorld *= XMMatrixScaling(5.0f, 5.0f, 5.0f);
+	//commonMatrices.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);
+	//commonMatrices.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
+
+	//commonMatrices.matrix = commonMatrices.matrixWorld;
+
+	//// ビューマトリクス
+	//commonMatrices.matrix *= GetCameraViewMatrix();
+	//// プロジェクションマトリクス
+	//commonMatrices.matrix *= GetCameraProjectionMatrix();
+	//
+	//Shader_SetMatrix(commonMatrices);
+
+	//ModelDraw(g_Model);
 }
 
 XMFLOAT3 GetBallPosition()

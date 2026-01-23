@@ -127,7 +127,6 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(false);
 	DrawGoal();
-	DrawBall();
 	DrawRocket();
 
 	// ライトをオフにする
@@ -139,6 +138,7 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(false);
 	DrawShadow();
+	DrawBall();
 
 	DrawTrail();
 	// DrawGirl();
