@@ -59,10 +59,10 @@ void InitializeBillboardTree()
 		// xが横方向、yが縦方向、zが奥行方向
 		//四つの頂点を作る。頭の中でイメージ
 
-		float tx = 0.2f;
+		float tx = 0.0f;
 		float ty = 0.0f;
-		float tw = 0.6f;
-		float th = 0.7f;
+		float tw = 1.0f;
+		float th = 1.0f;
 
 		v[0].position = { -0.5f, 0.5f, 0.0f };
 		v[1].position = { 0.5f, 0.5f, 0.0f };

@@ -14,8 +14,6 @@ struct BackgroundBlock
 
 static constexpr unsigned int BackgroundBlockMax = 500;
 
-
-
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
 static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
 static ID3D11Buffer* g_InstanceBuffer;
@@ -28,7 +26,7 @@ static BackgroundBlock g_BackgroundBlock[BackgroundBlockMax];
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
 void InitializeBackgroundBlock()
 {
-	g_Texture = TextureLoad(L"asset\\texture\\block_breakable.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_field.png");
 
 	for (int i = 0; i < BackgroundBlockMax; i++)
 	{
@@ -261,6 +259,7 @@ void FinalizeBackgroundBlock()
 {
 	SAFE_RELEASE(g_VertexBuffer);  // 頂点バッファには必ず解放しなければならないというルールがある。
 	SAFE_RELEASE(g_IndexBuffer);
+	SAFE_RELEASE(g_InstanceBuffer);
 }
 
 void UpdateBackgroundBlock()
