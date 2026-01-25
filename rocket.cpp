@@ -210,7 +210,7 @@ void RocketMove()
 
 	// 正規化して速度（0.2f）を掛ける
 	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
-	moveVec = XMVectorScale(moveVec, 0.25f); // 0.2f は移動スピード
+	moveVec = XMVectorScale(moveVec, 1.0f); // 0.2f は移動スピード
 
 	// --- 座標更新 ---
 	XMVECTOR posVec = XMLoadFloat3(&g_Position);
@@ -222,7 +222,7 @@ void RocketMove()
 void RocketHitCheck()
 {
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 0.5f;
+	float blockRadius = 1.5f;
 
 
 	float e = 0.5f;  // 跳ね返り係数
@@ -315,7 +315,7 @@ bool RocketIsHit()
 	}
 
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 0.5f;
+	float blockRadius = 1.5f;
 
 	// 跳ね返り係数
 	float e = 0.5f;

@@ -1,15 +1,21 @@
 #include "directX.h"
+
+#include <fstream>  // ファイル読み込み用
+#include <string>
+#include <sstream>
+
 #include "field.h"
 #include "Keyboard.h"
 #include "model.h"
 #include "camera.h"
 #include "shader.h"
 #include "breakableBlock.h"
+#include "BackgroundBlock.h"
 #include "grass.h"
 #include "ball.h"
-#include <fstream>  // ファイル読み込み用
-#include <string>
-#include <sstream>
+#include "start.h"
+#include "goal.h"
+#include "billboardTree.h"
 
 static constexpr unsigned int typeMax = 4;
 
@@ -57,7 +63,7 @@ void InitializeField()
 	std::swap_ranges(std::begin(g_FieldData), std::end(g_FieldData), std::begin(g_FieldDataDammy));
 
 	// ここでファイルを読み込む
-	LoadFieldData("asset\\data\\level_data.csv");
+	LoadFieldData("asset\\data\\levelData_1.csv");
 
 	D3D11_BUFFER_DESC desc = {};
 	// 4,000個分のサイズ
@@ -108,7 +114,7 @@ void DrawField()
 
 				if (g_FieldData[type].blockType == BLOCKTYPE::BLOCK)  // ground
 				{
-					
+					world *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
 				}
 				else if (g_FieldData[type].blockType == BLOCKTYPE::TREE)  // tree
 				{
@@ -184,9 +190,10 @@ void LoadFieldData(const char* filename)
 			{
 				value = BLOCKTYPE::TREE;
 			}
-			else if (seglist[0] == "Kirby")
+			else if (seglist[0] == "BillboardTree")
 			{
-				value = BLOCKTYPE::KIRBY;
+				CreateBillboardTree({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
 			}
 			else if (seglist[0] == "BreakableBlock")
 			{
@@ -194,19 +201,32 @@ void LoadFieldData(const char* filename)
 				CreateBreakableBlock({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
 				continue;
 			}
-			else if (seglist[0] == "Start")
+			// バックグラウンドブロック
+			else if (seglist[0] == "BackgroundBlock")
 			{
-				SetBallStartPosition({std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3])});
+				CreateBackgroundBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
 				continue;
 			}
-			else if (seglist[0] == "Goal")
+			else if (seglist[0] == "StartFlag")
 			{
-				
+				SetStartFlagPosition({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
 				continue;
 			}
-			else if (seglist[0] == "BackGroundBlock")
+			else if (seglist[0] == "StartPoint")
 			{
-
+				SetStartPosition({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
+			}
+			else if (seglist[0] == "GoalFlag")
+			{
+				SetGoalFlagPosition({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				SetGoalPosition({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
+			}
+			else if (seglist[0] == "GoalPoint")
+			{
+				SetGoalPosition({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
 			}
 
 			// 固定配列にデータを格納
@@ -220,4 +240,5 @@ void LoadFieldData(const char* filename)
 	}
 
 	// DEBUG: 読み込まれなかった残りの配列要素を初期化したい場合はここでループを回す
+
 }

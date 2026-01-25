@@ -1,18 +1,18 @@
 #include "directx.h"
 
 #include "main.h"
-#include "BackGroundBlock.h"
+#include "BackgroundBlock.h"
 #include "shader.h"
 #include "texture.h"
 #include "camera.h"
 
-struct BackGroundBlock
+struct BackgroundBlock
 {
 	XMFLOAT3 position;
 	bool use;
 };
 
-static constexpr unsigned int backGroundBlockMax = 500;
+static constexpr unsigned int BackgroundBlockMax = 500;
 
 
 
@@ -22,18 +22,18 @@ static ID3D11Buffer* g_InstanceBuffer;
 
 static int g_Texture;
 
-static BackGroundBlock g_BackGroundBlock[backGroundBlockMax];
+static BackgroundBlock g_BackgroundBlock[BackgroundBlockMax];
 
 // 実際の描画は2dで行われている。最後に描画したものが手前になる。
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
-void InitializeBackGroundBlock()
+void InitializeBackgroundBlock()
 {
-	g_Texture = TextureLoad(L"asset\\texture\\block_field.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_breakable.png");
 
-	for (int i = 0; i < backGroundBlockMax; i++)
+	for (int i = 0; i < BackgroundBlockMax; i++)
 	{
-		g_BackGroundBlock[i].position = { 0.0f, 0.0f, 0.0f };
-		g_BackGroundBlock[i].use = false;
+		g_BackgroundBlock[i].position = { 0.0f, 0.0f, 0.0f };
+		g_BackgroundBlock[i].use = false;
 	}
 
 	{  // 頂点バッファ生成
@@ -57,7 +57,7 @@ void InitializeBackGroundBlock()
 	{
 		D3D11_BUFFER_DESC desc = {};
 		// 最大個数分のサイズを確保
-		desc.ByteWidth = sizeof(InstanceData) * backGroundBlockMax;
+		desc.ByteWidth = sizeof(InstanceData) * BackgroundBlockMax;
 		// 毎フレーム更新するため動的に設定
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		// 頂点バッファとして扱う
@@ -257,17 +257,17 @@ void InitializeBackGroundBlock()
 	//////////////頂点バッファ設定終了////////////////////
 }
 
-void FinalizeBackGroundBlock()
+void FinalizeBackgroundBlock()
 {
 	SAFE_RELEASE(g_VertexBuffer);  // 頂点バッファには必ず解放しなければならないというルールがある。
 	SAFE_RELEASE(g_IndexBuffer);
 }
 
-void UpdateBackGroundBlock()
+void UpdateBackgroundBlock()
 {
 }
 
-void DrawBackGroundBlock()
+void DrawBackgroundBlock()
 {
 	ID3D11DeviceContext* context = DirectXGetDeviceContext();
 
@@ -277,15 +277,15 @@ void DrawBackGroundBlock()
 	InstanceData* data = (InstanceData*)mappedResource.pData;
 	int drawCount = 0;
 
-	for (int i = 0; i < backGroundBlockMax; i++)
+	for (int i = 0; i < BackgroundBlockMax; i++)
 	{
-		if (g_BackGroundBlock[i].use == false) continue;
+		if (g_BackgroundBlock[i].use == false) continue;
 
 
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-		matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-		matrixWorld *= XMMatrixTranslation(g_BackGroundBlock[i].position.x, g_BackGroundBlock[i].position.y, g_BackGroundBlock[i].position.z);
+		matrixWorld *= XMMatrixScaling(63.0f, 63.0f, 63.0f);
+		matrixWorld *= XMMatrixTranslation(g_BackgroundBlock[i].position.x, g_BackgroundBlock[i].position.y, g_BackgroundBlock[i].position.z);
 
 		data[drawCount].worldMatrix = matrixWorld;
 		drawCount++;
@@ -305,13 +305,13 @@ void DrawBackGroundBlock()
 		ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
 		DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
 
+		// indexバッファ設定   // intは4byteで、32bit 
+		context->IASetIndexBuffer(g_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
 		// 頂点バッファ設定
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
 		context->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset);
-
-		// indexバッファ設定   // intは4byteで、32bit 
-		context->IASetIndexBuffer(g_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		UINT instanceStride = sizeof(InstanceData);
 		UINT instanceOffset = 0;
@@ -321,15 +321,23 @@ void DrawBackGroundBlock()
 	}
 
 	context->DrawIndexedInstanced(36, drawCount, 0, 0, 0);
+
+	// スロット１をnullptrで上書きして、インスタンスバッファの設定を解除する
+	ID3D11Buffer* nullBuffer = nullptr;
+	UINT zeroStride = 0;
+	UINT zeroOffset = 0;
+	context->IASetVertexBuffers(1, 1, &nullBuffer, &zeroStride, &zeroOffset);
+
+	context->IASetVertexBuffers(0, 1, &nullBuffer, &zeroStride, &zeroOffset);  // スロット１の初期化はあってもなくても変わらない。
 }
 
-void CreateBackGroundBlock(XMFLOAT3 position)
+void CreateBackgroundBlock(XMFLOAT3 position)
 {
-	for (int i = 0; i < backGroundBlockMax; i++)
+	for (int i = 0; i < BackgroundBlockMax; i++)
 	{
-		if (g_BackGroundBlock[i].use == true) continue;
-		g_BackGroundBlock[i].position = position;
-		g_BackGroundBlock[i].use = true;
+		if (g_BackgroundBlock[i].use == true) continue;
+		g_BackgroundBlock[i].position = position;
+		g_BackgroundBlock[i].use = true;
 		break;
 	}
 }

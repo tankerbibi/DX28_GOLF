@@ -17,7 +17,6 @@ static float g_Alpha;
 void InitializeResult()
 {
 	g_BGTexture = TextureLoad(L"asset\\texture\\CoolBall.png");
-	g_ResultTexture = TextureLoad(L"asset\\texture\\Title.png");
 	g_PressKeyTexture = TextureLoad(L"asset\\texture\\PressKey.png");
 	g_FrameCount = 0;
 	InitializeRanking();

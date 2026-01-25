@@ -1,8 +1,8 @@
 #pragma once
 
-void InitializeBackGroundBlock();
-void FinalizeBackGroundBlock();
-void UpdateBackGroundBlock();
-void DrawBackGroundBlock();
+void InitializeBackgroundBlock();
+void FinalizeBackgroundBlock();
+void UpdateBackgroundBlock();
+void DrawBackgroundBlock();
 
-void CreateBackGroundBlock(XMFLOAT3 position);
+void CreateBackgroundBlock(XMFLOAT3 position);

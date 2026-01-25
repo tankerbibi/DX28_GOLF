@@ -126,8 +126,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="animationFbx.h" />
-    <ClInclude Include="BackGroundBlock.h" />
+    <ClInclude Include="BackgroundBlock.h" />
     <ClInclude Include="ball.h" />
+    <ClInclude Include="billboardTree.h" />
     <ClInclude Include="breakableBlock.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cube.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="shadow.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="sprite.h" />
+    <ClInclude Include="start.h" />
     <ClInclude Include="stroke.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="title.h" />
@@ -158,8 +160,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animationFbx.cpp" />
-    <ClCompile Include="BackGroundBlock.cpp" />
+    <ClCompile Include="BackgroundBlock.cpp" />
     <ClCompile Include="ball.cpp" />
+    <ClCompile Include="billboardTree.cpp" />
     <ClCompile Include="breakableBlock.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cube.cpp" />
@@ -183,6 +186,7 @@
     <ClCompile Include="shadow.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="start.cpp" />
     <ClCompile Include="stroke.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="title.cpp" />

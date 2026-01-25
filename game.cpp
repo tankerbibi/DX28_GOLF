@@ -16,6 +16,9 @@
 #include "shadow.h"
 #include "breakableBlock.h"
 #include "grass.h"
+#include "start.h"
+#include "BackgroundBlock.h"
+#include "billboardTree.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -26,18 +29,22 @@ void InitializeGame()
 {
 	g_Pause = false;
 	InitializeBreakableBlock();
+	InitializeBackgroundBlock();
 	InitializeGrass();
+	InitializeBillboardTree();
 	InitializeCamera();
 	InitializeScore();
 	InitializeStroke();
 	InitializeMouse();
 	InitializeBall();
 	InitializeRocket();
-	InitializeField();
 	InitializeGoal();
 	InitializeEffect();
 	InitializeTrail();
 	InitializeShadow();
+	InitializeStart();
+	InitializeGoal();
+	InitializeField();
 
 	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };  // SIMDの機能　XYZを一度に計算できる
 	direction = XMVector3Normalize(direction);  // 正規化(長さ)
@@ -69,7 +76,11 @@ void FinalizeGame()
 	FinalizeTrail();
 	FinalizeShadow();
 	FinalizeBreakableBlock();
+	FinalizeBackgroundBlock();
+	FinalizeBillboardTree();
 	FinalizeGrass();
+	FinalizeStart();
+	FinalizeGoal();
 }
 
 void UpdateGame()
@@ -84,7 +95,12 @@ void UpdateGame()
 		// UpdateScore();
 		UpdateStroke();
 		UpdateField();
-		UpdateGrass();	
+		UpdateGrass();
+		UpdateBillboardTree();
+		UpdateBackgroundBlock();
+		UpdateStart();
+		UpdateGoal();
+
 
 		if (GetCameraMode() == CameraMode::DEBUG)
 		{
@@ -122,11 +138,10 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(true);
 	DrawField();
+	DrawBackgroundBlock();
 	DrawBreakableBlock();
 
-
 	Shader_SetPipelineInstance(false);
-	DrawGoal();
 	DrawRocket();
 
 	// ライトをオフにする
@@ -135,13 +150,15 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(true);
 	DrawGrass();
+	DrawBillboardTree();
 
 	Shader_SetPipelineInstance(false);
 	DrawShadow();
 	DrawBall();
+	DrawStart();
+	DrawGoal();
 
 	DrawTrail();
-	// DrawGirl();
 	DrawEffect();
 
 	// 2D描画するときの設定
@@ -150,5 +167,4 @@ void DrawGame()
 	// DrawScore();
 	DrawStroke();
 	DrawMouse();
-	
 }

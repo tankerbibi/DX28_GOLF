@@ -119,7 +119,7 @@ void SetShadowPosition(XMFLOAT3 position)
 void ShadowHitCheck()
 {
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 0.5f;
+	float blockRadius = 1.5f;
 	float shadowY = -100.0f;
 
 	for (int i = 0; i < blockMax; i++)
