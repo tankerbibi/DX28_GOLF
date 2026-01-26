@@ -141,8 +141,8 @@ void DrawGrass()
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // çsóÒÇçÏê¨Å@float 4 x 4
 		XMMATRIX matrixWorldPair = XMMatrixIdentity();
 
-		matrixWorldPair *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-		matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+		matrixWorldPair *= XMMatrixScaling(2.0f, 2.0f, 2.0f);
+		matrixWorld *= XMMatrixScaling(2.0f, 2.0f, 2.0f);
 
 		matrixWorldPair *= XMMatrixRotationY(XM_PIDIV2);
 

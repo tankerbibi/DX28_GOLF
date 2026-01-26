@@ -1,13 +1,7 @@
 #include "directX.h"
 #include "breakableBlock.h"
-#include "Keyboard.h"
-#include "model.h"
 #include "camera.h"
 #include "shader.h"
-#include "field.h"
-#include "goal.h"
-#include "main.h"
-#include "ball.h"
 #include "effect.h"
 #include "texture.h"
 
@@ -15,12 +9,9 @@ static constexpr int maxHealth = 1000;
 
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
 static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
-static ID3D11Buffer* g_InstanceBuffer;
+static ID3D11Buffer* g_InstanceBuffer;  // インスタンス描画用のバッファ
 
 static int g_Texture;
-
-// インスタンス描画用のバッファ
-static ID3D11Buffer* g_InstanceBuffer;
 
 static BreakableBlock g_BreakableBlock[maxBreakableBlock];
 

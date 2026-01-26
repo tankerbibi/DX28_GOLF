@@ -184,7 +184,7 @@ void LoadFieldData(const char* filename)
 			if (seglist[0] == "Block")
 			{
 				value = BLOCKTYPE::BLOCK;
-				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 1.0f,std::stof(seglist[3]) });
+				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 3.0f,std::stof(seglist[3]) });
 			}
 			else if (seglist[0] == "Tree")
 			{
@@ -193,6 +193,11 @@ void LoadFieldData(const char* filename)
 			else if (seglist[0] == "BillboardTree")
 			{
 				CreateBillboardTree({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				continue;
+			}
+			else if (seglist[0] == "Grass")
+			{
+				//CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
 				continue;
 			}
 			else if (seglist[0] == "BreakableBlock")
