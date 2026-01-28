@@ -61,7 +61,7 @@ void UpdateTrail()
 
 void DrawTrail()
 {
-	const int vertexCountPerTrail = trailLength * 2;
+	const int vertexIndexPerTrail = trailLength * 2;
 
 	D3D11_MAPPED_SUBRESOURCE msr;
 	DirectXGetDeviceContext()->Map(g_VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr); //g_VertexBufferのありかを探す。
@@ -74,7 +74,7 @@ void DrawTrail()
 	{
 		if (g_Trail[t].use == false) continue;
 
-		Vertex* v = &vHead[t * vertexCountPerTrail];
+		Vertex* v = &vHead[t * vertexIndexPerTrail];
 
 		for (int i = 0; i < trailLength - 1; i++)
 		{
@@ -151,48 +151,60 @@ void DrawTrail()
 
 		// ポリゴン描画
 		//DirectXGetDeviceContext()->Draw(trailLength * 2 - 2, 0);
-		DirectXGetDeviceContext()->Draw(vertexCountPerTrail - 2, startVertexLocation);
+		DirectXGetDeviceContext()->Draw(vertexIndexPerTrail - 2, startVertexLocation);
 	}
 }
 
-int StartTrailEffect()
+int StartTrailEffect(XMFLOAT3 position)
 {
-	for (int i = 0; i < trailMax; i++)
+	for (int t = 0; t < trailMax; t++)
 	{
-		if (g_Trail[i].use == true)
+		if (g_Trail[t].use == false)
 		{
-			return i;
+			for (int i = 0; i < trailLength; i++)
+			{
+				g_Trail[t].position[i] = position;
+			}
+			g_Trail[t].use = true;
+			return t;
 		}
 	}
 }
 
 void FinishTrailEffect(int index)
 {
-	if (index < trailMax)
+	if (0 < index && index < trailMax)
 	{
 		g_Trail[index].use = false;
 	}
 }
 
-//void SetTrailPosition(XMFLOAT3 position)
-//{
-//	for (int i = 0; i < trailLength - 1; i++)
-//	{
-//		// 自分より前のインデックスの内容を、自分のインデックスに保存する。
-//		g_TrailPosition[i] = g_TrailPosition[i + 1];
-//	}
-//
-//	// 一番最後のインデックスに最新のポジションを入れる。
-//	g_TrailPosition[trailLength - 1] = position;
-//}
-//
-//void ResetTrailPosition(XMFLOAT3 position)
-//{
-//	for (int i = 0; i < trailLength - 1; i++)
-//	{
-//		g_TrailPosition[i] = position;
-//	}
-//}
+void SetTrailPosition(XMFLOAT3 position, int id)
+{
+	for (int t = 0; t < trailMax; t++)
+	{
+		for (int i = 0; i < trailLength - 1; i++)
+		{
+			// 自分より前のインデックスの内容を、自分のインデックスに保存する。
+			g_Trail[t].position[i] = g_Trail[t].position[i + 1];
+		}
+		g_Trail[t].position[trailLength - 1] = position;
+	}
+
+	// 一番最後のインデックスに最新のポジションを入れる。
+}
+
+void ResetTrailPosition(XMFLOAT3 position, int id)
+{
+	for (int t = 0; t < trailMax; t++)
+	{
+		for (int i = 0; i < trailLength - 1; i++)
+		{
+			// 自分より前のインデックスの内容を、自分のインデックスに保存する。
+			g_Trail[t].position[i] = position;
+		}
+	}
+}
 /////////////////////頂点バッファ設定開始///////////////////////
 //{
 //	D3D11_MAPPED_SUBRESOURCE msr;

@@ -15,9 +15,12 @@
 #include "breakableBlock.h"
 #include "texture.h"
 #include "start.h"
+#include "slope.h"
 
 static MODEL* g_Model = nullptr;
 static int g_Texture = -1;
+
+static int g_TrailId;
 
 static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
@@ -43,6 +46,7 @@ void MoveBall();
 
 void InitializeBall()
 {
+	g_TrailId = 0;
 	g_Model = ModelLoad("asset\\model\\ball.fbx");
 	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_green.png");
 	g_Position = {0.0f, 0.0f, 0.0f};
@@ -51,7 +55,7 @@ void InitializeBall()
 	g_State = BALL_STATE_START;
 	g_StateCount = 0;
 
-	ResetTrailPosition(g_Position);
+	//ResetTrailPosition(g_Position);
 
 	{
 		// 頂点バッファの作成
@@ -153,7 +157,7 @@ void DrawBall()
 	XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 	XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrixWorld *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
+	matrixWorld *= XMMatrixScaling(2.5f, 2.5f, 2.5f);
 
 	// 回転マトリクス（ビルボード処理）
 	matrixWorld *= invView;
@@ -175,6 +179,8 @@ void DrawBall()
 
 	// ポリゴン描画
 	DirectXGetDeviceContext()->Draw(4, 0);
+
+	// ModelDraw(g_Model);
 }
 
 void FinalizeBall()
@@ -286,7 +292,7 @@ void MoveBall()
 	// 衝突判定
 	BallHitCheck();
 
-	SetTrailPosition(g_Position);
+	//SetTrailPosition(g_Position);
 
 	SetShadowPosition(g_Position);
 
@@ -321,6 +327,139 @@ XMFLOAT3 GetBallPosition()
 void BallHitCheck()
 {
 	{
+		Slope* slope = GetSlope();
+		float slopeRadius = 1.5f;
+
+
+		float e = 0.5f;  // 跳ね返り係数
+
+		for (int i = 0; i < slopeMax; i++)
+		{
+
+			float slopeTop = slope[i].position.y + slopeRadius;
+
+			if (slope[i].slopeDirection == SlopeDirection::BACKWARDUP)
+				slopeTop = slope[i].position.y + std::min((g_Position.z - slope[i].position.z), slopeRadius);
+			else if (slope[i].slopeDirection == SlopeDirection::LEFTUP)
+				slopeTop = slope[i].position.y + std::min(-(g_Position.x - slope[i].position.x), slopeRadius);
+			else if (slope[i].slopeDirection == SlopeDirection::FORWARDUP)
+				slopeTop = slope[i].position.y + std::min(-(g_Position.z - slope[i].position.z), slopeRadius);
+			else if (slope[i].slopeDirection == SlopeDirection::RIGHTUP)
+				slopeTop = slope[i].position.y + std::min((g_Position.x - slope[i].position.x), slopeRadius);
+
+			// 横方向の当たり判定処理
+			if (slope[i].position.y - slopeRadius < g_Position.y &&
+				g_Position.y < slopeTop)  // 横からみた図の状況を作り出している！！
+			{
+				// x方向
+				if (slope[i].position.z - slopeRadius < g_Position.z &&
+					g_Position.z < slope[i].position.z + slopeRadius)  // 3次元だから2次元に絞ろう！
+				{
+					if (slope[i].position.x - slopeRadius < g_Position.x + g_BallRadius &&
+						g_Position.x - g_BallRadius < slope[i].position.x + slopeRadius)
+					{
+						if (slope[i].position.x < g_Position.x)
+						{
+							// 右
+							g_Position.x = slope[i].position.x + slopeRadius + g_BallRadius;
+						}
+						else
+						{
+							// 左
+							g_Position.x = slope[i].position.x - slopeRadius - g_BallRadius;
+						}
+						g_Velocity.x *= -e;
+					}
+				}
+				// z方向
+				else if (slope[i].position.x - slopeRadius < g_Position.x + g_BallRadius &&
+					g_Position.x < slope[i].position.x + slopeRadius)
+				{
+					if (slope[i].position.z - slopeRadius < g_Position.z + g_BallRadius &&
+						g_Position.z - g_BallRadius < slope[i].position.z + slopeRadius)
+					{
+						if (slope[i].position.z < g_Position.z)
+						{
+							// 奥
+							g_Position.z = slope[i].position.z + slopeRadius + g_BallRadius;
+						}
+						else
+						{
+							// 手前
+							g_Position.z = slope[i].position.z - slopeRadius - g_BallRadius;
+						}
+					}
+				}
+			}
+			else
+				// 縦方向の当たり判定処理
+			{
+				// 手前　奥
+				if (slope[i].position.z - slopeRadius < g_Position.z &&
+					g_Position.z < slope[i].position.z + slopeRadius)
+				{
+					if (slope[i].position.x - slopeRadius < g_Position.x &&
+						g_Position.x < slope[i].position.x + slopeRadius)
+					{
+						if (slope[i].position.y - slopeRadius < g_Position.y + g_BallRadius &&
+							g_Position.y - g_BallRadius < slopeTop)
+						{
+							if (slopeTop < g_Position.y )
+							{
+								// 上
+								g_Position.y = slopeTop + g_BallRadius;
+
+								if (g_Velocity.y < -3.0f)
+								{
+									CreateEffect(g_Position);
+									SetCameraShake(1.0f);
+								}
+
+								// 本当は法線から計算してみたいなことをやるらしい。
+								float dt = 1.0f / 60.0f;
+
+								if (slope[i].slopeDirection == SlopeDirection::BACKWARDUP)
+								{
+									// 坂道転がるコード
+									g_Velocity.z += -1.0f * dt;
+									// バウンドのコード
+									g_Velocity.z += -g_Velocity.y * -e;
+									g_Velocity.y = 0.0f;
+								}
+								else if (slope[i].slopeDirection == SlopeDirection::LEFTUP)
+								{
+									g_Velocity.x += 1.0f * dt;
+									g_Velocity.x += g_Velocity.y * -e;
+									g_Velocity.y = 0.0f;
+								}
+								else if (slope[i].slopeDirection == SlopeDirection::FORWARDUP)
+								{
+									g_Velocity.z += 1.0f * dt;
+									g_Velocity.z += g_Velocity.y * -e;
+									g_Velocity.y = 0.0f;
+								}
+								else if (slope[i].slopeDirection == SlopeDirection::RIGHTUP)
+								{
+									g_Velocity.x += -1.0f * dt;
+									g_Velocity.x += -g_Velocity.y * -e;
+									g_Velocity.y = 0.0f;
+								}
+							}
+							else
+							{
+								// 下
+								g_Position.y = slope[i].position.y - slopeRadius - g_BallRadius;
+								g_Velocity.y *= -e;
+							}
+						}
+					}
+				}
+			}
+		}
+	
+	}
+
+	{
 		BLOCK* block = GetFieldBlock();
 		float blockRadius = 1.5f;
 
@@ -329,9 +468,12 @@ void BallHitCheck()
 
 		for (int i = 0; i < blockMax; i++)
 		{
+
+			float blockTop = block[i].pos.y + blockRadius;
+
 			// 横方向の当たり判定処理
 			if (block[i].pos.y - blockRadius < g_Position.y &&
-				g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
+				g_Position.y < blockTop)  // 横からみた図の状況を作り出している！！
 			{
 				// x方向
 				if (block[i].pos.z - blockRadius < g_Position.z &&
@@ -384,12 +526,12 @@ void BallHitCheck()
 						g_Position.x < block[i].pos.x + blockRadius)
 					{
 						if (block[i].pos.y - blockRadius < g_Position.y + g_BallRadius &&
-							g_Position.y - g_BallRadius < block[i].pos.y + blockRadius)
+							g_Position.y - g_BallRadius < blockTop)
 						{
 							if (g_Position.y > block[i].pos.y)
 							{
 								// 上
-								g_Position.y = block[i].pos.y + blockRadius + g_BallRadius;
+								g_Position.y = blockTop + g_BallRadius;
 
 								if (g_Velocity.y < -3.0f)
 								{

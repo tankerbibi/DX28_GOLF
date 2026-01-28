@@ -19,6 +19,7 @@
 #include "start.h"
 #include "BackgroundBlock.h"
 #include "billboardTree.h"
+#include "slope.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -31,6 +32,7 @@ void InitializeGame()
 	InitializeBreakableBlock();
 	InitializeBackgroundBlock();
 	InitializeGrass();
+	InitializeSlope();
 	InitializeBillboardTree();
 	InitializeCamera();
 	InitializeScore();
@@ -70,6 +72,7 @@ void FinalizeGame()
 	FinalizeCamera();
 	FinalizeMouse();
 	FinalizeBall();
+	FinalizeSlope();
 	FinalizeRocket();
 	FinalizeGoal();
 	FinalizeEffect();
@@ -95,6 +98,7 @@ void UpdateGame()
 		// UpdateScore();
 		UpdateStroke();
 		UpdateField();
+		UpdateSlope();
 		UpdateGrass();
 		UpdateBillboardTree();
 		UpdateBackgroundBlock();
@@ -142,6 +146,7 @@ void DrawGame()
 	DrawBreakableBlock();
 
 	Shader_SetPipelineInstance(false);
+	DrawSlope();
 	DrawRocket();
 
 	// ライトをオフにする
@@ -154,12 +159,12 @@ void DrawGame()
 
 	Shader_SetPipelineInstance(false);
 	DrawShadow();
-	DrawBall();
 	DrawStart();
 	DrawGoal();
 
 	DrawTrail();
 	DrawEffect();
+	DrawBall();
 
 	// 2D描画するときの設定
 	SetDepthEnable(false);

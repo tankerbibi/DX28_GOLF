@@ -16,6 +16,7 @@
 #include "start.h"
 #include "goal.h"
 #include "billboardTree.h"
+#include "slope.h"
 
 static constexpr unsigned int typeMax = 4;
 
@@ -185,6 +186,10 @@ void LoadFieldData(const char* filename)
 			{
 				value = BLOCKTYPE::BLOCK;
 				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 3.0f,std::stof(seglist[3]) });
+			}
+			else if (seglist[0] == "Slope")
+			{
+				CreateSlope({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
 			}
 			else if (seglist[0] == "Tree")
 			{
