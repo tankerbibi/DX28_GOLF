@@ -47,7 +47,7 @@ void InitializeCamera()
 	g_CameraRotation = {0.0f, 0.0f,0.0f};
 	g_CameraYaw = 0.0f;
 	g_CameraPitch = 0.0f;
-	g_CameraMode = CameraMode::ROCKET;
+	g_CameraMode = CameraMode::BALL;
 	g_FixCameraIndex = 0;
 	g_FixCameraTime = 0;
 	g_ShakeTime = 0;
@@ -64,10 +64,6 @@ void UpdateCamera()
 	if (Keyboard_IsKeyTrigger(KK_D1))
 	{
 		g_CameraMode = CameraMode::BALL;
-	}
-	else if (Keyboard_IsKeyTrigger(KK_D2))
-	{
-		g_CameraMode = CameraMode::ROCKET;
 	}
 	else if (Keyboard_IsKeyTrigger(KK_D3))
 	{
@@ -178,8 +174,8 @@ void FollowBall()
 	XMFLOAT3 ballPos = GetBallPosition();
 
 	g_Position = ballPos;
-	g_Position.z -= 5.0f;
-	g_Position.y += 5.0f;
+	g_Position.z -= 50.0f;
+	g_Position.y += 30.0f;
 
 	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
@@ -204,8 +200,8 @@ void FollowBall()
 		g_CameraRotation.y -= 0.1f;
 	}
 
-	g_Position.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
-	g_Position.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;
+	/*g_Position.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
+	g_Position.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;*/
 }
 
 void FollowRocket()

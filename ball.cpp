@@ -46,7 +46,7 @@ void MoveBall();
 
 void InitializeBall()
 {
-	g_TrailId = 0;
+
 	g_Model = ModelLoad("asset\\model\\ball.fbx");
 	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_green.png");
 	g_Position = {0.0f, 0.0f, 0.0f};
@@ -55,7 +55,7 @@ void InitializeBall()
 	g_State = BALL_STATE_START;
 	g_StateCount = 0;
 
-	//ResetTrailPosition(g_Position);
+	ResetTrailPosition(g_Position);
 
 	{
 		// 頂点バッファの作成
@@ -292,7 +292,7 @@ void MoveBall()
 	// 衝突判定
 	BallHitCheck();
 
-	//SetTrailPosition(g_Position);
+	SetTrailPosition(g_Position);
 
 	SetShadowPosition(g_Position);
 

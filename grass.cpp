@@ -38,7 +38,7 @@ void InitializeGrass()
 	{
 		D3D11_BUFFER_DESC desc = {};
 		// 十字作るために二つ分確保・最大個数分のサイズを確保
-		desc.ByteWidth = sizeof(InstanceData) * maxGrass * 2;
+		desc.ByteWidth = sizeof(InstanceData) * maxGrass;
 		// 毎フレーム更新するため動的に設定
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		// 頂点バッファとして扱う
@@ -122,42 +122,39 @@ void DrawGrass()
 	{
 		if (g_Grass[i].use == false) continue;
 
-		// ビューマトリクスを取得 カメラのビューマトリクスはカメラが向いている方向そのもの。
-		XMMATRIX view = GetCameraViewMatrix();
-		// ビューマトリクスの逆行列を求める 掛け算の代わりに割り算をするみたいな感じ。
-		XMMATRIX invView = XMMatrixInverse(nullptr, view);
+		const XMFLOAT3 cameraPos = GetCameraPosition();
 
-		// 移動成分を消去
-		invView.r[3].m128_f32[0] = 0.0f;
-		invView.r[3].m128_f32[1] = 0.0f;
-		invView.r[3].m128_f32[2] = 0.0f;
+		XMVECTOR gPos = XMLoadFloat3(&g_Grass[i].position);
+		XMVECTOR cPos = XMLoadFloat3(&cameraPos);
 
-		invView.r[0].m128_f32[1] = 0; // 上下方向の成分を0にする
-		invView.r[1] = XMVectorSet(0, 1, 0, 0); // 上向きは常に垂直(0,1,0)固定
-		invView.r[2].m128_f32[1] = 0;
+		XMVECTOR forward = XMVectorSubtract(cPos, gPos);
 
-		// 頂点シェーダーに変換行列を設定
-		XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-		XMMATRIX matrixWorldPair = XMMatrixIdentity();
+		forward = XMVectorSetY(forward, 0);
+		forward = XMVector3Normalize(forward);
 
-		matrixWorldPair *= XMMatrixScaling(2.0f, 2.0f, 2.0f);
-		matrixWorld *= XMMatrixScaling(2.0f, 2.0f, 2.0f);
+		XMVECTOR upVec = XMVectorSet(0, 1, 0, 0);
 
-		matrixWorldPair *= XMMatrixRotationY(XM_PIDIV2);
+		XMVECTOR right = XMVector3Cross(upVec, forward);
 
-		// 回転マトリクス（ビルボード処理）
-		matrixWorld *= invView;
-		matrixWorldPair *= invView;
+		// 5. 回転行列を作成 (各ベクトルを軸としてセット)
+		XMMATRIX rot = XMMatrixIdentity();
+		rot.r[0] = right;   // X軸
+		rot.r[1] = upVec;   // Y軸
+		rot.r[2] = forward; // Z軸
 
-		// 移動マトリクス。gpuで計算されている。
-		matrixWorld *= XMMatrixTranslation(g_Grass[i].position.x, g_Grass[i].position.y, g_Grass[i].position.z);
-		matrixWorldPair *= XMMatrixTranslation(g_Grass[i].position.x, g_Grass[i].position.y, g_Grass[i].position.z);
+		// XMMatrixLookAtLHはカメラの視点（ビュー行列）を作るための関数みたい。
+
+		// 6. ワールド行列の合成 (スケーリング * 回転 * 移動)
+		XMMATRIX matrixWorld = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+		matrixWorld *= rot;
+		matrixWorld *= XMMatrixRotationY(XM_PI);
+		matrixWorld *= XMMatrixTranslationFromVector(gPos);
+
+		//matrixWorldPair *= XMMatrixRotationY(XM_PIDIV2);
 
 		// バッファに書き込み
 		data[drawCount].worldMatrix = matrixWorld;
-		data[drawCount + 1].worldMatrix = matrixWorldPair;
-		drawCount += 2;
+		drawCount += 1;
 	}
 	context->Unmap(g_InstanceBuffer, 0);
 
@@ -213,82 +210,3 @@ void CreateGrass(XMFLOAT3 position)
 		break;
 	}
 }
-
-//// 座標を指定して描画する関数に変更
-//void DrawGrass()
-//{
-//	ID3D11DeviceContext* context = DirectXGetDeviceContext();
-//
-//	// --- 1. バッファをロックしてデータを書き込む ---
-//	D3D11_MAPPED_SUBRESOURCE mappedResource;
-//
-//	context->Map(g_InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-//
-//	InstanceData* data = (InstanceData*)mappedResource.pData;
-//	int drawCount = 0;
-//
-//	for (int i = 0; i < maxGrass; i++)
-//	{
-//		if (g_Grass[i].use == false) continue;
-//
-//		// 行列計算
-//		XMMATRIX world = XMMatrixIdentity();
-//		world *= XMMatrixScaling(1.0f, 1.0f, 1.0f); // 拡大縮小
-//		world *= XMMatrixTranslation(g_BreakableBlock[i].position.x, g_BreakableBlock[i].position.y, g_BreakableBlock[i].position.z); // 移動
-//
-//		// バッファに書き込み
-//		data[drawCount].worldMatrix = world;
-//		drawCount++;
-//	}
-//	// 頂点バッファ設定
-//	UINT stride = sizeof(Vertex);
-//	UINT offset = 0;
-//	DirectXGetDeviceContext()->IASetVertexBuffers(0, 1, &g_VertexBuffer, &stride, &offset); //気を付けて　GetじゃなくてSet
-//
-//	// プリミティブトポロジ設定
-//	DirectXGetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);  // トライアングルストリップ（連続） つまりZの書き方
-//
-//	ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
-//	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
-//
-//	// ビューマトリクスを取得 カメラのビューマトリクスはカメラが向いている方向そのもの。
-//	XMMATRIX view = GetCameraViewMatrix();
-//	// ビューマトリクスの逆行列を求める 掛け算の代わりに割り算をするみたいな感じ。
-//	XMMATRIX invView = XMMatrixInverse(nullptr, view);
-//
-//	// 移動成分を消去
-//	invView.r[3].m128_f32[0] = 0.0f;
-//	invView.r[3].m128_f32[1] = 0.0f;
-//	invView.r[3].m128_f32[2] = 0.0f;
-//
-//	invView.r[0].m128_f32[1] = 0; // 上下方向の成分を0にする
-//	invView.r[1] = XMVectorSet(0, 1, 0, 0); // 上向きは常に垂直(0,1,0)固定
-//	invView.r[2].m128_f32[1] = 0;
-//
-//	// 頂点シェーダーに変換行列を設定
-//	XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-//	XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-//
-//	matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-//
-//	// 回転マトリクス（ビルボード処理）
-//	matrixWorld *= invView;
-//
-//	// 移動マトリクス。gpuで計算されている。
-//	matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
-//
-//	matrix = matrixWorld;
-//
-//	// ビューマトリクス
-//	matrix *= GetCameraViewMatrix();
-//
-//	// プロジェクションマトリクス
-//
-//	matrix *= GetCameraProjectionMatrix();
-//
-//	// vertex.hlslのmtxに値を送っている。
-//	Shader_SetMatrix({ matrix, matrixWorld });
-//
-//	// ポリゴン描画
-//	DirectXGetDeviceContext()->Draw(4, 0);
-//}

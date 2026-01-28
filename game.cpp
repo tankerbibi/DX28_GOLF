@@ -35,6 +35,7 @@ void InitializeGame()
 	InitializeSlope();
 	InitializeBillboardTree();
 	InitializeCamera();
+	InitializeTrail();
 	InitializeScore();
 	InitializeStroke();
 	InitializeMouse();
@@ -42,7 +43,6 @@ void InitializeGame()
 	InitializeRocket();
 	InitializeGoal();
 	InitializeEffect();
-	InitializeTrail();
 	InitializeShadow();
 	InitializeStart();
 	InitializeGoal();
