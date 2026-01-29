@@ -130,7 +130,7 @@ void DrawCamera()
 	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_Position), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
 
 	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス （新規）
-	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 1.0f/*見ることができる一番近い距離*/, 1000.0f/*見ることができる一番遠い距離*/);
+	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 0.1f/*見ることができる一番近い距離*/, 500.0f/*見ることができる一番遠い距離*/);
 }
 
 XMMATRIX GetCameraViewMatrix()

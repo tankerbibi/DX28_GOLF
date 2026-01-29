@@ -124,8 +124,8 @@ void DrawGrass()
 
 		const XMFLOAT3 cameraPos = GetCameraPosition();
 
-		XMVECTOR gPos = XMLoadFloat3(&g_Grass[i].position);
-		XMVECTOR cPos = XMLoadFloat3(&cameraPos);
+		const XMVECTOR gPos = XMLoadFloat3(&g_Grass[i].position);
+		const XMVECTOR cPos = XMLoadFloat3(&cameraPos);
 
 		XMVECTOR forward = XMVectorSubtract(cPos, gPos);
 
