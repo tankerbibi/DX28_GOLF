@@ -20,6 +20,7 @@
 #include "BackgroundBlock.h"
 #include "billboardTree.h"
 #include "slope.h"
+#include "block.h"
 
 static int g_BGM{};
 static bool g_Pause{false};
@@ -31,6 +32,7 @@ void InitializeGame()
 	g_Pause = false;
 	InitializeBreakableBlock();
 	InitializeBackgroundBlock();
+	InitializeBlock();
 	InitializeGrass();
 	InitializeSlope();
 	InitializeBillboardTree();
@@ -79,6 +81,7 @@ void FinalizeGame()
 	FinalizeTrail();
 	FinalizeShadow();
 	FinalizeBreakableBlock();
+	FinalizeBlock();
 	FinalizeBackgroundBlock();
 	FinalizeBillboardTree();
 	FinalizeGrass();
@@ -101,6 +104,7 @@ void UpdateGame()
 		UpdateSlope();
 		UpdateGrass();
 		UpdateBillboardTree();
+		UpdateBlock();
 		UpdateBackgroundBlock();
 		UpdateStart();
 		UpdateGoal();
@@ -144,6 +148,7 @@ void DrawGame()
 	DrawField();
 	DrawBackgroundBlock();
 	DrawBreakableBlock();
+	DrawBlock();
 
 	Shader_SetPipelineInstance(false);
 	DrawSlope();

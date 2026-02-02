@@ -275,7 +275,7 @@ void DrawBreakableBlock()
 
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // çsóÒÇçÏê¨Å@float 4 x 4
 
-		matrixWorld *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+		matrixWorld *= XMMatrixScaling(2.0f, 2.0f, 2.0f);
 		matrixWorld *= XMMatrixTranslation(g_BreakableBlock[i].position.x, g_BreakableBlock[i].position.y, g_BreakableBlock[i].position.z);
 
 		data[drawCount].worldMatrix = matrixWorld;

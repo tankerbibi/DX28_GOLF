@@ -65,6 +65,10 @@ void UpdateCamera()
 	{
 		g_CameraMode = CameraMode::BALL;
 	}
+	else if (Keyboard_IsKeyTrigger(KK_D2))
+	{
+		g_CameraMode = CameraMode::ROCKET;
+	}
 	else if (Keyboard_IsKeyTrigger(KK_D3))
 	{
 		g_CameraMode = CameraMode::DEBUG;

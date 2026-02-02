@@ -173,7 +173,8 @@ void SetFullScreen(bool fullScreen)
 //バックバッファクリア
 void Clear(void)
 {
-	float clear_color[4] = { 0.5f,0.5f,0.7f,1.0f };
+	// float clear_color[4] = { 0.5f,0.2f,0.0f,1.0f };
+	float clear_color[4] = { 0.6f,0.83f,0.95f,1.0f };
 	g_DeviceContext->ClearRenderTargetView(g_RenderTargetView, clear_color);
 	g_DeviceContext->ClearDepthStencilView(g_DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }

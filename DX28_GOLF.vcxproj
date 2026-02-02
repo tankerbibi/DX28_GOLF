@@ -129,6 +129,7 @@
     <ClInclude Include="BackgroundBlock.h" />
     <ClInclude Include="ball.h" />
     <ClInclude Include="billboardTree.h" />
+    <ClInclude Include="block.h" />
     <ClInclude Include="breakableBlock.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cube.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="BackgroundBlock.cpp" />
     <ClCompile Include="ball.cpp" />
     <ClCompile Include="billboardTree.cpp" />
+    <ClCompile Include="block.cpp" />
     <ClCompile Include="breakableBlock.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cube.cpp" />

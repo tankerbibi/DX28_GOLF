@@ -91,7 +91,7 @@ void InitializeGrass()
 	}
 
 	// テクスチャ読み込み（草の画像を読み込んでください）
-	g_Texture = TextureLoad(L"asset\\texture\\grass.png");
+	g_Texture = TextureLoad(L"asset\\texture\\Grassdw.png");
 }
 
 void FinalizeGrass()

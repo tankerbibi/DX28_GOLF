@@ -5,18 +5,15 @@
 #include <sstream>
 
 #include "field.h"
-#include "Keyboard.h"
 #include "model.h"
-#include "camera.h"
-#include "shader.h"
 #include "breakableBlock.h"
 #include "BackgroundBlock.h"
 #include "grass.h"
-#include "ball.h"
 #include "start.h"
 #include "goal.h"
 #include "billboardTree.h"
 #include "slope.h"
+#include "block.h"
 
 static constexpr unsigned int typeMax = 4;
 
@@ -95,57 +92,57 @@ void UpdateField()
 
 void DrawField()
 {
-	ID3D11DeviceContext* context = DirectXGetDeviceContext();
+	//ID3D11DeviceContext* context = DirectXGetDeviceContext();
 
-	for (int type = 0; type < typeMax; type++)
-	{
-		// バッファをロック
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		context->Map(g_InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	//for (int type = 0; type < typeMax; type++)
+	//{
+	//	// バッファをロック
+	//	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	//	context->Map(g_InstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
-		InstanceData* data = (InstanceData*)mappedResource.pData;
-		// 今回描画する個数
-		int drawCount = 0;
+	//	InstanceData* data = (InstanceData*)mappedResource.pData;
+	//	// 今回描画する個数
+	//	int drawCount = 0;
 
-		for (int i = 0; i < g_BlockCount; i++)
-		{
-			if (g_Block[i].blockType == g_FieldData[type].blockType)
-			{
-				XMMATRIX world = XMMatrixIdentity();
+	//	for (int i = 0; i < g_BlockCount; i++)
+	//	{
+	//		if (g_Block[i].blockType == g_FieldData[type].blockType)
+	//		{
+	//			XMMATRIX world = XMMatrixIdentity();
 
-				if (g_FieldData[type].blockType == BLOCKTYPE::BLOCK)  // ground
-				{
-					world *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
-				}
-				else if (g_FieldData[type].blockType == BLOCKTYPE::TREE)  // tree
-				{
-					world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
-				}
-				else if (g_FieldData[type].blockType == BLOCKTYPE::KIRBY)  // カービィ
-				{
+	//			if (g_FieldData[type].blockType == BLOCKTYPE::BLOCK)  // ground
+	//			{
+	//				world *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
+	//			}
+	//			else if (g_FieldData[type].blockType == BLOCKTYPE::TREE)  // tree
+	//			{
+	//				world *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	//			}
+	//			else if (g_FieldData[type].blockType == BLOCKTYPE::KIRBY)  // カービィ
+	//			{
 
-				}
+	//			}
 
-				world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
-				data[drawCount].worldMatrix = world;
-				drawCount++;
-			}
-		}
-		context->Unmap(g_InstanceBuffer, 0);
+	//			world *= XMMatrixTranslation(g_Block[i].pos.x, g_Block[i].pos.y, g_Block[i].pos.z);
+	//			data[drawCount].worldMatrix = world;
+	//			drawCount++;
+	//		}
+	//	}
+	//	context->Unmap(g_InstanceBuffer, 0);
 
-		if (drawCount > 0)
-		{
-			MATRIX commonMatrices;
-			// 単位行列に初期化
-			commonMatrices.matrixWorld = XMMatrixIdentity();
-			commonMatrices.matrix = XMMatrixIdentity();
+	//	if (drawCount > 0)
+	//	{
+	//		MATRIX commonMatrices;
+	//		// 単位行列に初期化
+	//		commonMatrices.matrixWorld = XMMatrixIdentity();
+	//		commonMatrices.matrix = XMMatrixIdentity();
 
-			commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
-			Shader_SetMatrix(commonMatrices);
+	//		commonMatrices.matrix = GetCameraViewMatrix() * GetCameraProjectionMatrix();
+	//		Shader_SetMatrix(commonMatrices);
 
-			ModelDrawInstanced(g_FieldData[type].model, g_InstanceBuffer, drawCount);
-		}
-	}
+	//		ModelDrawInstanced(g_FieldData[type].model, g_InstanceBuffer, drawCount);
+	//	}
+	//}
 }
 
 BLOCK* GetFieldBlock()
@@ -185,6 +182,7 @@ void LoadFieldData(const char* filename)
 			if (seglist[0] == "Block")
 			{
 				value = BLOCKTYPE::BLOCK;
+				CreateBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
 				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 3.0f,std::stof(seglist[3]) });
 			}
 			else if (seglist[0] == "Slope")

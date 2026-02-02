@@ -1,18 +1,18 @@
 #include "directx.h"
 
 #include "main.h"
-#include "BackgroundBlock.h"
+#include "Block.h"
 #include "shader.h"
 #include "texture.h"
 #include "camera.h"
 
-struct BackgroundBlock
+struct Block
 {
 	XMFLOAT3 position;
 	bool use;
 };
 
-static constexpr unsigned int BackgroundBlockMax = 500;
+static constexpr unsigned int BlockMax = 10000;
 
 static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
 static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
@@ -20,18 +20,18 @@ static ID3D11Buffer* g_InstanceBuffer;
 
 static int g_Texture;
 
-static BackgroundBlock g_BackgroundBlock[BackgroundBlockMax];
+static Block g_Block[BlockMax];
 
 // 実際の描画は2dで行われている。最後に描画したものが手前になる。
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
-void InitializeBackgroundBlock()
+void InitializeBlock()
 {
 	g_Texture = TextureLoad(L"asset\\texture\\block_field.png");
 
-	for (int i = 0; i < BackgroundBlockMax; i++)
+	for (int i = 0; i < BlockMax; i++)
 	{
-		g_BackgroundBlock[i].position = { 0.0f, 0.0f, 0.0f };
-		g_BackgroundBlock[i].use = false;
+		g_Block[i].position = { 0.0f, 0.0f, 0.0f };
+		g_Block[i].use = false;
 	}
 
 	{  // 頂点バッファ生成
@@ -55,7 +55,7 @@ void InitializeBackgroundBlock()
 	{
 		D3D11_BUFFER_DESC desc = {};
 		// 最大個数分のサイズを確保
-		desc.ByteWidth = sizeof(InstanceData) * BackgroundBlockMax;
+		desc.ByteWidth = sizeof(InstanceData) * BlockMax;
 		// 毎フレーム更新するため動的に設定
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		// 頂点バッファとして扱う
@@ -185,8 +185,8 @@ void InitializeBackgroundBlock()
 		v[3].texcoord = { tx + tw,	ty + 0.2f };
 
 		// 底面
-		v[4].texcoord = { tx,		ty  };
-		v[5].texcoord = { tx + tw,	ty  };
+		v[4].texcoord = { tx,		ty + 0.7f };
+		v[5].texcoord = { tx + tw,	ty + 0.7f };
 		v[6].texcoord = { tx,		ty + th };
 		v[7].texcoord = { tx + tw,	ty + th };
 
@@ -255,18 +255,18 @@ void InitializeBackgroundBlock()
 	//////////////頂点バッファ設定終了////////////////////
 }
 
-void FinalizeBackgroundBlock()
+void FinalizeBlock()
 {
 	SAFE_RELEASE(g_VertexBuffer);  // 頂点バッファには必ず解放しなければならないというルールがある。
 	SAFE_RELEASE(g_IndexBuffer);
 	SAFE_RELEASE(g_InstanceBuffer);
 }
 
-void UpdateBackgroundBlock()
+void UpdateBlock()
 {
 }
 
-void DrawBackgroundBlock()
+void DrawBlock()
 {
 	ID3D11DeviceContext* context = DirectXGetDeviceContext();
 
@@ -276,15 +276,15 @@ void DrawBackgroundBlock()
 	InstanceData* data = (InstanceData*)mappedResource.pData;
 	int drawCount = 0;
 
-	for (int i = 0; i < BackgroundBlockMax; i++)
+	for (int i = 0; i < BlockMax; i++)
 	{
-		if (g_BackgroundBlock[i].use == false) continue;
+		if (g_Block[i].use == false) continue;
 
 
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-		matrixWorld *= XMMatrixScaling(63.0f, 63.0f, 63.0f);
-		matrixWorld *= XMMatrixTranslation(g_BackgroundBlock[i].position.x, g_BackgroundBlock[i].position.y, g_BackgroundBlock[i].position.z);
+		matrixWorld *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
+		matrixWorld *= XMMatrixTranslation(g_Block[i].position.x, g_Block[i].position.y, g_Block[i].position.z);
 
 		data[drawCount].worldMatrix = matrixWorld;
 		drawCount++;
@@ -330,13 +330,13 @@ void DrawBackgroundBlock()
 	context->IASetVertexBuffers(0, 1, &nullBuffer, &zeroStride, &zeroOffset);  // スロット１の初期化はあってもなくても変わらない。
 }
 
-void CreateBackgroundBlock(XMFLOAT3 position)
+void CreateBlock(XMFLOAT3 position)
 {
-	for (int i = 0; i < BackgroundBlockMax; i++)
+	for (int i = 0; i < BlockMax; i++)
 	{
-		if (g_BackgroundBlock[i].use == true) continue;
-		g_BackgroundBlock[i].position = position;
-		g_BackgroundBlock[i].use = true;
+		if (g_Block[i].use == true) continue;
+		g_Block[i].position = position;
+		g_Block[i].use = true;
 		break;
 	}
 }
