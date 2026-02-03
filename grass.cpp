@@ -87,11 +87,10 @@ void InitializeGrass()
 	{
 		g_Grass[i].position = { 0.0f,0.0f,0.0f};
 		g_Grass[i].use = false;
-
 	}
 
 	// テクスチャ読み込み（草の画像を読み込んでください）
-	g_Texture = TextureLoad(L"asset\\texture\\Grassdw.png");
+	g_Texture = TextureLoad(L"asset\\texture\\Grass.png");
 }
 
 void FinalizeGrass()

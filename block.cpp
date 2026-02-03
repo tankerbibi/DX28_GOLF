@@ -1,6 +1,5 @@
 #include "directx.h"
 
-#include "main.h"
 #include "Block.h"
 #include "shader.h"
 #include "texture.h"

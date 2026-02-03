@@ -17,6 +17,13 @@ struct Vertex //頂点データ　GPUメモリに保存する。
 	float bone_weights[4];  // 各ボーンからの影響度
 };
 
+struct Transform
+{
+	XMFLOAT3 position;
+	XMFLOAT3 scale;
+	XMFLOAT3 rotaiton;
+};
+
 
 // 各インスタンスが持つデータ
 struct InstanceData
