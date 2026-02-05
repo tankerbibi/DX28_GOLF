@@ -44,6 +44,8 @@ static bool isDraw;
 
 static int score;
 
+
+
 void RocketHitCheck();
 bool RocketIsHit();
 void RocketMove();

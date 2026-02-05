@@ -1,9 +1,8 @@
-cpp title.h
 #pragma once
 #include "scene.h"
 
 class TitleScene : public Scene {
-public:
+public:                             
     TitleScene();
     ~TitleScene() override;
     void Initialize() override;
