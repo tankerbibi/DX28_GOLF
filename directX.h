@@ -44,6 +44,7 @@ void DirectXInitialize(HWND hWnd); //HWND‚Æ‚ÍƒEƒCƒ“ƒhƒE‚Ì¯•ÊqBƒEƒBƒ“ƒhƒEƒnƒ“ƒ
 void DirectXFinalize(void);
 
 ID3D11Device* DirectXGetDevice(void);
+void SetRenderTarget();
 ID3D11DeviceContext* DirectXGetDeviceContext(void);
 
 void SetFullScreen(bool fullScreen);  // g‚Á‚Ä‚¢‚È‚¢B

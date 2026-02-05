@@ -137,8 +137,19 @@ void DrawCamera()
 	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, screenWidth / screenHeight/*アスペクト比*/, 0.1f/*見ることができる一番近い距離*/, 500.0f/*見ることができる一番遠い距離*/);
 }
 
-XMMATRIX GetCameraViewMatrix()
+void DrawCameraMap()
 {
+	const XMFLOAT3 position = XMFLOAT3(0.0f, 30.0f, 0.0f);
+	const XMFLOAT3 target = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	const XMFLOAT3 up = XMFLOAT3(0.0f, 0.0f, 1.0f);  // カメラの上方向 いつもと違うよ！
+	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&position), XMLoadFloat3(&target), XMLoadFloat3(&up));
+
+	//プロジェクションマトリクス 3dの画面に大きさを合わせるためのマトリクス （新規）
+	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*カメラの視野（ラジアン角）*/, 256.0f / 256.0f/*アスペクト比*/, 0.1f/*見ることができる一番近い距離*/, 500.0f/*見ることができる一番遠い距離*/);
+}
+
+XMMATRIX GetCameraViewMatrix()
+{	
 	return g_ViewMatrix;
 }
 

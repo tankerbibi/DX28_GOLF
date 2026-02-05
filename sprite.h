@@ -6,7 +6,7 @@
 
 void SpriteInitialize();
 void SpriteFinalize();
-void SpriteDraw(float x, float y, float width, float height, float tx, float ty, float tw, float th,int texId);
+void SpriteDraw(float x, float y, float width, float height, float tx, float ty, float tw, float th);
 void SpriteDrawRotation(float x, float y, float width, float height, float tx, float ty, float tw, float th, float rotation, float texId);
 
 void SetAlpha(float alpha);

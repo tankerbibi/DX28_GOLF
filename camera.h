@@ -15,6 +15,8 @@ void FinalizeCamera();
 void UpdateCamera();
 void DrawCamera();
 
+void DrawCameraMap();
+
 XMMATRIX GetCameraViewMatrix();
 XMMATRIX GetCameraProjectionMatrix();
 XMFLOAT3 GetCameraForward();

@@ -1,11 +1,27 @@
-#ifndef TITLE_H_
-#define TITLE_H_
+cpp title.h
+#pragma once
+#include "scene.h"
 
-#define TEXTURE_NUM	(2)
+class TitleScene : public Scene {
+public:
+    TitleScene();
+    ~TitleScene() override;
+    void Initialize() override;
+    void Finalize() override;
+    void Update() override;
+    void Draw() override;
 
+private:
+    static constexpr int TEXTURE_NUM = 2;
+    int m_BGTexture{ 0 };
+    int m_TitleTexture{ 0 };
+    int m_PressKeyTexture{ 0 };
+    float m_FrameCount{ 0.0f };
+    float m_Alpha{ 0.0f };
+};
+
+// Backwards-compatible C API
 void InitializeTitle();
 void FinalizeTitle();
 void UpdateTitle();
 void DrawTitle();
-
-#endif // !TITLE_H_

@@ -160,6 +160,11 @@ ID3D11Device* DirectXGetDevice(void)
 	return g_Device;
 }
 
+void SetRenderTarget()
+{
+	g_DeviceContext->OMSetRenderTargets(1, &g_RenderTargetView, g_DepthStencilView);
+}
+
 ID3D11DeviceContext* DirectXGetDeviceContext(void)
 {
 	return g_DeviceContext;

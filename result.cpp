@@ -42,9 +42,13 @@ void UpdateResult()
 
 void DrawResult()
 {
-	SpriteDraw(screenWidth * 0.5f, screenHeight * 0.5f, screenWidth, screenHeight, 0, 0, 1.0f, 1.0f, g_BGTexture);
+	ID3D11ShaderResourceView* texture = GetTexture(g_BGTexture);
+	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
+	SpriteDraw(screenWidth * 0.5f, screenHeight * 0.5f, screenWidth, screenHeight, 0, 0, 1.0f, 1.0f);
 	//SpriteDraw(screenWidth * 0.5f, screenHeight * 2.0f / 5.0f, screenWidth * 0.5f, screenHeight * 2 / 3.0f, 0, 0, 1.0f, 1.0f, 1.0f, 1.0f, 0, g_ResultTexture);
 	SetAlpha(g_Alpha);
-	SpriteDraw(screenWidth * 0.5f, screenHeight * 6.0f / 7.0f, screenWidth * 3.0f / 5.0f, screenHeight / 7.0f, 0, 0, 1.0f, 1.0f,g_PressKeyTexture);
+	 texture = GetTexture(g_PressKeyTexture);
+	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
+	SpriteDraw(screenWidth * 0.5f, screenHeight * 6.0f / 7.0f, screenWidth * 3.0f / 5.0f, screenHeight / 7.0f, 0, 0, 1.0f, 1.0f);
 	DrawRanking();
 }

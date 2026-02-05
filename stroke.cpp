@@ -29,6 +29,9 @@ void DrawStroke()
 {
 	int value = g_Stroke;
 
+	ID3D11ShaderResourceView* texture = GetTexture(g_Texture);
+	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
+
 	for (int i = 0; i < 3; i++)
 	{
 		int num = value % 10;
@@ -39,7 +42,8 @@ void DrawStroke()
 		float ty{ (num / 5) / 5.0f };
 		float th{ 1.0f / 5.0f };
 
-		SpriteDraw(150.0f - i * 50.0f, 100.0f, 100.0f, 100.0f, tx, ty, tw, th, g_Texture);
+
+		SpriteDraw(150.0f - i * 50.0f, 100.0f, 100.0f, 100.0f, tx, ty, tw, th);
 	}
 }
 

@@ -47,10 +47,8 @@ void SpriteFinalize()
 	SAFE_RELEASE(g_AlphaBuffer);
 }
 
-void SpriteDraw(float x, float y, float width, float height, float tx, float ty, float tw, float th, int texId)
+void SpriteDraw(float x, float y, float width, float height, float tx, float ty, float tw, float th)
 {
-	ID3D11ShaderResourceView* texture = GetTexture(texId);
-	DirectXGetDeviceContext()->PSSetShaderResources(0, 1, &texture);
 
 	//頂点バッファにデータを設定
 	D3D11_MAPPED_SUBRESOURCE msr;
