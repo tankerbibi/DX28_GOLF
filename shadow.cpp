@@ -93,7 +93,7 @@ void DrawShadow()
 	matrix.matrixWorld = XMMatrixIdentity();
 
 	matrix.matrixWorld *= XMMatrixScaling(5.0f, 1.0f, 5.0f);
-	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);
+	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y + 0.1f, g_Position.z);
 
 	matrix.matrix = matrix.matrixWorld;
 

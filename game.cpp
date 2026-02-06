@@ -21,6 +21,7 @@
 #include "slope.h"
 #include "block.h"
 #include "map.h"
+#include "sky.h"
 
 static GameScene g_GameScene; // single instance
 
@@ -49,6 +50,8 @@ void GameScene::Initialize()
     InitializeStart();
     InitializeField();
     InitializeMap();
+    InitializeSky();
+
 
     XMVECTOR direction{ 0.3f, -1.0f, 0.5f };
     direction = XMVector3Normalize(direction);
@@ -80,6 +83,7 @@ void GameScene::Finalize()
     FinalizeGrass();
     FinalizeStart();
     FinalizeMap();
+    FinalizeSky();
 }
 
 void GameScene::Update()
@@ -113,6 +117,7 @@ void GameScene::Update()
         UpdateShadow();
         UpdateBreakableBlock();
         UpdateMap();
+        UpdateSky();
     }
 }
 
@@ -139,6 +144,9 @@ void GameScene::Draw()
 
     light.lightEnable = false;
     Shader_SetLight(light);
+
+    DrawSky();
+
 
     Shader_SetPipelineInstance(true);
     DrawGrass();

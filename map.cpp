@@ -14,10 +14,12 @@ static ID3D11Texture2D* g_MapTexture = NULL;
 static ID3D11RenderTargetView* g_MapRTV = NULL;
 // 参照窓口 今まではこれもあった
 static ID3D11ShaderResourceView* g_MapSRV = NULL;
+
 // デプステクスチャ　深度バッファを保存するための変数。普通に順番に描画すると、奥行が狂うので順番を設定する
 static ID3D11Texture2D* g_MapDepthTexture = NULL;
 // デプス窓口
 static ID3D11DepthStencilView* g_MapDSV = NULL;
+// 参照するときは必要らしい。
 
 void InitializeMap()
 {
@@ -85,7 +87,7 @@ void UpdateMap()
 
 void DrawMap()
 {
-	// レンダーターゲット設定
+	// レンダーターゲット設定 レンダーテクスチャに矢印をつないでる
 	DirectXGetDeviceContext()->OMSetRenderTargets(1, &g_MapRTV, g_MapDSV);
 	// ビューポート設定
 	D3D11_VIEWPORT vp;
@@ -95,6 +97,7 @@ void DrawMap()
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
+	// ずれないように。
 	DirectXGetDeviceContext()->RSSetViewports(1, &vp);
 	//クリア
 	float clearColor[4] = { 0.8f, 0.2f, 0.2f, 0.3f };
@@ -118,6 +121,7 @@ void DrawMap()
 	DirectXGetDeviceContext()->RSSetViewports(1, &vp);
 
 	Shader_SetPipelineInstance(false);
+	// レンダーターゲットをバックバッファに戻してあげる。
 	SetRenderTarget();
 
 	// スプライト描画

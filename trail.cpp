@@ -22,7 +22,7 @@ void InitializeTrail()
 	{  // 頂点バッファ生成
 		D3D11_BUFFER_DESC bd{};
 		bd.Usage = D3D11_USAGE_DYNAMIC;
-		// 頂点は保存ポジションの２倍分必要。
+		// 頂点は保存ポジションの２倍分必要。	
 		bd.ByteWidth = sizeof(Vertex) * (trailLength * 2 - 2);
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -30,7 +30,7 @@ void InitializeTrail()
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer); //g_VertexBufferはGPUのメモリなのでアクセスできない。
 	}
 
-	g_Texture = TextureLoad(L"asset\\texture\\shadow.png");
+	g_Texture = TextureLoad(L"asset\\texture\\sha.png");
 }
 
 void FinalizeTrail()
@@ -84,14 +84,16 @@ void DrawTrail()
 			crossProduct.y /= crossProductLength;
 			crossProduct.z /= crossProductLength;
 
+			float t = (float)(trailLength - 1 - i) / (trailLength - 1); // 0.0 ～ 1.0
+			float width = (1.0f - t) * 1.5f;        // 先端ほど0に近づく
 
-			v[i * 2 + 0].position.x = g_TrailPosition[i].x + crossProduct.x * 0.5f;
-			v[i * 2 + 0].position.y = g_TrailPosition[i].y + crossProduct.y * 0.5f;
-			v[i * 2 + 0].position.z = g_TrailPosition[i].z + crossProduct.z * 0.5f;
-
-			v[i * 2 + 1].position.x = g_TrailPosition[i].x - crossProduct.x * 0.5f;
-			v[i * 2 + 1].position.y = g_TrailPosition[i].y - crossProduct.y * 0.5f;
-			v[i * 2 + 1].position.z = g_TrailPosition[i].z - crossProduct.z * 0.5f;
+			v[i * 2 + 0].position.x = g_TrailPosition[i].x + crossProduct.x * width;
+			v[i * 2 + 0].position.y = g_TrailPosition[i].y + crossProduct.y * width;
+			v[i * 2 + 0].position.z = g_TrailPosition[i].z + crossProduct.z * width;
+																			  
+			v[i * 2 + 1].position.x = g_TrailPosition[i].x - crossProduct.x * width;
+			v[i * 2 + 1].position.y = g_TrailPosition[i].y - crossProduct.y * width;
+			v[i * 2 + 1].position.z = g_TrailPosition[i].z - crossProduct.z * width;
 
 			v[i * 2 + 0].texcoord = { 0.5f, 1.0f };
 			v[i * 2 + 1].texcoord = { 0.5f, 0.0f };
