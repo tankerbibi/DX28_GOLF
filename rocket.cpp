@@ -13,6 +13,12 @@
 #include "ranking.h"
 #include "stroke.h"
 
+struct ROCKET
+{
+	XMFLOAT3 position;
+	XMFLOAT3 rotation;
+};
+
 enum ROCKET_STATE
 {
 	ROCKET_STATE_START,
@@ -44,11 +50,10 @@ static bool isDraw;
 
 static int score;
 
-
+static 
 
 void RocketHitCheck();
 bool RocketIsHit();
-void RocketMove();
 void PushBallWithRocket();
 
 void InitializeRocket()
@@ -58,6 +63,8 @@ void InitializeRocket()
 	g_Position = g_RocketStartPosition;
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
+
+	for(int i = 0;)
 	// g_TargetPos = { g_Pos.x, , 0.0f };
 	g_Pitch = 0.0f;
 	g_Yaw = 0.0f;
@@ -168,6 +175,10 @@ void SetRocketStartPosition(XMFLOAT3 newPosition)
 	g_RocketStartPosition = newPosition;
 }
 
+
+
+
+
 float GetRocketYaw()
 {
 	return g_Yaw;
@@ -176,48 +187,6 @@ float GetRocketYaw()
 float GetRocketPitch()
 {
 	return g_Pitch;
-}
-
-void RocketMove()
-{
-	const float deltaTime = 1.0f / 60.0f;
-
-	// 限りなく90度に近い数値を取得(90 * 0.99)
-	const float pitchLimit = XM_PIDIV2 * 0.99f;
-
-	// --- 角度の入力処理 ---
-	if (Keyboard_IsKeyDown(KK_A)) g_Yaw -= 0.05f;      // 左
-	else if (Keyboard_IsKeyDown(KK_D)) g_Yaw += 0.05f; // 右
-
-	if (Keyboard_IsKeyDown(KK_W)) g_Pitch += 0.05f;    // 上
-	else if (Keyboard_IsKeyDown(KK_S)) g_Pitch -= 0.05f; // 下
-
-	// ピッチを制限
-	if (g_Pitch > pitchLimit) g_Pitch = pitchLimit;
-	else if (g_Pitch < -pitchLimit) g_Pitch = -pitchLimit;
-
-	// 角度を変数に反映
-	g_Rotation.x = g_Pitch;
-	g_Rotation.y = g_Yaw;
-
-	// --- 移動ベクトルの計算 ---
-	// 方向ベクトル取得 (Z+ が正面と仮定)
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-
-	// 現在の角度から回転行列を作成
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_Pitch, g_Yaw, 0.0f);
-
-	// 正面ベクトルを回転させる
-	XMVECTOR forwardVec = XMVector3TransformNormal(forwardBase, rotationMatrix);
-
-	// 正規化して速度（0.2f）を掛ける
-	XMVECTOR moveVec = XMVector3Normalize(forwardVec);
-	moveVec = XMVectorScale(moveVec, 1.0f); // 0.2f は移動スピード
-
-	// --- 座標更新 ---
-	XMVECTOR posVec = XMLoadFloat3(&g_Position);
-	posVec = XMVectorAdd(posVec, moveVec);
-	XMStoreFloat3(&g_Position, posVec);
 }
 
 // ロケットがブロックに当たったらロールバックする関数
@@ -437,3 +406,5 @@ void PushBallWithRocket()
 		AddForce({ force.x * power * 3.0f, force.y * power + 5.0f, force.z * power * 3.0f});
 	}
 }
+
+
