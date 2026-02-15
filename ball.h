@@ -1,4 +1,7 @@
 #pragma once
+#include <DirectXMath.h>
+
+using namespace DirectX;
 
 void InitializeBall();
 void FinalizeBall();

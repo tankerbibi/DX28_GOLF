@@ -1,3 +1,4 @@
+#include "directX.h"
 /*==============================================================================
 
    シェーダー [shader.cpp]
@@ -9,7 +10,6 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 using namespace DirectX;
-#include "directx.h"
 #include "debug_ostream.h"
 #include <fstream>
 #include "shader.h"

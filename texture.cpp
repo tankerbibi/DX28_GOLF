@@ -1,7 +1,7 @@
+#include "directX.h"
 #include "texture.h"
 #include "DirectXTex.h"
 using namespace DirectX;
-#include "directx.h"
 #include <string>
 
 #if _DEBUG

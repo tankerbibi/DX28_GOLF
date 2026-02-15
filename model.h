@@ -3,33 +3,32 @@
 #include <unordered_map>
 
 #include "assimp/cimport.h"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
 #include "assimp/matrix4x4.h"
-#pragma comment (lib, "assimp-vc143-mt.lib")
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 
-struct BoneInfo
-{
-	aiMatrix4x4 offsetMatrix;
-	aiMatrix4x4 finalTransform;
+#pragma comment(lib, "assimp-vc143-mt.lib")
+
+struct BoneInfo {
+  aiMatrix4x4 offsetMatrix;
+  aiMatrix4x4 finalTransform;
 };
 
-struct MODEL
-{
-	const aiScene* AiScene = nullptr;
+struct MODEL {
+  const aiScene *AiScene = nullptr;
 
-	ID3D11Buffer** VertexBuffer;
-	ID3D11Buffer** IndexBuffer;
+  ID3D11Buffer **VertexBuffer;
+  ID3D11Buffer **IndexBuffer;
 
-	std::unordered_map<std::string, ID3D11ShaderResourceView*> Texture;  // mapÇÕunreal engineÇÃÇ‚Ç¬ÅBîzóÒÇÃêiâªî≈ÅB
-	std::unordered_map<std::string, int> boneMapping;
-	BoneInfo boneInfo[100];
-	int numBones = 0;
+  std::unordered_map<std::string, ID3D11ShaderResourceView *>
+      Texture; // map„ÅØunreal engine„ÅÆ„ÇÑ„Å§„ÄÇÈÖçÂàó„ÅÆÈÄ≤ÂåñÁâà„ÄÇ
+  std::unordered_map<std::string, int> boneMapping;
+  BoneInfo boneInfo[100];
+  int numBones = 0;
 };
 
-
-MODEL* ModelLoad(const char* FileName);
-void ModelRelease(MODEL* model);
-void ModelDraw(MODEL* model);
-void ModelDrawInstanced(MODEL* model, ID3D11Buffer* pInstanceBuffer, UINT instanceCount);
-
+MODEL *ModelLoad(const char *FileName);
+void ModelRelease(MODEL *model);
+void ModelDraw(MODEL *model);
+void ModelDrawInstanced(MODEL *model, ID3D11Buffer *pInstanceBuffer,
+                        UINT instanceCount);

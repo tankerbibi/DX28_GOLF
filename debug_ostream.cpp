@@ -1,3 +1,4 @@
+#include "directX.h"
 #include "debug_ostream.h"
 namespace hal
 {

@@ -1,3 +1,4 @@
+#include "directX.h"
 #include "game.h"
 #include "score.h" 
 #include "sound.h"

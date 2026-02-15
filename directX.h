@@ -1,53 +1,56 @@
-#ifndef DIRECTX_H //ƒCƒ“ƒNƒ‹[ƒhƒK[ƒh
+#ifndef DIRECTX_H // ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ã‚¬ãƒ¼ãƒ‰
 #define DIRECTX_H
 
-#define NOMINMAX  //windows.h‚Åƒtƒ@ƒCƒ“‚Ì’¼‘O‚É‘‚­ƒ‹[ƒ‹B No! Min and Maxƒ}ƒNƒ’è‹`B
-#include <Windows.h>  // min maxŠÖ”‚ª“ñd’è‹`‚³‚ê‚é‚Ì‚ğ–h‚®‚½‚ß‚ÉNOMINMAX‚ª•K—vB
-#include <d3d11.h> //DirectX 11‚ÌŠÖ”‚Ìƒvƒƒgƒ^ƒCƒvéŒ¾‚ª“ü‚Á‚½ƒwƒbƒ_[ DirectX11‚Æ12‚Å‚ÍİŒvv‘z‚ªˆá‚¤B12‚Í“ï‚µ‚·‚¬‚é‚ç‚µ‚¢AGPU‚ğ’¼Ú‘€ì‚·‚éB
-#include <DirectXMath.h> //ƒGƒtƒFƒNƒg‚Æ‚©ƒ}ƒgƒŠƒbƒNƒX‚ğg‚¤‚½‚ß‚ÌŠÖ”
+#pragma once
+
+#define NOMINMAX
+#include <DirectXMath.h> //ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã¨ã‹ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã‚’ä½¿ã†ãŸã‚ã®é–¢æ•°
+#include <Windows.h>     // min maxé–¢æ•°å®šç¾©ã‚’æ­¢ã‚ã‚‹NOMINMAXå¿…è¦ã€‚
+#include <d3d11.h> //DirectX 11ã®é–¢æ•°ã®ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒ—å®£è¨€ãƒ˜ãƒƒãƒ€ãƒ¼ DirectX11ã¨12ã§ã¯è¨­è¨ˆæ€æƒ³ãŒé•ã†ã€‚12ã¯é›£ã—ãã€GPUã‚’ç›´æ¥æ“ä½œã™ã‚‹ã€‚
 using namespace DirectX;
 
-struct Vertex //’¸“_ƒf[ƒ^@GPUƒƒ‚ƒŠ‚É•Û‘¶‚·‚éB
+struct Vertex // é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã€€GPUãƒ¡ãƒ¢ãƒªã«ä¿å­˜ã™ã‚‹ã€‚
 {
-	XMFLOAT3 position;  // ’¸“_À•W
-	XMFLOAT2 texcoord;  // ƒeƒNƒXƒ`ƒƒÀ•W
-	XMFLOAT3 normal;  // –@üÀ•W
+  XMFLOAT3 position; // é ‚ç‚¹åº§æ¨™
+  XMFLOAT2 texcoord; // ãƒ†ã‚¯ã‚¹ãƒãƒ£åº§æ¨™
+  XMFLOAT3 normal;   // æ³•ç·šåº§æ¨™
 
-	UINT bone_indices[4];
-	float bone_weights[4];  // Šeƒ{[ƒ“‚©‚ç‚Ì‰e‹¿“x
+  UINT bone_indices[4];
+  float bone_weights[4]; // å„ãƒœãƒ¼ãƒ³ã‹ã‚‰ã®å½±éŸ¿åº¦
 };
 
-struct Transform
-{
-	XMFLOAT3 position;
-	XMFLOAT3 scale;
-	XMFLOAT3 rotaiton;
+struct Transform {
+  XMFLOAT3 position;
+  XMFLOAT3 scale;
+  XMFLOAT3 rotaiton;
 };
 
-
-// ŠeƒCƒ“ƒXƒ^ƒ“ƒX‚ª‚Âƒf[ƒ^
-struct InstanceData
-{
-	XMMATRIX worldMatrix; // ŠeƒuƒƒbƒN‚Ìƒ[ƒ‹ƒhs—ñ
+// å„ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒæŒã¤ãƒ‡ãƒ¼ã‚¿
+struct InstanceData {
+  XMMATRIX worldMatrix; // å„ãƒ–ãƒ­ãƒƒã‚¯ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
 };
 
-#define SAFE_RELEASE(o)		if (o) { (o)->Release(); o = NULL;}
+#define SAFE_RELEASE(o)                                                        \
+  if (o) {                                                                     \
+    (o)->Release();                                                            \
+    o = NULL;                                                                  \
+  }
 
 static constexpr float screenWidth = 1920.0f;
 static constexpr float screenHeight = 1080.0f;
 
-
-
 static constexpr float deltaTime = 1.0f / 60.0f;
 
-void DirectXInitialize(HWND hWnd); //HWND‚Æ‚ÍƒEƒCƒ“ƒhƒE‚Ì¯•ÊqBƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹ hwnd‚ª‚È‚¢‚ÆŒÄ‚Ño‚¹‚È‚¢B
+void DirectXInitialize(
+    HWND hWnd); // HWNDã¨ã¯ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ã®è­˜åˆ¥å­ã€‚ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
+                // hwndãŒãªã„ã¨å‘¼ã³å‡ºã›ãªã„ã€‚
 void DirectXFinalize(void);
 
-ID3D11Device* DirectXGetDevice(void);
+ID3D11Device *DirectXGetDevice(void);
 void SetRenderTarget();
-ID3D11DeviceContext* DirectXGetDeviceContext(void);
+ID3D11DeviceContext *DirectXGetDeviceContext(void);
 
-void SetFullScreen(bool fullScreen);  // g‚Á‚Ä‚¢‚È‚¢B
+void SetFullScreen(bool fullScreen); // ä½¿ã£ã¦ã„ãªã„ã€‚
 
 void Clear(void);
 void Present(void);

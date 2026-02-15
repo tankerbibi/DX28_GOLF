@@ -1,3 +1,4 @@
+#include "directX.h"
 #include "easing.h"
 #include <math.h>
 

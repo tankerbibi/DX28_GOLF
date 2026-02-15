@@ -44,7 +44,7 @@ void InitializeCamera()
 {
 	g_Position = { 0.0f, 1.0f, -10.0f };
 	g_CameraTargetPos = { 0.0f, 0.0f, 1.0f };
-	g_CameraRotation = {0.0f, 0.0f,0.0f};
+	g_CameraRotation = { 0.0f, 0.0f,0.0f };
 	g_CameraYaw = 0.0f;
 	g_CameraPitch = 0.0f;
 	g_CameraMode = CameraMode::BALL;
@@ -108,10 +108,10 @@ void UpdateCamera()
 		break;
 	}
 
-	////// ƒC[ƒWƒ“ƒOŒvZ
+	////// ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°è¨ˆç®—
 	//float ease = easeInOutCubic(g_FixCameraTime);
 
-	//// üŒ`•âŠÔ
+	//// ç·šå½¢è£œé–“
 	//g_Position.x = g_FixCameraOldPosition.x * (1.0f - ease)
 	//	+ g_FixCameraPosition[g_FixCameraIndex].x * ease;
 	//g_Position.y = g_FixCameraOldPosition.y * (1.0f - ease)
@@ -130,26 +130,36 @@ void UpdateCamera()
 
 void DrawCamera()
 {
-	const XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // ƒJƒƒ‰‚Ìã•ûŒü
+	const XMFLOAT3 up = XMFLOAT3(0.0f, 1.0f, 0.0f);  // ã‚«ãƒ¡ãƒ©ã®ä¸Šæ–¹å‘
 	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&g_Position), XMLoadFloat3(&g_CameraTargetPos), XMLoadFloat3(&up));
 
-	//ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒNƒX 3d‚Ì‰æ–Ê‚É‘å‚«‚³‚ğ‡‚í‚¹‚é‚½‚ß‚Ìƒ}ƒgƒŠƒNƒX iV‹Kj
-	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*ƒJƒƒ‰‚Ì‹–ìiƒ‰ƒWƒAƒ“Špj*/, screenWidth / screenHeight/*ƒAƒXƒyƒNƒg”ä*/, 0.1f/*Œ©‚é‚±‚Æ‚ª‚Å‚«‚éˆê”Ô‹ß‚¢‹——£*/, 50000.0f/*Œ©‚é‚±‚Æ‚ª‚Å‚«‚éˆê”Ô‰“‚¢‹——£*/);
+	//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªã‚¯ã‚¹ 3dã®ç”»é¢ã«å¤§ãã•ã‚’åˆã‚ã›ã‚‹ãŸã‚ã®ãƒãƒˆãƒªã‚¯ã‚¹ ï¼ˆæ–°è¦ï¼‰
+	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(
+		1.3f,                                 // Field of view angle in radians
+		static_cast<float>(screenWidth) / static_cast<float>(screenHeight), // Aspect ratio
+		0.1f,                                 // Near clipping plane
+		50000.0f                              // Far clipping plane
+	);
 }
 
 void DrawCameraMap()
 {
 	const XMFLOAT3 position = XMFLOAT3(0.0f, 30.0f, 0.0f);
 	const XMFLOAT3 target = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	const XMFLOAT3 up = XMFLOAT3(0.0f, 0.0f, 1.0f);  // ƒJƒƒ‰‚Ìã•ûŒü ‚¢‚Â‚à‚Æˆá‚¤‚æI
+	const XMFLOAT3 up = XMFLOAT3(0.0f, 0.0f, 1.0f);  // ã‚«ãƒ¡ãƒ©ã®ä¸Šæ–¹å‘ ã„ã¤ã‚‚ã¨é•ã†ã‚ˆï¼
 	g_ViewMatrix = XMMatrixLookAtLH(XMLoadFloat3(&position), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-	//ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒNƒX 3d‚Ì‰æ–Ê‚É‘å‚«‚³‚ğ‡‚í‚¹‚é‚½‚ß‚Ìƒ}ƒgƒŠƒNƒX iV‹Kj
-	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(1.3 /*ƒJƒƒ‰‚Ì‹–ìiƒ‰ƒWƒAƒ“Špj*/, 256.0f / 256.0f/*ƒAƒXƒyƒNƒg”ä*/, 0.1f/*Œ©‚é‚±‚Æ‚ª‚Å‚«‚éˆê”Ô‹ß‚¢‹——£*/, 500.0f/*Œ©‚é‚±‚Æ‚ª‚Å‚«‚éˆê”Ô‰“‚¢‹——£*/);
+	//ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªã‚¯ã‚¹ 3dã®ç”»é¢ã«å¤§ãã•ã‚’åˆã‚ã›ã‚‹ãŸã‚ã®ãƒãƒˆãƒªã‚¯ã‚¹ ï¼ˆæ–°è¦ï¼‰
+	g_ProjectionMatrix = XMMatrixPerspectiveFovLH(
+		1.3f,                                 // Field of view angle in radians
+		256.0f / 256.0f, // Aspect ratio
+		0.1f,                                 // Near clipping plane
+		500.0f                              // Far clipping plane
+	);
 }
 
 XMMATRIX GetCameraViewMatrix()
-{	
+{
 	return g_ViewMatrix;
 }
 
@@ -160,7 +170,7 @@ XMMATRIX GetCameraProjectionMatrix()
 
 XMFLOAT3 GetCameraForward()
 {
-	// I“_‚©‚çn“_‚ğˆø‚­
+	// çµ‚ç‚¹ã‹ã‚‰å§‹ç‚¹ã‚’å¼•ã
 	XMFLOAT3 forward;
 	forward.x = g_CameraTargetPos.x - g_Position.x;
 	forward.y = g_CameraTargetPos.y - g_Position.y;
@@ -199,7 +209,7 @@ void FollowBall()
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
 	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
 
-	///ö‹ÆƒR[ƒhn‚Ü‚è///
+	///æˆæ¥­ã‚³ãƒ¼ãƒ‰å§‹ã¾ã‚Š///
 	if (Keyboard_IsKeyDown(KK_RIGHT))
 	{
 		g_CameraTargetPos.x += 0.1f;
@@ -227,37 +237,37 @@ void FollowRocket()
 	float rocketYaw = GetRocketYaw();
 	float rocketPitch = GetRocketPitch();
 
-	// ƒJƒƒ‰‚ÆƒƒPƒbƒg‚Ì‹——£iƒIƒtƒZƒbƒgj
+	// ã‚«ãƒ¡ãƒ©ã¨ãƒ­ã‚±ãƒƒãƒˆã®è·é›¢ï¼ˆã‚ªãƒ•ã‚»ãƒƒãƒˆï¼‰
 	const float distance = 2.0f;
 	const float height = 2.0f;
 
 	XMFLOAT3 rocketPos = GetRocketPos();
 
-	// ‰ñ“]ƒ}ƒgƒŠƒNƒX‚ğæ“¾
+	// å›è»¢ãƒãƒˆãƒªã‚¯ã‚¹ã‚’å–å¾—
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, rocketYaw, 0.0f);
-	// Œã•ûƒxƒNƒgƒ‹‚ğæ“¾
+	// å¾Œæ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	XMVECTOR backWard = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 	XMVECTOR offsetVec = XMVector3TransformNormal(backWard, rotationMatrix);
 
-	// ƒxƒNƒgƒ‹‚ğƒIƒtƒZƒbƒg•ªƒXƒP[ƒ‹
+	// ãƒ™ã‚¯ãƒˆãƒ«ã‚’ã‚ªãƒ•ã‚»ãƒƒãƒˆåˆ†ã‚¹ã‚±ãƒ¼ãƒ«
 	offsetVec = XMVectorScale(offsetVec, distance);
 
-	// ƒ^[ƒQƒbƒgƒxƒNƒgƒ‹‚ğæ“¾
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	XMVECTOR targetPosVec = XMLoadFloat3(&rocketPos);
-	// ƒ^[ƒQƒbƒgƒxƒNƒgƒ‹‚ÉƒIƒtƒZƒbƒg‚Ìî•ñ‚ğ’Ç‰Á
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ™ã‚¯ãƒˆãƒ«ã«ã‚ªãƒ•ã‚»ãƒƒãƒˆã®æƒ…å ±ã‚’è¿½åŠ 
 	XMVECTOR newCameraPosVec = XMVectorAdd(targetPosVec, offsetVec);
 
-	// Y²i‚‚³j‚ğ’²®
+	// Yè»¸ï¼ˆé«˜ã•ï¼‰ã‚’èª¿æ•´
 	XMFLOAT3 newCameraPos;
 	XMStoreFloat3(&newCameraPos, newCameraPosVec);
 	newCameraPos.y += height;
-	
-	// ƒJƒƒ‰‚ÌˆÊ’u‚ğ•âŠÔ‚·‚é
+
+	// ã‚«ãƒ¡ãƒ©ã®ä½ç½®ã‚’è£œé–“ã™ã‚‹
 	g_Position.x += (newCameraPos.x - g_Position.x) * 0.1f;
 	g_Position.y += (newCameraPos.y - g_Position.y) * 0.1f;
 	g_Position.z += (newCameraPos.z - g_Position.z) * 0.1f;
 
-	// ’‹“_iƒ^[ƒQƒbƒgj‚ğƒƒPƒbƒg‚ÌˆÊ’u‚Ì­‚µã‚Éİ’èB
+	// æ³¨è¦–ç‚¹ï¼ˆã‚¿ãƒ¼ã‚²ãƒƒãƒˆï¼‰ã‚’ãƒ­ã‚±ãƒƒãƒˆã®ä½ç½®ã®å°‘ã—ä¸Šã«è¨­å®šã€‚
 	g_CameraTargetPos.x = rocketPos.x;
 	g_CameraTargetPos.y = rocketPos.y + 0.3f;
 	g_CameraTargetPos.z = rocketPos.z;
@@ -270,16 +280,16 @@ void ReflectsDebugKeyOperations()
 	g_CameraYaw += mousePosDif.x * 0.0018f;
 	g_CameraPitch += mousePosDif.y * 0.0018f;
 
-	const float pitchLimit = XM_PIDIV2 * 0.99f;  // ŒÀ‚è‚È‚­90“x‚É‹ß‚¢”’l‚ğæ“¾(90 * 0.99)
-		
-	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; else if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // Å‘å’lEÅ¬’l§ŒÀ
+	const float pitchLimit = XM_PIDIV2 * 0.99f;  // é™ã‚Šãªã90åº¦ã«è¿‘ã„æ•°å€¤ã‚’å–å¾—(90 * 0.99)
 
-	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // •ûŒüƒxƒNƒgƒ‹æ“¾
-	// --- 1. W/S (‘OŒã) —p‚Ì‘O•ûƒxƒNƒgƒ‹‚ğŒvZ (ƒsƒbƒ`‚ğl—¶‚·‚é) ---
+	if (g_CameraPitch > pitchLimit) g_CameraPitch = pitchLimit; else if (g_CameraPitch < -pitchLimit) g_CameraPitch = -pitchLimit;  // æœ€å¤§å€¤ãƒ»æœ€å°å€¤åˆ¶é™
+
+	const XMVECTOR forwardBase = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);  // æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«å–å¾—
+	// --- 1. W/S (å‰å¾Œ) ç”¨ã®å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®— (ãƒ”ãƒƒãƒã‚’è€ƒæ…®ã™ã‚‹) ---
 	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
 	XMVECTOR forwardVec_WS = XMVector3TransformNormal(forwardBase, rotationMatrix);
 
-	// --- 2. A/D (¶‰E) —p‚Ì"…•½"‘O•ûƒxƒNƒgƒ‹‚ğŒvZ (ƒsƒbƒ`‚ğ 0.0f ‚É‚·‚é) ---
+	// --- 2. A/D (å·¦å³) ç”¨ã®"æ°´å¹³"å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®— (ãƒ”ãƒƒãƒã‚’ 0.0f ã«ã™ã‚‹) ---
 	XMMATRIX horizontalRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, g_CameraYaw, 0.0f);
 	XMVECTOR forwardVec_AD = XMVector3TransformNormal(forwardBase, horizontalRotationMatrix);
 
@@ -296,27 +306,27 @@ void ReflectsDebugKeyOperations()
 
 	if (Keyboard_IsKeyDown(KK_LEFT))
 	{
-		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // ‰ñ“]ƒ}ƒgƒŠƒNƒX‚ğæ“¾
-		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // ‘O•ûƒxƒNƒgƒ‹‚ğ‰ñ“]
+		XMMATRIX leftRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, -XM_PIDIV2, 0);  // å›è»¢ãƒãƒˆãƒªã‚¯ã‚¹ã‚’å–å¾—
+		XMVECTOR left = XMVector3TransformNormal(forwardVec_AD, leftRotationMatrix);  // å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
 		velocity = XMVectorAdd(velocity, left);
 	}
 	else if (Keyboard_IsKeyDown(KK_RIGHT))
 	{
-		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2, 0);  // ‰ñ“]ƒ}ƒgƒŠƒNƒX‚ğæ“¾
-		XMVECTOR right = XMVector3TransformNormal(forwardVec_AD, rightRotationMatrix);  // ‘O•ûƒxƒNƒgƒ‹‚ğ‰ñ“]
+		XMMATRIX rightRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, XM_PIDIV2, 0);  // å›è»¢ãƒãƒˆãƒªã‚¯ã‚¹ã‚’å–å¾—
+		XMVECTOR right = XMVector3TransformNormal(forwardVec_AD, rightRotationMatrix);  // å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
 		velocity = XMVectorAdd(velocity, right);
 	}
 
 	if (Keyboard_IsKeyDown(KK_E))
 	{
-		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // ‰ñ“]ƒ}ƒgƒŠƒNƒX‚ğæ“¾
-		XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // ‘O•ûƒxƒNƒgƒ‹‚ğ‰ñ“]
+		XMMATRIX upRotationMatrix = XMMatrixRotationRollPitchYaw(-XM_PIDIV2, 0, 0);  // å›è»¢ãƒãƒˆãƒªã‚¯ã‚¹ã‚’å–å¾—
+		XMVECTOR up = XMVector3TransformNormal(forwardBase, upRotationMatrix);  // å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
 		velocity = XMVectorAdd(velocity, up);
 	}
 	else if (Keyboard_IsKeyDown(KK_Q))
 	{
-		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // ‰ñ“]ƒ}ƒgƒŠƒNƒX‚ğæ“¾
-		XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // ‘O•ûƒxƒNƒgƒ‹‚ğ‰ñ“]
+		XMMATRIX downRotationMatrix = XMMatrixRotationRollPitchYaw(XM_PIDIV2, 0, 0);  // å›è»¢ãƒãƒˆãƒªã‚¯ã‚¹ã‚’å–å¾—
+		XMVECTOR down = XMVector3TransformNormal(forwardBase, downRotationMatrix);  // å‰æ–¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å›è»¢
 		velocity = XMVectorAdd(velocity, down);
 	}
 
@@ -328,8 +338,8 @@ void ReflectsDebugKeyOperations()
 	velocity = XMVectorAdd(cameraPosVec, velocity);  //
 	XMStoreFloat3(&g_Position, velocity);
 
-	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_Position), forwardVec_WS);  // ’‹“_ƒxƒNƒgƒ‹‚ğ“±‚«o‚·
-	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // ’‹“_ƒxƒNƒgƒ‹‚ğÀ•W‚É•ÏŠ·
+	XMVECTOR targetPosVec = XMVectorAdd(XMLoadFloat3(&g_Position), forwardVec_WS);  // æ³¨è¦–ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’å°ãå‡ºã™
+	XMStoreFloat3(&g_CameraTargetPos, targetPosVec);  // æ³¨è¦–ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ã‚’åº§æ¨™ã«å¤‰æ›
 }
 
 void LookBall()

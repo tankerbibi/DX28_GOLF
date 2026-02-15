@@ -1,6 +1,6 @@
+#include "directX.h"
 #include "sprite.h"
 
-#include "directx.h"
 #include "shader.h"
 #include "texture.h"
 

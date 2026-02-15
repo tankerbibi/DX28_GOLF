@@ -1,14 +1,9 @@
 #pragma once
+#include <DirectXMath.h>
 
-enum class CameraMode
-{
-	PLAY,
-	ROCKET,
-	BALL,
-	LOOKBALL,
-	DEBUG,
-	COUNT
-};
+using namespace DirectX;
+
+enum class CameraMode { PLAY, ROCKET, BALL, LOOKBALL, DEBUG, COUNT };
 
 void InitializeCamera();
 void FinalizeCamera();

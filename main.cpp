@@ -29,8 +29,8 @@ void ChangeFullWindow();
 HWND GetWindow();
 
 static constexpr char WINDOW_CLASS[] = "GameWindow";
-static constexpr char TITLE[] = "ƒEƒBƒ“ƒhƒE•\¦";
-static bool g_FullWindow{false};
+static constexpr char TITLE[] = "‚Î‚ñ‚Î‚ñƒSƒ‹ƒt";
+static bool g_FullWindow{ false };
 HWND g_HWnd;
 int g_WindowWidth;
 int g_WindowHeight;
@@ -60,7 +60,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,  // ‚P”N¶‚Ì‚Éì‚Á‚Ä‚¢‚½mainŠÖ
 	// ƒNƒ‰ƒCƒAƒ“ƒg—Ìˆæ‚ÌƒTƒCƒY‚ğ‚Á‚½’ZŒa(¶‚©‚çleft, top, right , bottom)
 	RECT window_rect = { 0, 0, screenWidth, screenHeight };  // ’¼’l‚ğ“ü‚ê‚é‚Ì‚Í‚ ‚ñ‚Ü‚è‚æ‚­‚È‚¢ƒR[ƒhBdefine‚â’è”‚Å‚â‚é‚×‚«B
 	// ƒEƒBƒ“ƒhƒE‚ÌƒXƒ^ƒCƒ‹
-	 DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+	DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 	// w’è‚µ‚½ƒNƒ‰ƒCƒAƒ“ƒg—Ìˆæ‚ğŠm•Û‚·‚é‚½‚ß‚ÉV‚½‚È‹éŒ`À•W‚ğŒvZ@ƒQ[ƒ€‚ğ•\¦‚·‚é—Ìˆæ
 	AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, FALSE);
 
@@ -197,7 +197,7 @@ void Update()
 	default:
 		break;
 	}
-	
+
 	Keyboard_Update();  // ‰ß‹‚Ìó‘Ô‚ğ”äŠr‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢‚Ì‚ÅAˆê”ÔÅŒã‚É’u‚­B
 }
 

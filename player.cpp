@@ -1,3 +1,4 @@
+#include "directX.h"
 #include "player.h"
 
 void InitializePlayer()

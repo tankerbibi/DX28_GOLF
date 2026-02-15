@@ -1,36 +1,39 @@
 /*==============================================================================
 
-   ƒVƒF[ƒ_[ [shader.h]
-														 Author : Youhei Sato
-														 Date   : 2025/05/15
+   ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ [shader.h]
+                                                                                                                 Author : Youhei Sato
+                                                                                                                 Date   : 2025/05/15
 --------------------------------------------------------------------------------
-ƒvƒƒWƒFƒNƒgƒtƒ@ƒCƒ‹‚ÅƒeƒLƒXƒgƒhƒLƒ…ƒƒ“ƒg‚ğV‹Kì¬B–¼‘O‚ğshaderPixel2D.hlsl shaderVertex2D.hlsl‚É‚µ‚½B
+ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã§ãƒ†ã‚­ã‚¹ãƒˆãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã‚’æ–°è¦ä½œæˆã€‚åå‰ã‚’shaderPixel2D.hlsl
+shaderVertex2D.hlslã«ã—ãŸã€‚
 ==============================================================================*/
 #ifndef SHADER_H
-#define	SHADER_H
+#define SHADER_H
 
-#include <d3d11.h>
 #include <DirectXMath.h>
+#include <d3d11.h>
 
-struct MATRIX
-{
-	XMMATRIX matrix;  // XMMATRIX ŒvZ‚É“K‚µ‚Ä‚¢‚é    XMFLOAT4X4 •Û‘¶‚É“K‚µ‚Ä‚¢‚é
-	XMMATRIX matrixWorld;
+using namespace DirectX;
+
+struct MATRIX {
+  XMMATRIX
+  matrix; // XMMATRIX è¨ˆç®—ã«é©ã—ã¦ã„ã‚‹    XMFLOAT4X4 ä¿å­˜ã«é©ã—ã¦ã„ã‚‹
+  XMMATRIX matrixWorld;
 };
 
-struct LIGHT  // shader.hlsl‚Ìlight‚É‘Î‰‚·‚é•¨
+struct LIGHT // shader.hlslã®lightã«å¯¾å¿œã™ã‚‹ç‰©
 {
-	BOOL lightEnable;  // 4ƒoƒCƒg
-	float dummy0[3];  // 12ƒoƒCƒg
-	XMFLOAT3 lightDirection;  // float 4ƒoƒCƒg@int 4ƒoƒCƒg  4*3=12
-	float dummy1;
+  BOOL lightEnable;        // 4ãƒã‚¤ãƒˆ
+  float dummy0[3];         // 12ãƒã‚¤ãƒˆ
+  XMFLOAT3 lightDirection; // float 4ãƒã‚¤ãƒˆã€€int 4ãƒã‚¤ãƒˆ  4*3=12
+  float dummy1;
 };
 
-bool Shader_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+bool Shader_Initialize(ID3D11Device *pDevice, ID3D11DeviceContext *pContext);
 void Shader_Finalize();
 
-void Shader_SetMatrix(const MATRIX& matrix);
-void Shader_SetLight(const LIGHT& light);
+void Shader_SetMatrix(const MATRIX &matrix);
+void Shader_SetLight(const LIGHT &light);
 void Shader_SetPipelineInstance(bool isInstance);
 
 void Shader_Begin();

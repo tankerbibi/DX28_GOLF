@@ -1,410 +1,253 @@
 #include "directX.h"
 #include "rocket.h"
 #include "Keyboard.h"
-#include "model.h"
+#include "ball.h"
+#include "breakableBlock.h"
 #include "camera.h"
-#include "shader.h"
+#include "effect.h"
 #include "field.h"
 #include "goal.h"
 #include "main.h"
-#include "ball.h"
-#include "effect.h"
-#include "breakableBlock.h"
+#include "model.h"
 #include "ranking.h"
+#include "shader.h"
 #include "stroke.h"
+#include <cmath>
+#include <vector>
 
-struct ROCKET
-{
-	XMFLOAT3 position;
-	XMFLOAT3 rotation;
-};
+static MODEL *g_Model = nullptr;
+static std::vector<Rocket> g_Rockets;
 
-enum ROCKET_STATE
-{
-	ROCKET_STATE_START,
-	ROCKET_STATE_MOVE,
-	ROCKET_STATE_EXPLODED,
-};
+// --- Rocket Class Implementation ---
 
-static MODEL* g_Model = nullptr;
+Rocket::Rocket()
+    : position({0.0f, 0.0f, 0.0f}), velocity({0.0f, 0.0f, 0.0f}),
+      rotation({0.0f, 0.0f, 0.0f}), state(STATE_INACTIVE), stateCount(0) {}
 
-static XMFLOAT3 g_Position;
-static XMFLOAT3 g_Velocity;
-static XMFLOAT3 g_Rotation;
-static XMFLOAT3 g_TargetPos;
+void Rocket::Initialize(const DirectX::XMFLOAT3 &startPos,
+                        const DirectX::XMFLOAT3 &direction) {
+  position = startPos;
 
-static float g_Pitch;
-static float g_Yaw;
+  // Normalize direction and set velocity
+  float speed = 0.5f; // Adjust speed as needed
+  float len = sqrtf(direction.x * direction.x + direction.y * direction.y +
+                    direction.z * direction.z);
+  if (len > 0.0f) {
+    velocity.x = (direction.x / len) * speed;
+    velocity.y = (direction.y / len) * speed;
+    velocity.z = (direction.z / len) * speed;
+  } else {
+    velocity = {0.0f, 0.0f, 0.5f}; // Default forward if direction is zero
+  }
 
-static constexpr float g_RocketRadius = 0.25f;
+  // Calculate rotation (Yaw/Pitch) from direction for rendering
+  // Simple lookup: Yaw is atan2(x, z)
+  rotation.y = atan2f(velocity.x, velocity.z);
+  // Pitch is atan2(y, sqrt(x^2 + z^2)) roughly, simplified
+  float xzLen = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
+  rotation.x = -atan2f(velocity.y, xzLen);
+  rotation.z = 0.0f;
 
-static ROCKET_STATE rocketState;
-static int stateCount;
-
-static XMFLOAT3 g_RocketStartPosition;
-
-static constexpr float explosionMaxPower = 20.0f;
-static constexpr float explosionRadius = 5.0f;
-
-static bool isDraw;
-
-static int score;
-
-static 
-
-void RocketHitCheck();
-bool RocketIsHit();
-void PushBallWithRocket();
-
-void InitializeRocket()
-{
-	g_Model = ModelLoad("asset\\model\\Rocket2.fbx");
-	g_RocketStartPosition = { -2, 6, -40 };
-	g_Position = g_RocketStartPosition;
-	g_Rotation = { 0.0f, 0.0f, 0.0f };
-	g_Velocity = { 0.0f, 0.0f ,0.0f };
-
-	for(int i = 0;)
-	// g_TargetPos = { g_Pos.x, , 0.0f };
-	g_Pitch = 0.0f;
-	g_Yaw = 0.0f;
-	rocketState = ROCKET_STATE_MOVE;
-	stateCount = 0;
-	isDraw = true;
-	score = 0;
+  state = STATE_START;
+  stateCount = 0;
 }
 
-void FinalizeRocket()
-{
-	ModelRelease(g_Model);
+void Rocket::Update() {
+  if (state == STATE_INACTIVE)
+    return;
+
+  switch (state) {
+  case STATE_START:
+    // Optional start delay or animation
+    stateCount++;
+    if (stateCount >
+        10) // Short delay to ensure it doesn't explode immediately on player?
+    {
+      state = STATE_MOVE;
+      stateCount = 0;
+    }
+    break;
+
+  case STATE_MOVE:
+    Move();
+    if (IsHit()) {
+      OnHit();
+    }
+    break;
+
+  case STATE_EXPLODED:
+    CreateEffectScale(position,
+                      {ExplosionRadius, ExplosionRadius, ExplosionRadius});
+    stateCount++;
+    if (stateCount > 30) // Explosion duration
+    {
+      // Trigger ball push once during explosion
+      if (stateCount == 31) {
+        PushBall();
+      }
+    }
+
+    if (stateCount > 60) // End explosion
+    {
+      state = STATE_INACTIVE;
+    }
+    break;
+  }
 }
 
-void UpdateRocket()
-{
-	// ロケットの爆発状態用のブール
-	static bool rocketStateExplodedFlg = false;
+void Rocket::Draw() {
+  if (state != STATE_MOVE && state != STATE_START)
+    return; // Don't draw if exploded (effect handles it) or inactive
 
-	if (GetCameraMode() == CameraMode::BALL || GetCameraMode() == CameraMode::DEBUG) return;
-	switch (rocketState)
-	{
-	case ROCKET_STATE_START:
-		stateCount++;
-		if (stateCount > 60)
-		{
-			rocketState = ROCKET_STATE_MOVE;
-			stateCount = 0;
-		}
-		break;
-	case ROCKET_STATE_MOVE:
-		// ロケットを動かす。
-		RocketMove();
-		// ロケットが当たったら爆発させる処理
-		if (RocketIsHit())
-		{
-			score++;
-			SetRankingScore(score);
-			AddStroke(1);
-			// 爆風のコリジョンと破壊可能ブロックの判定を行う
-			ResolveBreakableBlockCollision(g_Position, 3.0f);
-			rocketState = ROCKET_STATE_EXPLODED;
-			isDraw = false;
-		}
-		break;
-	case ROCKET_STATE_EXPLODED:
-		CreateEffectScale(g_Position, { explosionRadius, explosionRadius, explosionRadius });
-		stateCount++;
-		if (stateCount > 30)
-		{
-			if (rocketStateExplodedFlg == false)
-			{
-				SetCameraMode(CameraMode::LOOKBALL);
-				PushBallWithRocket();
-				rocketStateExplodedFlg = true;
-			}
-		}
-		
-		if (stateCount > 120)
-		{
-			isDraw = true;
-			stateCount = 0;
-			g_Position = g_RocketStartPosition;
-			rocketState = ROCKET_STATE_START;
-			SetCameraMode(CameraMode::ROCKET);
-			rocketStateExplodedFlg = false;
-			g_Pitch = 0.0f;
-			g_Yaw = 0.0f;
-			g_Rotation = { 0.0f, 0.0f, 0.0f };
-		}
-		break;
-	default:
-		break;
-	}
+  Shader_Begin();
+
+  DirectX::XMMATRIX matrixWorld = DirectX::XMMatrixIdentity();
+  matrixWorld *= DirectX::XMMatrixScaling(10.0f, 10.0f, 10.0f);
+  matrixWorld *=
+      DirectX::XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z);
+  matrixWorld *=
+      DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+
+  MATRIX matrix;
+  matrix.matrixWorld = matrixWorld;
+  matrix.matrix =
+      matrixWorld * GetCameraViewMatrix() * GetCameraProjectionMatrix();
+
+  Shader_SetMatrix(matrix);
+  ModelDraw(g_Model);
 }
 
-void DrawRocket()
-{
-	if (isDraw == false) return;
-	Shader_Begin();  // シェーダーの設定
-	// 頂点シェーダーに変換行列を設定
-
-	MATRIX matrix;
-
-	matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-	matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-
-	matrix.matrixWorld *= XMMatrixScaling(10.0f, 10.0f, 10.0f);  // 拡大縮小マトリクス
-	matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-	matrix.matrixWorld *= XMMatrixTranslation(g_Position.x, g_Position.y, g_Position.z);  // 移動マトリクス。gpuで計算されている。
-
-	matrix.matrix = matrix.matrixWorld;
-
-	matrix.matrix *= GetCameraViewMatrix();  // ビューマトリクス
-	matrix.matrix *= GetCameraProjectionMatrix();  // プロジェクションマトリクス
-
-	Shader_SetMatrix(matrix);
-	ModelDraw(g_Model);
+void Rocket::Move() {
+  // Simple linear movement
+  position.x += velocity.x;
+  position.y += velocity.y;
+  position.z += velocity.z;
 }
 
-XMFLOAT3 GetRocketPos()
-{
-	return g_Position;
+bool Rocket::IsHit() {
+  // Collision with Breakable Blocks
+  if (ResolveBreakableBlockCollision(position, Radius)) {
+    return true;
+  }
+
+  // Collision with Static Blocks
+  BLOCK *block = GetFieldBlock();
+
+  float blockRadius = 1.5f; // From original code
+
+  for (int i = 0; i < blockMax; i++) {
+    if (block[i].blockType != BLOCKTYPE::BLOCK)
+      continue;
+
+    // AABB collision check (simplified from original for brevity but keeping
+    // logic)
+    if (block[i].pos.y - blockRadius < position.y &&
+        position.y < block[i].pos.y + blockRadius &&
+        block[i].pos.z - blockRadius < position.z &&
+        position.z < block[i].pos.z + blockRadius &&
+        block[i].pos.x - blockRadius < position.x &&
+        position.x < block[i].pos.x + blockRadius) {
+      return true;
+    }
+  }
+
+  // Floor collision (if needed, usually handled by blocks?)
+  if (position.y < -10.0f) // Out of bounds
+  {
+    return true;
+  }
+
+  return false;
 }
 
-void SetRocketStartPosition(XMFLOAT3 newPosition)
-{
-	g_RocketStartPosition = newPosition;
+void Rocket::OnHit() {
+  state = STATE_EXPLODED;
+  stateCount = 0;
 }
 
+void Rocket::PushBall() {
+  XMFLOAT3 ballPosition = GetBallPosition();
+  XMFLOAT3 force;
 
+  force.x = ballPosition.x - position.x;
+  force.y = ballPosition.y - position.y;
+  force.z = ballPosition.z - position.z;
 
+  float length =
+      sqrtf(force.x * force.x + force.y * force.y + force.z * force.z);
 
+  if (length <= ExplosionRadius) {
+    float ratio = length / ExplosionRadius;
+    if (ratio > 1.0f)
+      ratio = 1.0f;
+    float power = ExplosionMaxPower * (1.0f - ratio);
 
-float GetRocketYaw()
-{
-	return g_Yaw;
+    if (length > 0.01f) // Avoid div by zero
+    {
+      force.x /= length;
+      force.y /= length;
+      force.z /= length;
+    }
+
+    AddForce({force.x * power * 3.0f, force.y * power + 5.0f,
+              force.z * power * 3.0f});
+  }
 }
 
-float GetRocketPitch()
-{
-	return g_Pitch;
+// --- Global Management Functions ---
+
+void InitializeRocket() {
+  g_Model = ModelLoad("asset\\model\\Rocket2.fbx");
+  g_Rockets.clear();
 }
 
-// ロケットがブロックに当たったらロールバックする関数
-void RocketHitCheck()
-{
-	BLOCK* block = GetFieldBlock();
-	float blockRadius = 1.5f;
-
-
-	float e = 0.5f;  // 跳ね返り係数
-
-	for (int i = 0; i < blockMax; i++)
-	{
-		// 横方向の当たり判定処理
-		if (block[i].pos.y - blockRadius < g_Position.y &&
-			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
-		{
-			// x方向
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
-			{
-				if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
-					g_Position.x - g_RocketRadius < block[i].pos.x + blockRadius)
-				{
-					if (block[i].pos.x < g_Position.x)
-					{
-						// 右
-						g_Position.x = block[i].pos.x + blockRadius + g_RocketRadius;
-					}
-					else
-					{
-						// 左
-						g_Position.x = block[i].pos.x - blockRadius - g_RocketRadius;
-					}
-					g_Velocity.x *= -e;
-				}
-			}
-			// z方向
-			else if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
-				g_Position.x < block[i].pos.x + blockRadius)
-			{
-				if (block[i].pos.z - blockRadius < g_Position.z + g_RocketRadius &&
-					g_Position.z - g_RocketRadius < block[i].pos.z + blockRadius)
-				{
-					if (block[i].pos.z < g_Position.z)
-					{
-						// 奥
-						g_Position.z = block[i].pos.z + blockRadius + g_RocketRadius;
-					}
-					else
-					{
-						// 手前
-						g_Position.z = block[i].pos.z - blockRadius - g_RocketRadius;
-					}
-				}
-			}
-		}
-		else
-			// 縦方向の当たり判定処理
-		{
-			// 手前　奥
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)
-			{
-				if (block[i].pos.x - blockRadius < g_Position.x &&
-					g_Position.x < block[i].pos.x + blockRadius)
-				{
-					if (block[i].pos.y - blockRadius < g_Position.y + g_RocketRadius &&
-						g_Position.y - g_RocketRadius < block[i].pos.y + blockRadius)
-					{
-						if (g_Position.y > block[i].pos.y)
-						{
-							// 上
-							g_Position.y = block[i].pos.y + blockRadius + g_RocketRadius;
-
-						}
-						else
-						{
-							// 下
-							g_Position.y = block[i].pos.y - blockRadius - g_RocketRadius;
-						}
-						g_Velocity.y *= -e;
-					}
-				}
-			}
-		}
-	}
+void FinalizeRocket() {
+  ModelRelease(g_Model);
+  g_Rockets.clear();
 }
 
-// ロケットがブロックに当たったらtrueを返す関数
-bool RocketIsHit()
-{
-	// ロケットコリジョンと破壊可能ブロックの判定を行う。
-	if (ResolveBreakableBlockCollision(g_Position, g_RocketRadius))
-	{
-		return true; // 破壊ブロックに当たったので爆発へ
-	}
-
-	BLOCK* block = GetFieldBlock();
-	float blockRadius = 1.5f;
-
-	// 跳ね返り係数
-	float e = 0.5f;
-
-	for (int i = 0; i < blockMax; i++)
-	{
-		if (block[i].blockType != BLOCKTYPE::BLOCK) continue;
-		// 横方向の当たり判定処理
-		if (block[i].pos.y - blockRadius < g_Position.y &&
-			g_Position.y < block[i].pos.y + blockRadius)  // 横からみた図の状況を作り出している！！
-		{
-			// x方向
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)  // 3次元だから2次元に絞ろう！
-			{
-				if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
-					g_Position.x - g_RocketRadius < block[i].pos.x + blockRadius)
-				{
-					if (block[i].pos.x < g_Position.x)
-					{
-						// 右
-						g_Position.x = block[i].pos.x + blockRadius + g_RocketRadius;
-						return true;
-					}
-					else
-					{
-						// 左
-						g_Position.x = block[i].pos.x - blockRadius - g_RocketRadius;
-						return true;
-					}
-					g_Velocity.x *= -e;
-				}
-			}
-			// z方向
-			else if (block[i].pos.x - blockRadius < g_Position.x + g_RocketRadius &&
-				g_Position.x < block[i].pos.x + blockRadius)
-			{
-				if (block[i].pos.z - blockRadius < g_Position.z + g_RocketRadius &&
-					g_Position.z - g_RocketRadius < block[i].pos.z + blockRadius)
-				{
-					if (block[i].pos.z < g_Position.z)
-					{
-						// 奥
-						g_Position.z = block[i].pos.z + blockRadius + g_RocketRadius;
-						return true;
-					}
-					else
-					{
-						// 手前
-						g_Position.z = block[i].pos.z - blockRadius - g_RocketRadius;
-						return true;
-					}
-				}
-			}
-		}
-		else
-			// 縦方向の当たり判定処理
-		{
-			// 手前　奥
-			if (block[i].pos.z - blockRadius < g_Position.z &&
-				g_Position.z < block[i].pos.z + blockRadius)
-			{
-				if (block[i].pos.x - blockRadius < g_Position.x &&
-					g_Position.x < block[i].pos.x + blockRadius)
-				{
-					if (block[i].pos.y - blockRadius < g_Position.y + g_RocketRadius &&
-						g_Position.y - g_RocketRadius < block[i].pos.y + blockRadius)
-					{
-						if (g_Position.y > block[i].pos.y)
-						{
-							// 上
-							g_Position.y = block[i].pos.y + blockRadius + g_RocketRadius;
-							return true;
-						}
-						else
-						{
-							// 下
-							g_Position.y = block[i].pos.y - blockRadius - g_RocketRadius;
-							return true;
-						}
-						g_Velocity.y *= -e;
-					}
-				}
-			}
-		}
-	}
-	return false;
+void UpdateRocket() {
+  // Update all rockets
+  for (auto it = g_Rockets.begin(); it != g_Rockets.end();) {
+    it->Update();
+    if (!it->IsActive()) {
+      it = g_Rockets.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
-void PushBallWithRocket()
-{
-	XMFLOAT3 ballPosition = GetBallPosition();
-	XMFLOAT3 force;
-
-	force.x = ballPosition.x - g_Position.x;
-	force.y = ballPosition.y - g_Position.y;
-	force.z = ballPosition.z - g_Position.z;
-
-	float length = sqrtf((ballPosition.x - g_Position.x) * (ballPosition.x - g_Position.x)
-		+ (ballPosition.y - g_Position.y) * (ballPosition.y - g_Position.y)
-		+ (ballPosition.z - g_Position.z) * (ballPosition.z - g_Position.z));
-
-	float ratio = length / 20.0f;
-	if (ratio > 1.0f) ratio = 1.0f; // 1.0を超えないようにする
-	float power = explosionMaxPower * (1.0f - ratio);
-
-	if (length > 1.0f)
-	{
-		force.x /= length;
-		force.y /= length;
-		force.z /= length;
-	}
-
-	if (length <= explosionRadius)
-	{
-		// ボールに力を加える。
-		AddForce({ force.x * power * 3.0f, force.y * power + 5.0f, force.z * power * 3.0f});
-	}
+void DrawRocket() {
+  for (auto &rocket : g_Rockets) {
+    rocket.Draw();
+  }
 }
 
+void CreateRocket(const DirectX::XMFLOAT3 &position,
+                  const DirectX::XMFLOAT3 &direction) {
+  Rocket newRocket;
+  newRocket.Initialize(position, direction);
+  g_Rockets.push_back(newRocket);
+}
 
+// Deprecated getters implementation (returning latest rocket data)
+float GetRocketYaw() {
+  if (!g_Rockets.empty())
+    return g_Rockets.back().GetRotation().y;
+  return 0.0f;
+}
+
+float GetRocketPitch() {
+  if (!g_Rockets.empty())
+    return g_Rockets.back().GetRotation().x;
+  return 0.0f;
+}
+
+DirectX::XMFLOAT3 GetRocketPos() {
+  if (!g_Rockets.empty())
+    return g_Rockets.back().GetPosition();
+  return {0.0f, 0.0f, 0.0f};
+}
+
+void SetRocketStartPosition(DirectX::XMFLOAT3 newPosition) {}

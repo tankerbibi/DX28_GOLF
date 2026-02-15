@@ -1,6 +1,6 @@
+#include "directX.h"
 #include "score.h"
 
-#include "directx.h"
 #include "texture.h"
 #include "sprite.h"
 

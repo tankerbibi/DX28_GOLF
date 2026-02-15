@@ -1,7 +1,7 @@
+#include "directX.h"
 #include "cube.h"
 
 #include "main.h"
-#include "directx.h"
 #include "shader.h"
 #include "texture.h"
 #include "camera.h"

@@ -1,5 +1,5 @@
+#include "directX.h"
 
-#include "directx.h"
 #include "DirectXTex.h"  // DirectXTexというライブラリを使う。
 
 #include "texture.h"

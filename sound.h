@@ -1,14 +1,12 @@
-
 #pragma once
 
-#include <windows.h>
 #include "xaudio2.h"
-
+#include <windows.h>
 
 bool InitSound(HWND hWnd);
 void UninitSound(void);
 
-int LoadSound(const char* pFilename);
+int LoadSound(const char *pFilename);
 void PlaySound(int index, int loopCount);
 void StopSound(int index);
 void StopSoundAll(void);

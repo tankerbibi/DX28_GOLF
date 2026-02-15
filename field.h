@@ -1,21 +1,21 @@
 #pragma once
+#include <DirectXMath.h>
 #include <string>
 
-enum class BLOCKTYPE
-{
-	BLOCK,
-	TREE,
-	KIRBY,
-	BREAKABLEBLOCK,
-	COUNT,
+
+using namespace DirectX;
+
+enum class BLOCKTYPE {
+  BLOCK,
+  TREE,
+  KIRBY,
+  BREAKABLEBLOCK,
+  COUNT,
 };
 
-
-
-struct BLOCK
-{
-	XMFLOAT3 pos;
-	BLOCKTYPE blockType;
+struct BLOCK {
+  XMFLOAT3 pos;
+  BLOCKTYPE blockType;
 };
 
 static constexpr unsigned int blockMax = 40000;
@@ -25,4 +25,4 @@ void FinalizeField();
 void UpdateField();
 void DrawField();
 
-BLOCK* GetFieldBlock();
+BLOCK *GetFieldBlock();
