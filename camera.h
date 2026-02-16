@@ -3,7 +3,7 @@
 
 using namespace DirectX;
 
-enum class CameraMode { PLAY, ROCKET, BALL, LOOKBALL, DEBUG, COUNT };
+enum class CameraMode { PLAY, DEBUG, COUNT };
 
 void InitializeCamera();
 void FinalizeCamera();

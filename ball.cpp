@@ -212,7 +212,7 @@ void MoveBall()
 
 	// ‰Á‘¬
 	CameraMode cameraMode = GetCameraMode();
-	if (cameraMode == CameraMode::BALL)
+	if (cameraMode == CameraMode::PLAY)
 	{
 		if (Keyboard_IsKeyDown(KK_A))
 		{
