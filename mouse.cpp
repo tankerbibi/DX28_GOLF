@@ -52,3 +52,8 @@ void SetMouseFixed(bool fixed)
 {
 	g_MouseFixed = fixed;
 }
+
+bool IsMouseLeftDown()
+{
+	return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+}
