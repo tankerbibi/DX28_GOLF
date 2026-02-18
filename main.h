@@ -9,6 +9,8 @@ enum SCENE
 	SCENE_RESULT,
 };
 
+
+HWND GetWindow();
 void SetScene(SCENE scene);
 
 #endif

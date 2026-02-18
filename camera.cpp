@@ -83,7 +83,7 @@ void UpdateCamera() {
 	}
 
 	// マウスカーソルの固定設定
-	SetMouseFixed(g_CameraMode == CameraMode::DEBUG);
+	SetMouseFixed(g_CameraMode == CameraMode::PLAY || g_CameraMode == CameraMode::DEBUG);
 
 	////// イージング計算
 	// float ease = easeInOutCubic(g_FixCameraTime);
@@ -168,71 +168,48 @@ void FollowBall() {
 	g_Position = ballPos;
 	g_Position.z -= 50.0f;
 	g_Position.y += 30.0f;
-	// g_Position.z -= 10.0f;
-	// g_Position.y += 10.0f;
 
-	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
+	XMFLOAT2 mousePosDif = GetMousePosDif();
+
+	g_CameraYaw += mousePosDif.x * 0.0018f;
+	g_CameraPitch += mousePosDif.y * 0.0018f;
+
+	const float pitchLimit =
+		XM_PIDIV2 * 0.99f; // 限りなく90度に近い数値を取得(90 * 0.99)
+
+	if (g_CameraPitch > pitchLimit)
+		g_CameraPitch = pitchLimit;
+	else if (g_CameraPitch < -pitchLimit)
+		g_CameraPitch = -pitchLimit; // 最大値・最小値制限
+
+	const XMVECTOR forwardBase =
+		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // 方向ベクトル取得
+
+	XMMATRIX rotationMatrix =
+		XMMatrixRotationRollPitchYaw(g_CameraPitch, g_CameraYaw, 0.0f);
+	XMVECTOR rotationVec =
+		XMVector3TransformNormal(forwardBase, rotationMatrix);
+
+	XMVECTOR targetPosVec = XMVectorAdd(
+		XMLoadFloat3(&g_Position), rotationVec);   // 注視点ベクトルを導き出す
+	XMStoreFloat3(&g_CameraTargetPos, targetPosVec); // 注視点ベクトルを座標に変換
+
+	/*g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
-	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
+	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;*/
 
-	/// 授業コード始まり///
-	if (Keyboard_IsKeyDown(KK_RIGHT)) {
-		g_CameraTargetPos.x += 0.1f;
-	}
-	if (Keyboard_IsKeyDown(KK_LEFT)) {
-		g_CameraTargetPos.x -= 0.1f;
-	}
 
-	if (Keyboard_IsKeyDown(KK_K)) {
-		g_CameraRotation.y += 0.1f;
-	}
-	if (Keyboard_IsKeyDown(KK_J)) {
-		g_CameraRotation.y -= 0.1f;
-	}
+	//if (Keyboard_IsKeyDown(KK_K)) {
+	////	g_CameraRotation.y += 0.1f;
+	////}
+	////if (Keyboard_IsKeyDown(KK_J)) {
+	////	g_CameraRotation.y -= 0.1f;
+	////}
 
-	/*g_Position.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
-	g_Position.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;*/
+	///*g_Position.x = g_CameraTargetPos.x + sinf(g_CameraRotation.y) * 3.0f;
+	//g_Position.z = g_CameraTargetPos.z - cosf(g_CameraRotation.y) * 3.0f;*/
 }
 
-void FollowRocket() {
-	float rocketYaw = GetRocketYaw();
-	float rocketPitch = GetRocketPitch();
-
-	// カメラとロケットの距離（オフセット）
-	const float distance = 2.0f;
-	const float height = 2.0f;
-
-	XMFLOAT3 rocketPos = GetRocketPos();
-
-	// 回転マトリクスを取得
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, rocketYaw, 0.0f);
-	// 後方ベクトルを取得
-	XMVECTOR backWard = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
-	XMVECTOR offsetVec = XMVector3TransformNormal(backWard, rotationMatrix);
-
-	// ベクトルをオフセット分スケール
-	offsetVec = XMVectorScale(offsetVec, distance);
-
-	// ターゲットベクトルを取得
-	XMVECTOR targetPosVec = XMLoadFloat3(&rocketPos);
-	// ターゲットベクトルにオフセットの情報を追加
-	XMVECTOR newCameraPosVec = XMVectorAdd(targetPosVec, offsetVec);
-
-	// Y軸（高さ）を調整
-	XMFLOAT3 newCameraPos;
-	XMStoreFloat3(&newCameraPos, newCameraPosVec);
-	newCameraPos.y += height;
-
-	// カメラの位置を補間する
-	g_Position.x += (newCameraPos.x - g_Position.x) * 0.1f;
-	g_Position.y += (newCameraPos.y - g_Position.y) * 0.1f;
-	g_Position.z += (newCameraPos.z - g_Position.z) * 0.1f;
-
-	// 注視点（ターゲット）をロケットの位置の少し上に設定。
-	g_CameraTargetPos.x = rocketPos.x;
-	g_CameraTargetPos.y = rocketPos.y + 0.3f;
-	g_CameraTargetPos.z = rocketPos.z;
-}
 
 void ReflectsDebugKeyOperations() 
 {
@@ -326,15 +303,56 @@ void ReflectsDebugKeyOperations()
 	XMStoreFloat3(&g_CameraTargetPos, targetPosVec); // 注視点ベクトルを座標に変換
 }
 
+
+void SetCameraShake(float shake) {
+	g_Shake = shake;
+	g_ShakeTime = 0.0f;
+}
+
+void FollowRocket() {
+	float rocketYaw = GetRocketYaw();
+	float rocketPitch = GetRocketPitch();
+
+	// カメラとロケットの距離（オフセット）
+	const float distance = 2.0f;
+	const float height = 2.0f;
+
+	XMFLOAT3 rocketPos = GetRocketPos();
+
+	// 回転マトリクスを取得
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, rocketYaw, 0.0f);
+	// 後方ベクトルを取得
+	XMVECTOR backWard = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+	XMVECTOR offsetVec = XMVector3TransformNormal(backWard, rotationMatrix);
+
+	// ベクトルをオフセット分スケール
+	offsetVec = XMVectorScale(offsetVec, distance);
+
+	// ターゲットベクトルを取得
+	XMVECTOR targetPosVec = XMLoadFloat3(&rocketPos);
+	// ターゲットベクトルにオフセットの情報を追加
+	XMVECTOR newCameraPosVec = XMVectorAdd(targetPosVec, offsetVec);
+
+	// Y軸（高さ）を調整
+	XMFLOAT3 newCameraPos;
+	XMStoreFloat3(&newCameraPos, newCameraPosVec);
+	newCameraPos.y += height;
+
+
+	// カメラの位置を補間する
+	g_Position.x += (newCameraPos.x - g_Position.x) * 0.1f;
+	g_Position.y += (newCameraPos.y - g_Position.y) * 0.1f;
+	g_Position.z += (newCameraPos.z - g_Position.z) * 0.1f;
+
+	// 注視点（ターゲット）をロケットの位置の少し上に設定。
+	g_CameraTargetPos.x = rocketPos.x;
+	g_CameraTargetPos.y = rocketPos.y + 0.3f;
+	g_CameraTargetPos.z = rocketPos.z;
+}
 void LookBall() {
 	XMFLOAT3 ballPos = GetBallPosition();
 
 	g_CameraTargetPos.x += (ballPos.x - g_CameraTargetPos.x) * 0.3f;
 	g_CameraTargetPos.y += (ballPos.y - g_CameraTargetPos.y) * 0.3f;
 	g_CameraTargetPos.z += (ballPos.z - g_CameraTargetPos.z) * 0.3f;
-}
-
-void SetCameraShake(float shake) {
-	g_Shake = shake;
-	g_ShakeTime = 0.0f;
 }

@@ -1,5 +1,6 @@
 #include "directX.h"
 #include "mouse.h"
+#include "main.h"
 
 #include <windows.h>
 
@@ -7,6 +8,10 @@ bool g_MouseFixed = false;
 
 POINT g_MousePoint;
 XMFLOAT2 g_MousePosDif;
+
+bool g_CurrentState[static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS)];
+bool g_PreviousState[static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS)];
+int vKeys[] = { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON };
 
 void InitializeMouse()
 {
@@ -19,6 +24,12 @@ void FinalizeMouse()
 
 void UpdateMouse()
 {
+	for (int i = 0; i < static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS); i++)
+	{
+		g_PreviousState[i] = g_CurrentState[i];
+		g_CurrentState[i] = (GetAsyncKeyState(vKeys[i]) & 0x8000) != 0;
+	}
+
 	if (g_MouseFixed)
 	{
 		if (GetCursorPos(&g_MousePoint))
@@ -26,10 +37,8 @@ void UpdateMouse()
 			g_MousePosDif.x = g_MousePoint.x - (screenWidth * 0.5f);
 			g_MousePosDif.y = g_MousePoint.y - (screenHeight * 0.5f);
 
-			SetCursorPos(
-				static_cast<int>(screenWidth * 0.5f),
-				static_cast<int>(screenHeight * 0.5f)
-			);
+			XMFLOAT2 center = { static_cast<int>(screenWidth * 0.5f), static_cast<int>(screenHeight * 0.5f) };
+			SetCursorPos(center.x, center.y);
 		}
 	}
 	else
@@ -51,9 +60,29 @@ XMFLOAT2 GetMousePosDif()
 void SetMouseFixed(bool fixed)
 {
 	g_MouseFixed = fixed;
+
 }
 
-bool IsMouseLeftDown()
+bool IsMouseTriggered(MOUSE_BUTTON button)
 {
-	return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+	return g_CurrentState[static_cast<int>(button)] && !g_PreviousState[static_cast<int>(button)];
+}
+
+bool IsMousePressed(MOUSE_BUTTON button)
+{
+	return g_CurrentState[static_cast<int>(button)];
+}
+
+XMFLOAT2 GetMousePosition()
+{
+	POINT point;
+	GetCursorPos(&point); // デスクトップ全体の座標を取得
+
+	// ★ここがポイント：現在アクティブなウィンドウ（自分のゲーム画面）を自動取得
+	HWND hWnd = GetWindow();
+
+	// ウィンドウ内の座標に変換
+	ScreenToClient(hWnd, &point);
+
+	return XMFLOAT2(static_cast<float>(point.x), static_cast<float>(point.y));
 }

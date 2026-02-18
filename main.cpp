@@ -26,7 +26,6 @@ void Finalize();
 void Update();
 void Draw();
 void ChangeFullWindow();
-HWND GetWindow();
 
 static constexpr char WINDOW_CLASS[] = "GameWindow";
 static constexpr char TITLE[] = "‚Î‚ñ‚Î‚ñƒSƒ‹ƒt";

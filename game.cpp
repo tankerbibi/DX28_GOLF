@@ -23,6 +23,8 @@
 #include "block.h"
 #include "map.h"
 #include "sky.h"
+#include "player.h"
+#include "bomb.h"
 
 static GameScene g_GameScene; // single instance
 
@@ -31,144 +33,153 @@ GameScene::~GameScene() = default;
 
 void GameScene::Initialize()
 {
-    m_Pause = false;
-    InitializeBreakableBlock();
-    InitializeBackgroundBlock();
-    InitializeBlock();
-    InitializeGrass();
-    InitializeSlope();
-    InitializeBillboardTree();
-    InitializeCamera();
-    InitializeTrail();
-    InitializeScore();
-    InitializeStroke();
-    InitializeMouse();
-    InitializeBall();
-    InitializeRocket();
-    InitializeGoal();
-    InitializeEffect();
-    InitializeShadow();
-    InitializeStart();
-    InitializeField();
-    InitializeMap();
-    InitializeSky();
+	m_Pause = false;
+	InitializeBreakableBlock();
+	InitializeBackgroundBlock();
+	InitializeBlock();
+	InitializeGrass();
+	InitializeSlope();
+	InitializeBillboardTree();
+	InitializeCamera();
+	InitializeTrail();
+	InitializeScore();
+	InitializeStroke();
+	InitializeMouse();
+	InitializeBall();
+	InitializeRocket();
+	InitializeBomb();
+	InitializeGoal();
+	InitializeEffect();
+	InitializeShadow();
+	InitializeStart();
+	InitializeField();
+	InitializeMap();
+	InitializeSky();
+	InitializePlayer();
 
 
-    XMVECTOR direction{ 0.3f, -1.0f, 0.5f };
-    direction = XMVector3Normalize(direction);
-    DirectX::XMStoreFloat3(&m_LightDirection, direction);
+	XMVECTOR direction{ 0.3f, -1.0f, 0.5f };
+	direction = XMVector3Normalize(direction);
+	DirectX::XMStoreFloat3(&m_LightDirection, direction);
 
-    m_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
-    SetVolume(m_BGM, 0.2f);
+	m_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
+	SetVolume(m_BGM, 0.2f);
 }
 
 void GameScene::Finalize()
 {
-    StopSoundAll();
-    FinalizeScore();
-    FinalizeStroke();
-    FinalizeField();
-    FinalizeCamera();
-    FinalizeMouse();
-    FinalizeBall();
-    FinalizeSlope();
-    FinalizeRocket();
-    FinalizeGoal();
-    FinalizeEffect();
-    FinalizeTrail();
-    FinalizeShadow();
-    FinalizeBreakableBlock();
-    FinalizeBlock();
-    FinalizeBackgroundBlock();
-    FinalizeBillboardTree();
-    FinalizeGrass();
-    FinalizeStart();
-    FinalizeMap();
-    FinalizeSky();
+	StopSoundAll();
+	FinalizeScore();
+	FinalizeStroke();
+	FinalizeField();
+	FinalizeCamera();
+	FinalizeMouse();
+	FinalizeBall();
+	FinalizeSlope();
+	FinalizeRocket();
+	FinalizeBomb();
+	FinalizeGoal();
+	FinalizeEffect();
+	FinalizeTrail();
+	FinalizeShadow();
+	FinalizeBreakableBlock();
+	FinalizeBlock();
+	FinalizeBackgroundBlock();
+	FinalizeBillboardTree();
+	FinalizeGrass();
+	FinalizeStart();
+	FinalizeMap();
+	FinalizeSky();
+	FinalizePlayer();
 }
 
 void GameScene::Update()
 {
-    if (Keyboard_IsKeyTrigger(KK_P))
-    {
-        m_Pause = !m_Pause;
-    }
-    if (!m_Pause)
-    {
-        UpdateCamera();
-        UpdateStroke();
-        UpdateField();
-        UpdateSlope();
-        UpdateGrass();
-        UpdateBillboardTree();
-        UpdateBlock();
-        UpdateBackgroundBlock();
-        UpdateStart();
-        UpdateGoal();
+	UpdateMouse();
+	if (Keyboard_IsKeyTrigger(KK_P))
+	{
+		m_Pause = !m_Pause;
+	}
+	if (!m_Pause)
+	{
+		UpdateCamera();
+		UpdateStroke();
+		UpdateField();
+		UpdateSlope();
+		UpdateGrass();
+		UpdateBillboardTree();
+		UpdateBlock();
+		UpdateBackgroundBlock();
+		UpdateStart();
+		UpdateGoal();
+		UpdatePlayer();
 
-        if (GetCameraMode() == CameraMode::DEBUG)
-        {
-            UpdateMouse();
-        }
-        UpdateBall();
-        UpdateRocket();
-        UpdateGoal();
-        UpdateEffect();
-        UpdateTrail();
-        UpdateShadow();
-        UpdateBreakableBlock();
-        UpdateMap();
-        UpdateSky();
-    }
+		if (GetCameraMode() == CameraMode::DEBUG)
+		{
+
+		}
+		UpdateBall();
+		//UpdateRocket();
+		UpdateBomb();
+		UpdateGoal();
+		UpdateEffect();
+		UpdateTrail();
+		UpdateShadow();
+		UpdateBreakableBlock();
+		UpdateMap();
+		UpdateSky();
+	}
 }
 
 void GameScene::Draw()
 {
-    LIGHT light;
+	DrawPlayer();
+	LIGHT light;
 
-    SetDepthEnable(true);
-    light.lightEnable = true;
-    light.lightDirection = m_LightDirection;
-    Shader_SetLight(light);
+	SetDepthEnable(true);
+	light.lightEnable = true;
+	light.lightDirection = m_LightDirection;
+	Shader_SetLight(light);
 
-    DrawCamera();
+	DrawCamera();
 
-    Shader_SetPipelineInstance(true);
-    DrawField();
-    DrawBackgroundBlock();
-    DrawBreakableBlock();
-    DrawBlock();
+	Shader_SetPipelineInstance(true);
+	DrawField();
+	DrawBackgroundBlock();
+	DrawBreakableBlock();
+	DrawBlock();
 
-    Shader_SetPipelineInstance(false);
-    DrawSlope();
-    DrawRocket();
+	Shader_SetPipelineInstance(false);
+	DrawSlope();
+	//DrawRocket();
+	DrawBomb();
 
-    light.lightEnable = false;
-    Shader_SetLight(light);
+	light.lightEnable = false;
+	Shader_SetLight(light);
 
-    DrawSky();
+	DrawSky();
 
 
-    Shader_SetPipelineInstance(true);
-    DrawGrass();
-    DrawBillboardTree();
+	Shader_SetPipelineInstance(true);
+	DrawGrass();
+	DrawBillboardTree();
 
-    Shader_SetPipelineInstance(false);
-    DrawShadow();
-    DrawStart();
-    DrawGoal();
+	Shader_SetPipelineInstance(false);
+	DrawShadow();
+	DrawStart();
+	DrawGoal();
 
-    DrawTrail();
-    DrawEffect();
-    DrawBall();
+	DrawTrail();
+	DrawEffect();
+	DrawBall();
 
-    SetDepthEnable(false);
+	SetDepthEnable(false);
 
-    DrawStroke();
-    DrawMouse();
-    SetDepthEnable(true);
+	DrawStroke();
+	DrawMouse();
+	SetDepthEnable(true);
 
-    DrawMap();
+	DrawMap();
 }
 
 // wrappers
