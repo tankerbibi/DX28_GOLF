@@ -27,8 +27,8 @@ Bomb::Bomb()
 void Bomb::Initialize(const DirectX::XMFLOAT3& startPos,
 	const DirectX::XMFLOAT3& direction) {
 	position = startPos;
-	// Normalize direction and set velocity
-	float speed = 50.0f; // Adjust speed as needed
+	// 正規化
+	float speed = 50.0f;  // スピードを調整
 	float len = sqrtf(direction.x * direction.x + direction.y * direction.y +
 		direction.z * direction.z);
 	if (len > 0.0f) {

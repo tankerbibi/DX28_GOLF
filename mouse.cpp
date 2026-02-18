@@ -13,6 +13,9 @@ bool g_CurrentState[static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS)];
 bool g_PreviousState[static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS)];
 int vKeys[] = { VK_LBUTTON, VK_RBUTTON, VK_MBUTTON };
 
+static constexpr SHORT KEY_PRESSED = 0x8000;
+static constexpr float CENTER_RATIO = 0.5f;
+
 void InitializeMouse()
 {
 	g_MouseFixed = false;
@@ -27,17 +30,17 @@ void UpdateMouse()
 	for (int i = 0; i < static_cast<int>(MOUSE_BUTTON::MAX_BUTTONS); i++)
 	{
 		g_PreviousState[i] = g_CurrentState[i];
-		g_CurrentState[i] = (GetAsyncKeyState(vKeys[i]) & 0x8000) != 0;
+		g_CurrentState[i] = (GetAsyncKeyState(vKeys[i]) & KEY_PRESSED) != 0;
 	}
 
 	if (g_MouseFixed)
 	{
 		if (GetCursorPos(&g_MousePoint))
 		{
-			g_MousePosDif.x = g_MousePoint.x - (screenWidth * 0.5f);
-			g_MousePosDif.y = g_MousePoint.y - (screenHeight * 0.5f);
+			g_MousePosDif.x = g_MousePoint.x - (screenWidth * CENTER_RATIO);
+			g_MousePosDif.y = g_MousePoint.y - (screenHeight * CENTER_RATIO);
 
-			XMFLOAT2 center = { static_cast<int>(screenWidth * 0.5f), static_cast<int>(screenHeight * 0.5f) };
+			XMFLOAT2 center = { static_cast<int>(screenWidth * CENTER_RATIO), static_cast<int>(screenHeight * CENTER_RATIO) };
 			SetCursorPos(center.x, center.y);
 		}
 	}
