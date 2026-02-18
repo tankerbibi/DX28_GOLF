@@ -120,6 +120,7 @@ void Rocket::Move() {
 	position.x += velocity.x;
 	position.y += velocity.y;
 	position.z += velocity.z;
+	
 }
 
 bool Rocket::IsHit() {

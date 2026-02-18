@@ -119,7 +119,7 @@ void GameScene::Update()
 
 		}
 		UpdateBall();
-		//UpdateRocket();
+		UpdateRocket();
 		UpdateBomb();
 		UpdateGoal();
 		UpdateEffect();
@@ -151,7 +151,7 @@ void GameScene::Draw()
 
 	Shader_SetPipelineInstance(false);
 	DrawSlope();
-	//DrawRocket();
+	DrawRocket();
 	DrawBomb();
 
 	light.lightEnable = false;

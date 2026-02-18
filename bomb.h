@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
+#include "trail.h"
 
 using namespace DirectX;
 
@@ -27,12 +28,15 @@ private:
 	DirectX::XMFLOAT3 velocity;
 	DirectX::XMFLOAT3 rotation;
 
+	Trail trail;
 	State state;
 	int stateCount;
 
-	static constexpr float Radius = 0.25f;
+	static constexpr float Radius = 0.7f;
 	static constexpr float ExplosionMaxPower = 20.0f;
 	static constexpr float ExplosionRadius = 5.0f;
+	static constexpr float resistance = 1.0f;
+	static constexpr float gravity = 4.8f;
 };
 
 // Global management functions

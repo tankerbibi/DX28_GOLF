@@ -50,11 +50,22 @@ void Bomb::Initialize(const DirectX::XMFLOAT3& startPos,
 
 	state = STATE_START;
 	stateCount = 0;
+
+	// トレイルの初期化
+	trail.Initialize();
+	trail.Reset(position); // 初期位置でリセット
 }
 
 void Bomb::Update() {
 	if (state == STATE_INACTIVE)
 		return;
+	static bool trailUpdate = false;
+	if (trailUpdate)
+	{
+		trailUpdate = false;
+		trail.Update(position);
+	}
+	if (!trailUpdate) trailUpdate = true;
 
 	switch (state) {
 	case STATE_START:
@@ -71,13 +82,12 @@ void Bomb::Update() {
 		Move();
 		if (IsHit()) {
 			OnHit();
-		}
 		BombHitCheck();
+		}
 		break;
 
 	case STATE_EXPLODED:
-		CreateEffectScale(position,
-			{ ExplosionRadius, ExplosionRadius, ExplosionRadius });
+		CreateEffectScale(position, { ExplosionRadius, ExplosionRadius, ExplosionRadius });
 		stateCount++;
 		// Trigger ball push once during explosion
 		Move();
@@ -95,7 +105,7 @@ void Bomb::Update() {
 }
 
 void Bomb::Draw() {
-	if (state != STATE_MOVE && state != STATE_START)
+	if (state == STATE_INACTIVE)
 		return; // Don't draw if exploded (effect handles it) or inactive
 
 	/*Shader_Begin();
@@ -162,18 +172,19 @@ void Bomb::Draw() {
 
 	// ポリゴン描画
 	DirectXGetDeviceContext()->Draw(4, 0);
+	trail.Draw();
 
 }
 
 void Bomb::Move() {
 
 	// 重力
-	velocity.y -= 13.0f * deltaTime;
+	velocity.y -= gravity * deltaTime;
 
 	// 抵抗
-	velocity.x -= velocity.x * 1.0f * deltaTime;
-	velocity.y -= velocity.y * 1.0f * deltaTime;
-	velocity.z -= velocity.z * 1.0f * deltaTime;
+	velocity.x -= velocity.x * resistance * deltaTime;
+	velocity.y -= velocity.y * resistance * deltaTime;
+	velocity.z -= velocity.z * resistance * deltaTime;
 
 	// 速度を加算
 	position.x += velocity.x * deltaTime;
@@ -182,35 +193,67 @@ void Bomb::Move() {
 }
 
 bool Bomb::IsHit() {
-	// Collision with Breakable Blocks
+	//// Collision with Breakable Blocks
+	//if (ResolveBreakableBlockCollision(position, Radius)) {
+	//	return true;
+	//}
+
+	//// Collision with Static Blocks
+	//BLOCK* block = GetFieldBlock();
+
+	//float blockRadius = 1.5f; // From original code
+
+	//for (int i = 0; i < blockMax; i++) {
+	//	if (block[i].blockType != BLOCKTYPE::BLOCK)
+	//		continue;
+
+	//	// AABB collision check (simplified from original for brevity but keeping
+	//	// logic)
+	//	if (block[i].pos.y - blockRadius < position.y &&
+	//		position.y < block[i].pos.y + blockRadius &&
+	//		block[i].pos.z - blockRadius < position.z &&
+	//		position.z < block[i].pos.z + blockRadius &&
+	//		block[i].pos.x - blockRadius < position.x &&
+	//		position.x < block[i].pos.x + blockRadius) {
+	//		return true;
+	//	}
+	//}
+
+	//// Floor collision (if needed, usually handled by blocks?)
+	//if (position.y < -10.0f) // Out of bounds
+	//{
+	//	return true;
+	//}
+
+	//return false;
+	// 1. Breakable Blocks との衝突
 	if (ResolveBreakableBlockCollision(position, Radius)) {
 		return true;
 	}
 
-	// Collision with Static Blocks
+	// 2. Static Blocks との衝突
 	BLOCK* block = GetFieldBlock();
-
-	float blockRadius = 1.5f; // From original code
+	float blockRadius = 1.5f;
 
 	for (int i = 0; i < blockMax; i++) {
 		if (block[i].blockType != BLOCKTYPE::BLOCK)
 			continue;
 
-		// AABB collision check (simplified from original for brevity but keeping
-		// logic)
-		if (block[i].pos.y - blockRadius < position.y &&
-			position.y < block[i].pos.y + blockRadius &&
-			block[i].pos.z - blockRadius < position.z &&
-			position.z < block[i].pos.z + blockRadius &&
-			block[i].pos.x - blockRadius < position.x &&
-			position.x < block[i].pos.x + blockRadius) {
+		// 【修正点】 position に Radius を考慮する (中心点ではなく球体として判定)
+
+		if (block[i].pos.y - blockRadius < position.y + Radius && // 上端
+			position.y - Radius < block[i].pos.y + blockRadius && // 下端
+			block[i].pos.z - blockRadius < position.z + Radius && // 奥端
+			position.z - Radius < block[i].pos.z + blockRadius && // 手前端
+			block[i].pos.x - blockRadius < position.x + Radius && // 右端
+			position.x - Radius < block[i].pos.x + blockRadius)   // 左端
+		{
 			return true;
 		}
 	}
 
-	// Floor collision (if needed, usually handled by blocks?)
-	if (position.y < -10.0f) // Out of bounds
-	{
+	// 3. 床（場外）判定
+	if (position.y < -10.0f) {
 		return true;
 	}
 
@@ -258,6 +301,7 @@ void Bomb::BombHitCheck()
 		float slopeRadius = 1.5f;
 
 		float e = 0.5f;  // 跳ね返り係数
+
 
 		for (int i = 0; i < slopeMax; i++)
 		{
@@ -572,6 +616,11 @@ void Bomb::BombHitCheck()
 // --- Global Management Functions ---
 
 void InitializeBomb() {
+
+	// ゲーム初期化時
+	Trail::LoadCommonResources();
+
+	
 	{
 		// 頂点バッファの作成
 		D3D11_BUFFER_DESC bd{};
@@ -622,6 +671,8 @@ void InitializeBomb() {
 
 void FinalizeBomb() {
 	g_Bombs.clear();
+	// ゲーム終了時
+	Trail::UnloadCommonResources();
 }
 
 void UpdateBomb() {

@@ -166,8 +166,8 @@ void FollowBall() {
 	XMFLOAT3 ballPos = GetBallPosition();
 
 	g_Position = ballPos;
-	g_Position.z -= 50.0f;
-	g_Position.y += 30.0f;
+	g_Position.z -= 20.0f;
+	g_Position.y += 17.0f;
 
 	XMFLOAT2 mousePosDif = GetMousePosDif();
 
