@@ -244,7 +244,7 @@ void Initialize(HWND hWnd)
 	//スプライト初期化
 	SpriteInitialize();
 
-	g_Scene = SCENE_GAME;
+	g_Scene = SCENE_TITLE;
 
 	SetScene(g_Scene);
 

@@ -33,8 +33,8 @@ private:
 	int stateCount;
 
 	static constexpr float Radius = 0.7f;
-	static constexpr float ExplosionMaxPower = 20.0f;
-	static constexpr float ExplosionRadius = 5.0f;
+	static constexpr float ExplosionMaxPower = 10.0f;
+	static constexpr float ExplosionRadius = 10.0f;
 	static constexpr float resistance = 1.0f;
 	static constexpr float gravity = 4.8f;
 };

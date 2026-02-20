@@ -251,17 +251,20 @@ void MoveBall()
 		force.z /= forceLength;
 	}
 
-	g_Velocity.x += force.x * 10.0f * deltaTime;
-	g_Velocity.z += force.z * 10.0f * deltaTime;
+	static constexpr float forcePower = 10.0f;
 
+	g_Velocity.x += force.x * forcePower * deltaTime;
+	g_Velocity.z += force.z * forcePower * deltaTime;
+
+	static constexpr float shotPower = 5.0f;
 
 	// ÉVÉáÉbÉg
 	if (Keyboard_IsKeyTrigger(KK_SPACE))
 	{
-		g_Velocity.x += cameraForward.x * 5.0f;
-		g_Velocity.z += cameraForward.z * 5.0f;
+		g_Velocity.x += cameraForward.x * shotPower;
+		g_Velocity.z += cameraForward.z * shotPower;
 
-		g_Velocity.y += 5.0f;  // åÇóÕ
+		g_Velocity.y += shotPower;  // åÇóÕ
 
 		// ë≈êîâ¡éZ
 		AddStroke(1);

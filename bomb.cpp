@@ -80,20 +80,18 @@ void Bomb::Update() {
 
 	case STATE_MOVE:
 		Move();
-		if (IsHit()) {
+		if (IsHit()) 
+		{
 			OnHit();
-		BombHitCheck();
+			//BombHitCheck();
 		}
 		break;
 
 	case STATE_EXPLODED:
 		CreateEffectScale(position, { ExplosionRadius, ExplosionRadius, ExplosionRadius });
 		stateCount++;
-		// Trigger ball push once during explosion
-		Move();
-		BombHitCheck();
 
-		if (stateCount == 15) {
+		if (stateCount == 2) {
 			PushBall();
 		}
 		if (stateCount > 60) // End explosion
@@ -227,7 +225,7 @@ bool Bomb::IsHit() {
 
 	//return false;
 	// 1. Breakable Blocks との衝突
-	if (ResolveBreakableBlockCollision(position, Radius)) {
+	if (ResolveBreakableBlockCollision(position, ExplosionRadius)) {
 		return true;
 	}
 
@@ -665,7 +663,7 @@ void InitializeBomb() {
 		DirectXGetDeviceContext()->Unmap(g_VertexBuffer, 0);
 	}
 
-	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_red.png");
+	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_black.png");
 	g_Bombs.clear();
 }
 

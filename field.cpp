@@ -178,16 +178,19 @@ void LoadFieldData(const char* filename)
 		if (seglist.size() >= 4)
 		{
 			BLOCKTYPE value = BLOCKTYPE::BLOCK;
-
+			static constexpr float grassYGap = 3.0f;
+			static bool blockCreate = true;
 			if (seglist[0] == "Block")
 			{
 				value = BLOCKTYPE::BLOCK;
 				CreateBlock({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
-				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + 3.0f,std::stof(seglist[3]) });
+				CreateGrass({ std::stof(seglist[1]),std::stof(seglist[2]) + grassYGap,std::stof(seglist[3]) });
+				// CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]) + grassYGap,std::stof(seglist[3]) });
 			}
 			else if (seglist[0] == "Slope")
 			{
 				CreateSlope({ std::stof(seglist[1]),std::stof(seglist[2]),std::stof(seglist[3]) });
+				CreateBreakableBlock({ std::stof(seglist[1]),std::stof(seglist[2]) + grassYGap,std::stof(seglist[3]) });
 			}
 			else if (seglist[0] == "Tree")
 			{

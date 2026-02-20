@@ -31,6 +31,7 @@ void InitializeTrail()
 	}
 
 	g_Texture = TextureLoad(L"asset\\texture\\shadow.png");
+	ResetTrailPosition({0.0f, 0.0f, 0.0f});
 }
 
 void FinalizeTrail()
