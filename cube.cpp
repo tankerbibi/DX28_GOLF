@@ -377,7 +377,7 @@ void InitializeCube()
 
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 
-	g_Texture = TextureLoad(L"asset\\texture\\block_field.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_field1.png");
 
 	///////////////////Indexバッファ設定開始/////////////////////////////
 	{

@@ -62,8 +62,9 @@ void GameScene::Initialize()
 	direction = XMVector3Normalize(direction);
 	DirectX::XMStoreFloat3(&m_LightDirection, direction);
 
-	m_BGM = LoadSound("asset\\sound\\On_the_Edge_of_Midnight.wav");
+	m_BGM = LoadSound("asset\\sound\\maou_game_vehicle03_bgm.wav");
 	SetVolume(m_BGM, 0.2f);
+	PlaySound(m_BGM, 1);
 }
 
 void GameScene::Finalize()
@@ -91,6 +92,7 @@ void GameScene::Finalize()
 	FinalizeMap();
 	FinalizeSky();
 	FinalizePlayer();
+	StopSound(m_BGM);
 }
 
 void GameScene::Update()
@@ -133,7 +135,6 @@ void GameScene::Update()
 
 void GameScene::Draw()
 {
-	DrawPlayer();
 	LIGHT light;
 
 	SetDepthEnable(true);
@@ -171,7 +172,8 @@ void GameScene::Draw()
 
 	DrawTrail();
 	DrawEffect();
-	DrawBall();
+	//DrawBall();
+	DrawPlayer();
 
 	SetDepthEnable(false);
 

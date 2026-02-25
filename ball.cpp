@@ -20,7 +20,7 @@
 static MODEL* g_Model = nullptr;
 static int g_Texture = -1;
 
-static int g_TrailId;
+//static int g_TrailId;
 
 static XMFLOAT3 g_Position;
 static XMFLOAT3 g_Velocity;
@@ -48,14 +48,14 @@ void InitializeBall()
 {
 
 	g_Model = ModelLoad("asset\\model\\ball.fbx");
-	g_Texture = TextureLoad(L"asset\\texture\\crystalBall_green.png");
+	g_Texture = TextureLoad(L"asset\\texture\\WalkRight.png");
 	g_Position = {0.0f, 0.0f, 0.0f};
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 	g_Velocity = { 0.0f, 0.0f ,0.0f };
 	g_State = BALL_STATE_START;
 	g_StateCount = 0;
 
-	ResetTrailPosition(g_Position);
+	// ResetTrailPosition(g_Position);
 
 	{
 		// 頂点バッファの作成
@@ -295,7 +295,7 @@ void MoveBall()
 	// 衝突判定
 	BallHitCheck();
 
-	SetTrailPosition(g_Position);
+	//SetTrailPosition(g_Position);
 
 	SetShadowPosition(g_Position);
 

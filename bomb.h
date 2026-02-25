@@ -2,8 +2,6 @@
 #include <DirectXMath.h>
 #include "trail.h"
 
-using namespace DirectX;
-
 class Bomb {
 public:
 	enum State { STATE_START, STATE_MOVE, STATE_EXPLODED, STATE_INACTIVE };
