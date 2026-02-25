@@ -12,7 +12,7 @@ static XMFLOAT3 g_Rotation;
 
 void InitializeSky()
 {
-	g_Model = ModelLoad("asset\\model\\sky2.fbx");
+	g_Model = ModelLoad("asset\\model\\sky4.fbx");
 	g_Position = { 0.0f, 0.0f, 0.0f };
 	g_Rotation = { 0.0f, 0.0f, 0.0f };
 }

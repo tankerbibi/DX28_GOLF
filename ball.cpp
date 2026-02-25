@@ -297,7 +297,7 @@ void MoveBall()
 
 	//SetTrailPosition(g_Position);
 
-	SetShadowPosition(g_Position);
+	// SetShadowPosition(g_Position);
 
 	// 終点から始点を引くことで、ベクトルを求める
 	XMFLOAT3 goalVec;

@@ -8,6 +8,7 @@
 #include "easing.h"
 #include "mouse.h"
 #include "rocket.h"
+#include "player.h"
 
 static XMMATRIX g_ViewMatrix;
 static XMMATRIX g_ProjectionMatrix;
@@ -30,7 +31,7 @@ static float g_ShakeTime;
 static float g_Shake;
 static XMFLOAT3 g_FixCameraOldPosition;
 
-void FollowBall();
+void FollowTarget(XMFLOAT3 targetPos);
 void FollowRocket();
 void LookBall();
 
@@ -73,7 +74,7 @@ void UpdateCamera() {
 
 	switch (g_CameraMode) {
 	case CameraMode::PLAY:
-		FollowBall();
+		FollowTarget(GetPlayerPosition());
 		break;
 	case CameraMode::DEBUG:
 		ReflectsDebugKeyOperations();
@@ -162,12 +163,11 @@ CameraMode GetCameraMode() {
 	int d;
 }
 
-void FollowBall() {
-	XMFLOAT3 ballPos = GetBallPosition();
-
-	g_Position = ballPos;
+void FollowTarget(XMFLOAT3 targetPos) 
+{
+	g_Position = targetPos;
 	g_Position.z -= 20.0f;
-	g_Position.y += 17.0f;
+	g_Position.y += 5.0f;
 
 	XMFLOAT2 mousePosDif = GetMousePosDif();
 

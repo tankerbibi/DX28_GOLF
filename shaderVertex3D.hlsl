@@ -37,7 +37,7 @@ float4 main(in float4 position : POSITION0,
         outColor.rgb *= float3(1.0, 1.0, -lightDirection.g);
         
         //outColor.rgb = saturate(outColor.rgb);  // saturateは０以下を０に、１以上を１に制限してくれる 内積の後にsaturateする。ーになるのを防ぐ。
-        outColor.rgb += float3(0.6, 0.4, 0.4);  // 環境光（アンビエントライト）　空が夕日の色なので赤を強めにしてみた。
+        outColor.rgb += float3(0.5, 0.48, 0.5); // 環境光（アンビエントライト）　空が夕日の色なので赤を強めにしてみた。
     }
     else
     {

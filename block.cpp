@@ -25,7 +25,7 @@ static Block g_Block[BlockMax];
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
 void InitializeBlock()
 {
-	g_Texture = TextureLoad(L"asset\\texture\\block_field2.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_sand.png");
 
 	for (int i = 0; i < BlockMax; i++)
 	{

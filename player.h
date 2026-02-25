@@ -20,10 +20,15 @@ public:
 	void FinalizePlayer();
 	void UpdatePlayer();
 	void DrawPlayer();
+	XMFLOAT3 GetPosition() { return position; }
+
+
 };
+
 
 void InitializePlayer();
 void FinalizePlayer();
 void UpdatePlayer();
 void DrawPlayer();
 
+XMFLOAT3 GetPlayerPosition();

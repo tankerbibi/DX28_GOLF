@@ -26,7 +26,7 @@ static BackgroundBlock g_BackgroundBlock[BackgroundBlockMax];
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
 void InitializeBackgroundBlock()
 {
-	g_Texture = TextureLoad(L"asset\\texture\\block_field1.png");
+	g_Texture = TextureLoad(L"asset\\texture\\block_sand.png");
 
 	for (int i = 0; i < BackgroundBlockMax; i++)
 	{
