@@ -121,10 +121,10 @@ void DrawGoal()
 	XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 	XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrixWorld *= XMMatrixScaling(37.0f, 57.0f, 17.0f);
+	matrixWorld *= XMMatrixScaling(100.0f, 500.0f, 100.0f);
 
 	// 回転マトリクス（ビルボード処理）
-	matrixWorld *= invView;
+	// matrixWorld *= invView;
 
 	// 移動マトリクス。gpuで計算されている。
 	matrixWorld *= XMMatrixTranslation(g_FlagPosition.x, g_FlagPosition.y, g_FlagPosition.z);
@@ -142,6 +142,40 @@ void DrawGoal()
 
 	// ポリゴン描画
 	DirectXGetDeviceContext()->Draw(4, 0);
+
+	//// ビューマトリクスを取得 カメラのビューマトリクスはカメラが向いている方向そのもの。
+	//XMMATRIX view = GetCameraViewMatrix();
+
+	//// 頂点シェーダーに変換行列を設定
+	//XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	//XMMATRIX matrixWorld = XMMatrixIdentity();
+	//// 裏側を描画するための変換行列
+	//XMMATRIX matrixFlip = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+	//XMMATRIX matrixWorldFlip = XMMatrixIdentity();
+
+	//matrixWorld *= XMMatrixScaling(200, 500, 17.0f);
+	//matrixWorldFlip *= XMMatrixScaling(200, 57.0f, 17.0f);
+	//// 反転させる
+	//matrixWorldFlip *= XMMatrixRotationY(XM_PI);
+
+	//// 移動マトリクス。gpuで計算されている。
+	//matrixWorld *= XMMatrixTranslation(g_FlagPosition.x, g_FlagPosition.y, g_FlagPosition.z);
+	//matrixWorldFlip *= XMMatrixTranslation(g_FlagPosition.x, g_FlagPosition.y, g_FlagPosition.z);
+
+	//matrix = matrixWorld;
+	//matrixFlip = matrixWorldFlip;
+	//// ビューマトリクス
+	//matrix *= GetCameraViewMatrix();
+	//matrixFlip *= GetCameraViewMatrix();
+	//// プロジェクションマトリクス
+	//matrix *= GetCameraProjectionMatrix();
+	//matrixFlip *= GetCameraProjectionMatrix();
+	//// 表面描画 vertex.hlslのmtxに値を送っている。
+	//Shader_SetMatrix({ matrix, matrixWorld });
+	//DirectXGetDeviceContext()->Draw(4, 0);
+	//// 裏面描画
+	//Shader_SetMatrix({ matrixFlip, matrixWorldFlip });
+	//DirectXGetDeviceContext()->Draw(4, 0);
 }
 
 XMFLOAT3 GetGoalPosition()

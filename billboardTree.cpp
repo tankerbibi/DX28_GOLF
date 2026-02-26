@@ -91,7 +91,7 @@ void InitializeBillboardTree()
 	}
 
 	// テクスチャ読み込み（草の画像を読み込んでください）
-	g_Texture = TextureLoad(L"asset\\texture\\Tree.png");
+	g_Texture = TextureLoad(L"asset\\texture\\TreeDark.png");
 }
 
 void FinalizeBillboardTree()

@@ -13,6 +13,8 @@ static ID3D11Buffer* g_VertexBuffer;
 // 頂点数
 static constexpr int trailLength = 30;
 
+static constexpr int trailWidth = 0.5f;
+
 static XMFLOAT3 g_TrailPosition[trailLength];
 
 static int g_Texture;
@@ -30,7 +32,7 @@ void InitializeTrail()
 		DirectXGetDevice()->CreateBuffer(&bd, nullptr, &g_VertexBuffer); //g_VertexBufferはGPUのメモリなのでアクセスできない。
 	}
 
-	g_Texture = TextureLoad(L"asset\\texture\\shadow.png");
+	g_Texture = TextureLoad(L"asset\\texture\\shadowWhite.png");
 	ResetTrailPosition({0.0f, 0.0f, 0.0f});
 }
 
@@ -86,15 +88,15 @@ void DrawTrail()
 			crossProduct.z /= crossProductLength;
 
 			float t = (float)(trailLength - 1 - i) / (trailLength - 1); // 0.0 ～ 1.0
-			float width = (1.0f - t) * 1.5f;        // 先端ほど0に近づく
+			float currentWidth = (1.0f - t) * trailWidth;        // 先端ほど0に近づく
 
-			v[i * 2 + 0].position.x = g_TrailPosition[i].x + crossProduct.x * width;
-			v[i * 2 + 0].position.y = g_TrailPosition[i].y + crossProduct.y * width;
-			v[i * 2 + 0].position.z = g_TrailPosition[i].z + crossProduct.z * width;
+			v[i * 2 + 0].position.x = g_TrailPosition[i].x + crossProduct.x * currentWidth;
+			v[i * 2 + 0].position.y = g_TrailPosition[i].y + crossProduct.y * currentWidth;
+			v[i * 2 + 0].position.z = g_TrailPosition[i].z + crossProduct.z * currentWidth;
 																			  
-			v[i * 2 + 1].position.x = g_TrailPosition[i].x - crossProduct.x * width;
-			v[i * 2 + 1].position.y = g_TrailPosition[i].y - crossProduct.y * width;
-			v[i * 2 + 1].position.z = g_TrailPosition[i].z - crossProduct.z * width;
+			v[i * 2 + 1].position.x = g_TrailPosition[i].x - crossProduct.x * currentWidth;
+			v[i * 2 + 1].position.y = g_TrailPosition[i].y - crossProduct.y * currentWidth;
+			v[i * 2 + 1].position.z = g_TrailPosition[i].z - crossProduct.z * currentWidth;
 
 			v[i * 2 + 0].texcoord = { 0.5f, 1.0f };
 			v[i * 2 + 1].texcoord = { 0.5f, 0.0f };
@@ -180,7 +182,7 @@ Trail::~Trail()
 void Trail::LoadCommonResources()
 {
 	if (s_Texture == -1) {
-		s_Texture = TextureLoad(L"asset\\texture\\shadow.png");
+		s_Texture = TextureLoad(L"asset\\texture\\shadowWhite.png");
 	}
 }
 

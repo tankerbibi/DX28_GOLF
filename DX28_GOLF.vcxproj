@@ -138,6 +138,7 @@
     <ClInclude Include="directX.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="enemyBomb.h" />
     <ClInclude Include="field.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="goal.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="directX.cpp" />
     <ClCompile Include="easing.cpp" />
     <ClCompile Include="effect.cpp" />
+    <ClCompile Include="enemyBomb.cpp" />
     <ClCompile Include="field.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="goal.cpp" />

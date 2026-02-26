@@ -7,8 +7,6 @@
 
 static constexpr int maxHealth = 1000;
 
-//static ID3D11Buffer* g_VertexBuffer;  // 頂点バッファ
-//static ID3D11Buffer* g_IndexBuffer;  // インデックスバッファ
 static ID3D11Buffer* g_InstanceBuffer;  // インスタンス描画用のバッファ
 
 static MODEL* g_Model[4];
@@ -16,6 +14,8 @@ static MODEL* g_Model[4];
 static int g_Texture;
 
 static Slope g_Slope[slopeMax];
+
+static int g_SlopeRadius = 1.5f;
 
 void InitializeSlope()
 {
@@ -65,8 +65,6 @@ void InitializeSlope()
 
 void FinalizeSlope()
 {
-	//SAFE_RELEASE(g_VertexBuffer);  // 頂点バッファには必ず解放しなければならないというルールがある。
-	//SAFE_RELEASE(g_IndexBuffer);
 	SAFE_RELEASE(g_InstanceBuffer);
 
 	for (int i = 0; i < 3; i++)
@@ -90,12 +88,11 @@ void DrawSlope()
 
 		MATRIX matrix;
 
-		matrix.matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
-		matrix.matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
+		matrix.matrix = XMMatrixIdentity();
+		matrix.matrixWorld = XMMatrixIdentity();
 
-		matrix.matrixWorld *= XMMatrixScaling(3.0f, 3.0f, 3.0f);  // 拡大縮小マトリクス
-		// matrix.matrixWorld *= XMMatrixRotationRollPitchYaw(g_Rotation.x, g_Rotation.y, g_Rotation.z);  // 回転マトリクス
-		matrix.matrixWorld *= XMMatrixTranslation(g_Slope[i].position.x, g_Slope[i].position.y, g_Slope[i].position.z);  // 移動マトリクス。gpuで計算されている。
+		matrix.matrixWorld *= XMMatrixScaling(g_SlopeRadius * 2.0f, g_SlopeRadius * 2.0f, g_SlopeRadius * 2.0f);
+		matrix.matrixWorld *= XMMatrixTranslation(g_Slope[i].position.x, g_Slope[i].position.y, g_Slope[i].position.z);
 
 		matrix.matrix = matrix.matrixWorld;
 
@@ -176,4 +173,14 @@ void CreateSlope(XMFLOAT3 position)
 Slope* GetSlope()
 {
 	return g_Slope;
+}
+
+void SetSlopeRadius(float radius)
+{
+	g_SlopeRadius = radius;
+}
+
+float GetSlopeRadius()
+{
+	return g_SlopeRadius;
 }

@@ -16,6 +16,7 @@
 #include "texture.h"
 #include "start.h"
 #include "slope.h"
+#include "block.h"
 
 static MODEL* g_Model = nullptr;
 static int g_Texture = -1;
@@ -331,7 +332,7 @@ void BallHitCheck()
 {
 	{
 		Slope* slope = GetSlope();
-		float slopeRadius = 1.5f;
+		float slopeRadius = GetSlopeRadius();
 
 
 		float e = 0.5f;  // ’µ‚Ë•Ô‚èŒW”
@@ -464,7 +465,7 @@ void BallHitCheck()
 
 	{
 		BLOCK* block = GetFieldBlock();
-		float blockRadius = 1.5f;
+		float blockRadius = GetBlockRadius();
 
 
 		float e = 0.5f;  // ’µ‚Ë•Ô‚èŒW”

@@ -12,6 +12,7 @@
 #include "ranking.h"
 #include "shader.h"
 #include "stroke.h"
+#include "block.h"
 #include <cmath>
 #include <vector>
 
@@ -132,7 +133,7 @@ bool Rocket::IsHit() {
 	// Collision with Static Blocks
 	BLOCK* block = GetFieldBlock();
 
-	float blockRadius = 1.5f; // From original code
+	float blockRadius = GetBlockRadius();
 
 	for (int i = 0; i < blockMax; i++) {
 		if (block[i].blockType != BLOCKTYPE::BLOCK)

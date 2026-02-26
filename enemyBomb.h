@@ -2,11 +2,11 @@
 #include <DirectXMath.h>
 #include "trail.h"
 
-class Bomb {
+class EnemyBomb {
 public:
 	enum State { STATE_START, STATE_MOVE, STATE_EXPLODED, STATE_INACTIVE };
 
-	Bomb();
+	EnemyBomb();
 	void Initialize(const XMFLOAT3& position, const XMFLOAT3& direction);
 	void Update();
 	void Draw();
@@ -19,8 +19,7 @@ private:
 	void Move();
 	bool IsHit();
 	void OnHit();
-	void PushBall();
-	void BombHitCheck();
+	void EnemyBombHitCheck();
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 velocity;
@@ -29,23 +28,24 @@ private:
 	Trail trail;
 	State state;
 	int stateCount;
+	int lifeCount - 0;
 
-	
-	static constexpr float firstSpeed = 100.0f;
-	static constexpr float Radius = 0.3f;
-	static constexpr float ExplosionMaxPower = 10.0f;
-	static constexpr float ExplosionRadius = 10.0f;
-	static constexpr float resistance = 0.6f;
-	static constexpr float gravity = 4.8f;
+	static constexpr int lifeCountMax = 120;
+	static constexpr float ExplosionRadius = 5.0f;
+	static constexpr float firstSpeed = 6.0f;
+	static constexpr float Radius = 3.0f;
+	static constexpr float resistance = 0.0f;
+	static constexpr float gravity = 0.0f;
+	static constexpr float damage = 7.0f;
 };
 
 // Global management functions
-void InitializeBomb();
-void FinalizeBomb();
-void UpdateBomb();
-void DrawBomb();
-void CreateBomb(const DirectX::XMFLOAT3& position,
+void InitializeEnemyBomb();
+void FinalizeEnemyBomb();
+void UpdateEnemyBomb();
+void DrawEnemyBomb();
+void CreateEnemyBomb(const DirectX::XMFLOAT3& position,
 	const DirectX::XMFLOAT3& direction);
 
-DirectX::XMFLOAT3 GetBombPos();
-void SetBombStartPosition(DirectX::XMFLOAT3 newPosition);
+DirectX::XMFLOAT3 GetEnemyBombPos();
+void SetEnemyBombStartPosition(DirectX::XMFLOAT3 newPosition);

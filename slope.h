@@ -25,3 +25,6 @@ void DrawSlope();
 void CreateSlope(XMFLOAT3 position);
 
 Slope* GetSlope();
+
+void SetSlopeRadius(float radius);
+float GetSlopeRadius();

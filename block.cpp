@@ -21,6 +21,8 @@ static int g_Texture;
 
 static Block g_Block[BlockMax];
 
+static float g_BlockRadius = 1.5f;
+
 // 実際の描画は2dで行われている。最後に描画したものが手前になる。
 // 3dの描画の世界にはZバッファというものがある。カメラからの距離を保存しているもの。
 void InitializeBlock()
@@ -282,7 +284,7 @@ void DrawBlock()
 
 		XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-		matrixWorld *= XMMatrixScaling(3.0f, 3.0f, 3.0f);
+		matrixWorld *= XMMatrixScaling(g_BlockRadius * 2.0f, g_BlockRadius * 2.0f, g_BlockRadius * 2.0f);
 		matrixWorld *= XMMatrixTranslation(g_Block[i].position.x, g_Block[i].position.y, g_Block[i].position.z);
 
 		data[drawCount].worldMatrix = matrixWorld;
@@ -338,4 +340,14 @@ void CreateBlock(XMFLOAT3 position)
 		g_Block[i].use = true;
 		break;
 	}
+}
+
+void SetBlockRadius(float radius)
+{
+	g_BlockRadius = radius;
+}
+
+float GetBlockRadius()
+{
+	return g_BlockRadius;
 }

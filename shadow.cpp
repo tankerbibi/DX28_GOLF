@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "camera.h"
 #include "field.h"
+#include "block.h"
 
 static int g_Texture;
 static ID3D11Buffer* g_VertexBuffer = nullptr;  // 頂点バッファ
@@ -119,7 +120,7 @@ void SetShadowPosition(XMFLOAT3 position)
 void ShadowHitCheck()
 {
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 1.5f;
+	float blockRadius = GetBlockRadius();
 	float shadowY = -100.0f;
 
 	for (int i = 0; i < blockMax; i++)

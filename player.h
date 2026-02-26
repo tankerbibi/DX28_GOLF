@@ -7,7 +7,9 @@ private:
 	XMFLOAT3 velocity;
 	XMFLOAT3 rotation;
 
-	static constexpr float velocityPower = 3.0f;
+	static constexpr float Radius = 5.0f;
+
+	static constexpr float velocityPower = 10.0f;
 	static constexpr float posYGap = 5.0f;
 
 	static constexpr unsigned int animationFrame = 30;
@@ -22,6 +24,8 @@ public:
 	void DrawPlayer();
 	XMFLOAT3 GetPosition() { return position; }
 
+private:
+	void PlayerHitCheck();
 
 };
 

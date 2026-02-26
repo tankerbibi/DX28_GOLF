@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "slope.h"
 #include "texture.h"
+#include "block.h"
 #include <cmath>
 #include <vector>
 
@@ -28,7 +29,7 @@ void Bomb::Initialize(const DirectX::XMFLOAT3& startPos,
 	const DirectX::XMFLOAT3& direction) {
 	position = startPos;
 	// 正規化
-	float speed = 50.0f;  // スピードを調整
+	float speed = firstSpeed;  // スピードを調整
 	float len = sqrtf(direction.x * direction.x + direction.y * direction.y +
 		direction.z * direction.z);
 	if (len > 0.0f) {
@@ -148,7 +149,7 @@ void Bomb::Draw() {
 	XMMATRIX matrix = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 	XMMATRIX matrixWorld = XMMatrixIdentity();  // 行列を作成　float 4 x 4
 
-	matrixWorld *= XMMatrixScaling(2.5f, 2.5f, 2.5f);
+	matrixWorld *= XMMatrixScaling(Radius * 2, Radius * 2, Radius * 2);
 
 	// 回転マトリクス（ビルボード処理）
 	matrixWorld *= invView;
@@ -199,7 +200,7 @@ bool Bomb::IsHit() {
 	//// Collision with Static Blocks
 	//BLOCK* block = GetFieldBlock();
 
-	//float blockRadius = 1.5f; // From original code
+	//float blockRadius = GetBlockRadius(); // From original code
 
 	//for (int i = 0; i < blockMax; i++) {
 	//	if (block[i].blockType != BLOCKTYPE::BLOCK)
@@ -231,7 +232,7 @@ bool Bomb::IsHit() {
 
 	// 2. Static Blocks との衝突
 	BLOCK* block = GetFieldBlock();
-	float blockRadius = 1.5f;
+	float blockRadius = GetBlockRadius();
 
 	for (int i = 0; i < blockMax; i++) {
 		if (block[i].blockType != BLOCKTYPE::BLOCK)
@@ -296,7 +297,7 @@ void Bomb::BombHitCheck()
 {
 	{
 		Slope* slope = GetSlope();
-		float slopeRadius = 1.5f;
+		float slopeRadius = GetSlopeRadius();
 
 		float e = 0.5f;  // 跳ね返り係数
 
@@ -429,7 +430,7 @@ void Bomb::BombHitCheck()
 
 	{
 		BLOCK* block = GetFieldBlock();
-		float blockRadius = 1.5f;
+		float blockRadius = GetBlockRadius();
 
 
 		float e = 0.5f;  // 跳ね返り係数
